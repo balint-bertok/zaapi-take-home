@@ -1,0 +1,340 @@
+/*
+ * Theme recovered from app.zaapi.com's compiled Tailwind v4 CSS (saved pages in "Original files/",
+ * file 12qxajdq28mok.css). The first @theme block is the `@layer theme` token list copied verbatim;
+ * the second holds tokens the compiled utilities inline as literals (2np6or35q67-y.css).
+ * Do not "tidy" values: fidelity comes from these exact numbers (ADR 0001).
+ */
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --color-red-50: #fef3f2;
+  --color-red-100: #fee4e2;
+  --color-red-200: #fecdca;
+  --color-red-300: #fda29b;
+  --color-red-400: #f97066;
+  --color-red-500: #f04438;
+  --color-red-600: #d92d20;
+  --color-orange-50: #fef6ee;
+  --color-orange-100: #fdead7;
+  --color-orange-200: #f9dbaf;
+  --color-orange-300: #f7b27a;
+  --color-orange-400: #f38744;
+  --color-orange-500: #ef6820;
+  --color-amber-50: #fffbeb;
+  --color-amber-800: #953d00;
+  --color-yellow-50: #fefbe8;
+  --color-yellow-100: #fef7c3;
+  --color-yellow-200: #feee95;
+  --color-yellow-300: #fde272;
+  --color-yellow-400: #fac515;
+  --color-yellow-500: #eaaa08;
+  --color-yellow-600: #ca8504;
+  --color-lime-50: #f7fde8;
+  --color-lime-100: #ecfbc3;
+  --color-lime-200: #def995;
+  --color-lime-300: #c6f160;
+  --color-lime-400: #a7e431;
+  --color-lime-500: #86d41b;
+  --color-green-50: #edfcf2;
+  --color-green-100: #d3f8df;
+  --color-green-200: #aaf0c4;
+  --color-green-300: #73e2a3;
+  --color-green-400: #3ccb7f;
+  --color-green-500: #16b364;
+  --color-emerald-50: #ecfdf5;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-200: #a7f3d0;
+  --color-emerald-300: #6ee7b7;
+  --color-emerald-400: #34d399;
+  --color-emerald-500: #10b981;
+  --color-teal-50: #ccede9;
+  --color-teal-100: #ccede9;
+  --color-teal-200: #aae1da;
+  --color-teal-300: #80d2c8;
+  --color-teal-400: #55c4b6;
+  --color-teal-500: #2bb5a3;
+  --color-teal-700: #008a79;
+  --color-cyan-50: #ecfdff;
+  --color-cyan-100: #cff9fe;
+  --color-cyan-200: #a5f0fc;
+  --color-cyan-300: #67e3f9;
+  --color-cyan-400: #2ce;
+  --color-cyan-500: #06aed4;
+  --color-sky-50: #f0f9ff;
+  --color-sky-100: #e0f2fe;
+  --color-sky-200: #bae6fd;
+  --color-sky-300: #7dd3fc;
+  --color-sky-400: #38bdf8;
+  --color-sky-500: #0ea5e9;
+  --color-blue-50: #ebf2ff;
+  --color-blue-100: #d0e4ff;
+  --color-blue-200: #a6caff;
+  --color-blue-300: #74aaff;
+  --color-blue-400: #4693ff;
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #2364d6;
+  --color-indigo-50: #eef4ff;
+  --color-indigo-100: #e0eaff;
+  --color-indigo-200: #c7d7fe;
+  --color-indigo-300: #a4bcfd;
+  --color-indigo-400: #8098f9;
+  --color-indigo-500: #6172f3;
+  --color-violet-50: #f5f3ff;
+  --color-violet-100: #ece9fe;
+  --color-violet-200: #ddd6fe;
+  --color-violet-300: #c3b5fd;
+  --color-violet-400: #a48afb;
+  --color-violet-500: #875bf7;
+  --color-purple-600: #9810fa;
+  --color-fuchsia-50: #fdf4ff;
+  --color-fuchsia-100: #fbe8ff;
+  --color-fuchsia-200: #f6d0fe;
+  --color-fuchsia-300: #eeaafd;
+  --color-fuchsia-400: #e478fa;
+  --color-fuchsia-500: #d444f1;
+  --color-pink-50: #fdf2fa;
+  --color-pink-100: #fce7f6;
+  --color-pink-200: #fcceee;
+  --color-pink-300: #faa7e0;
+  --color-pink-400: #f670c7;
+  --color-pink-500: #ee46bc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-900: #0f172b;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f2f4f7;
+  --color-gray-200: #eaecf0;
+  --color-gray-300: #d0d5dd;
+  --color-gray-400: #98a2b3;
+  --color-gray-500: #667085;
+  --color-gray-600: #475467;
+  --color-gray-800: #1d2939;
+  --color-gray-900: #101828;
+  --color-zinc-50: #f9fafb;
+  --color-zinc-100: #f1f5f9;
+  --color-zinc-200: #e2e8f0;
+  --color-zinc-300: #cbd5e1;
+  --color-zinc-400: #94a3b8;
+  --color-zinc-500: #64748b;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-400: #a1a1a1;
+  --color-neutral-600: #525252;
+  --color-black: #000;
+  --color-white: #fff;
+  --spacing: .25rem;
+  --container-xs: 20rem;
+  --container-sm: 24rem;
+  --container-md: 28rem;
+  --container-xl: 36rem;
+  --text-xs: .75rem;
+  --text-xs--line-height: calc(1 / .75);
+  --text-sm: .875rem;
+  --text-sm--line-height: calc(1.25 / .875);
+  --text-base: 1rem;
+  --text-base--line-height: calc(1.5 / 1);
+  --text-lg: 1.125rem;
+  --text-lg--line-height: calc(1.75 / 1.125);
+  --text-xl: 1.25rem;
+  --text-xl--line-height: calc(1.75 / 1.25);
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: calc(2 / 1.5);
+  --text-3xl: 1.875rem;
+  --text-3xl--line-height: calc(2.25 / 1.875);
+  --text-4xl: 2.25rem;
+  --text-4xl--line-height: calc(2.5 / 2.25);
+  --text-5xl: 3rem;
+  --text-5xl--line-height: 1;
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --tracking-tight: -.025em;
+  --tracking-normal: 0em;
+  --tracking-wide: .025em;
+  --tracking-wider: .05em;
+  --tracking-widest: .1em;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --radius-xs: .125rem;
+  --radius-sm: .25rem;
+  --radius-md: .375rem;
+  --radius-lg: .5rem;
+  --radius-xl: .75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+  --radius-4xl: 2rem;
+  --ease-out: cubic-bezier(0, 0, .2, 1);
+  --ease-in-out: cubic-bezier(.4, 0, .2, 1);
+  --animate-spin: spin 1s linear infinite;
+  --animate-pulse: pulse 2s cubic-bezier(.4, 0, .6, 1) infinite;
+  --blur-xs: 4px;
+  --blur-sm: 8px;
+  --blur-md: 12px;
+  --aspect-video: 16 / 9;
+  --default-transition-duration: .15s;
+  --default-transition-timing-function: cubic-bezier(.4, 0, .2, 1);
+  --default-font-family: var(--font-sans);
+  --default-mono-font-family: var(--font-mono);
+  --color-error-50: #fef3f2;
+  --color-error-100: #fee4e2;
+  --color-error-200: #fecdca;
+  --color-error-300: #fda29b;
+  --color-error-400: #f97066;
+  --color-error-500: #f04438;
+  --color-warning-50: #fffaeb;
+  --color-warning-100: #fef0c7;
+  --color-warning-200: #fedf89;
+  --color-warning-300: #fec84b;
+  --color-warning-400: #fdb022;
+  --color-warning-500: #f79009;
+  --color-green-light-50: #f3fee7;
+  --color-green-light-100: #e4fbcc;
+  --color-green-light-200: #d0f8ab;
+  --color-green-light-300: #a6ef67;
+  --color-green-light-400: #85e13a;
+  --color-green-light-500: #66c61c;
+  --color-electric-green-50: #e8fffc;
+  --color-electric-green-100: #c8fef7;
+  --color-electric-green-200: #aefaf0;
+  --color-electric-green-300: #89eee1;
+  --color-electric-green-400: #55c3b5;
+  --color-electric-green-500: #09c8ab;
+  --color-electric-green-600: #00a892;
+  --color-electric-green-700: #008a77;
+  --color-yellow-gold-50: #fffaeb;
+  --color-yellow-gold-100: #fef0c7;
+  --color-yellow-gold-200: #fedf89;
+  --color-yellow-gold-300: #fec84b;
+  --color-yellow-gold-400: #fdb022;
+  --color-yellow-gold-500: #f79009;
+  --color-secondary-red-01: #e51d35;
+  --color-ai-gradient: linear-gradient(93.88deg, #1ed1bb 1.46%, #5e40e1 143.22%);
+  --color-ai-gradient-light: linear-gradient(93.88deg, #1ed1bb1a 1.46%, #5e40e11a 143.22%);
+  --color-ai-gradient-text: linear-gradient(to right, #008a77, #875bf7);
+  --animate-ping: ping 1s cubic-bezier(0, 0, .2, 1) infinite;
+  --animate-bounce: bounce 1s infinite;
+}
+
+@theme {
+  --color-gray-700: #344054;
+  --color-error-600: #d92d20;
+  --color-green-600: #099250;
+  --color-green-light-600: #4ca30d;
+  --color-indigo-600: #444ce7;
+  --color-pink-600: #dd2590;
+  --color-success-50: #f1faf9;
+  --color-warning-600: #dc6803;
+  --color-warning-700: #b54708;
+  --color-warning-800: #93370d;
+  --color-yellow-700: #a15c07;
+  --color-sidebar: #f9fafb;
+  --color-sidebar-accent: #edeff4;
+  --color-sidebar-foreground: var(--color-gray-500);
+  --color-sidebar-accent-foreground: var(--color-gray-600);
+  --color-light-black: #000;
+  --color-white-smock: #f5f5f5;
+  --shadow-small: 0px 1px 2px 0px #0000000d;
+  --shadow-medium: 0px 4px 6px 0px #0000000d;
+  --shadow-large: 0px 24px 24px -5px #0000000a;
+  --shadow-light: 0 1px 6px 0 #0000000f;
+}
+
+/* Inter, self-hosted: the variable latin file Google Fonts serves for weights 100 to 900. */
+@font-face {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/inter-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* App-level base rules and layout variables, verbatim from the saved pages' `@layer base`. */
+@layer base {
+  *,
+  :after,
+  :before,
+  ::backdrop {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  input:focus,
+  textarea:focus,
+  a:focus,
+  button:focus-visible {
+    outline-width: 1px;
+    outline-style: solid;
+    outline-color: var(--color-gray-300);
+  }
+  html {
+    /* The app has no dark theme; keep the canvas light in dark-mode browsers. */
+    color-scheme: light;
+    scroll-behavior: smooth;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  body {
+    font-family: Inter, var(--font-sans);
+  }
+  input[type="number"] {
+    appearance: textfield;
+  }
+  :root {
+    --auth-header-height: 70px;
+    --banner-height: 52px;
+    --banner-inner-height: 38px;
+    --side-nav-height: 77px;
+    --side-menu-width: 240px;
+    --content-area-margin: 8px;
+    --content-area-background: #fefeff;
+    --scrollbar-reserve: 15px;
+    --height-auth-header: var(--auth-header-height);
+    --height-banner: var(--banner-height);
+    --height-page-content: calc(100vh - (var(--content-area-margin) * 2));
+    --height-page-content-with-header: calc(100vh - var(--auth-header-height) - (var(--content-area-margin) * 2));
+    --height-page-content-with-banner: calc(100vh - var(--banner-height) - (var(--content-area-margin) * 2));
+    --min-width-content: 850px;
+    --max-width-content: 1400px;
+    --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
+    --ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
+  }
+}
+
+/*
+ * Font Awesome's base rule, copied from the saved pages. Deliberately unlayered, as on the real
+ * site: it outranks non-important Tailwind sizes, so an icon with `size-4` still renders 1em high.
+ */
+.svg-inline--fa {
+  box-sizing: content-box;
+  display: var(--fa-display, inline-block);
+  height: 1em;
+  overflow: visible;
+  vertical-align: -0.125em;
+  width: var(--fa-width, 1.25em);
+}
+
+/* AI gradient helpers used across AI Agent pages, verbatim. */
+@utility ai-gradient-bg {
+  background: var(--color-ai-gradient);
+}
+@utility ai-gradient-light-bg {
+  background: var(--color-ai-gradient-light);
+}
+@utility ai-gradient-text {
+  background: var(--color-ai-gradient-text);
+  color: #0000;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.ai-gradient-icon path {
+  fill: url(#ai-linear-gradient-svg);
+}

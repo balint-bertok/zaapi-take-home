@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Every test the project has, in the order that fails fastest. Called by scripts/gate (and so by CI).
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+echo "test: typecheck"; npx tsc -b
+echo "test: lint"; npx eslint . --max-warnings 0
+echo "test: unit"; npx vitest run
+echo "test: build"; npm run build --silent
+echo "test: e2e against the built preview"; npx playwright test

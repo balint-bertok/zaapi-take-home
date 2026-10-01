@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Local gate. Same command CI runs, so a green gate here means a green CI job on the same tree.
-# Fails closed on a missing scanner. Add the test command here once the stack is chosen.
+# Fails closed on a missing scanner or a missing test script.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -18,8 +18,4 @@ echo "gate: secret scan over full history"
 gitleaks git --redact --no-banner --config .gitleaks.toml .
 
 echo "gate: tests"
-if [ -x scripts/test ]; then
-  scripts/test
-else
-  echo "gate: WAIVED, no scripts/test yet (stack undecided as of 2026-10-01)"
-fi
+scripts/test

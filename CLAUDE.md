@@ -4,7 +4,7 @@ This file is the index and the process. Detail lives in `docs/`. Keep it under 3
 
 ## What this is
 
-A take-home assignment. Front-end only: no backend, no database, no cloud or VPS; nothing is deployed anywhere but GitHub (user decision, 2026-10-01). Reference material from the assignment (screenshots and saved pages of the Zaapi onboarding flow) sits in `Original files/`. Stack and first scope not yet decided (as of 2026-10-01). ADR 0001 is reserved for the stack decision.
+A take-home assignment. Front-end only: no backend, no database, no cloud or VPS; nothing is deployed anywhere but GitHub (user decision, 2026-10-01). Reference material from the assignment (screenshots and saved pages of the Zaapi onboarding flow) sits in `Original files/`. A clickable, non-functional recreation of the Zaapi dashboard, published on GitHub Pages. Stack: Vite + React + TypeScript + Tailwind v4, static, no network (ADR 0001). Build plan: `Original files/extracted/PLAN.md`.
 
 ## Where to find things
 
@@ -22,10 +22,12 @@ A take-home assignment. Front-end only: no backend, no database, no cloud or VPS
 
 ```bash
 git config core.hooksPath .githooks   # once per clone; pre-commit secret scan, fails closed
-scripts/gate                           # local gate: secret scan + tests; same command CI runs
+npm ci                                 # install exactly what package-lock.json pins
+npm run dev                            # dev server, at /zaapi-take-home/ like Pages
+npm run build                          # dist/ under the Pages base path, plus 404.html for deep links
+scripts/gate                           # local gate: secret scan + scripts/test; same command CI runs
+node scripts/extract-icons.mjs "<path to Original files>"   # regenerate src/icons/registry.ts
 ```
-
-Test and run commands are added here when the stack is chosen.
 
 ## Development process
 
@@ -38,7 +40,7 @@ One change = one session = one worktree = one branch = one PR = one squash merge
 5. **Local gate green:** `scripts/gate`, then `/simplify`.
 6. **Self-review:** `/security-review` and `/code-review`. Fix or waive every finding in the PR. No human diff read (user decision, 2026-10-01).
 7. **Rebase, then CI:** `git fetch origin && git rebase origin/main && git push --force-with-lease`; CI must pass on that tree.
-8. **Merge (human gate 2).** There is no server, so the squash merge to `main` is the release. Any publishing beyond GitHub (for example GitHub Pages) is the user's call. Live validation, deploy scripts, smoke tests and rollback from the full practices do not apply here (user decision, 2026-10-01).
+8. **Merge (human gate 2).** There is no server, so the squash merge to `main` is the release; the Pages workflow publishes it (user decision, 2026-10-01). Live validation, deploy scripts, smoke tests and rollback from the full practices do not apply here (user decision, 2026-10-01).
 9. **Docs in the same PR:** ADR, measurement, testing map as applicable. No docs-only PRs.
 
 Human gates are exactly two: scope and deploy. Everything else the session does on its own.
@@ -49,7 +51,11 @@ GitHub account `balint-bertok`. Check `git config user.email` and `gh auth statu
 
 ## Non-negotiable invariants
 
-Named when the stack and architecture are chosen. Candidates from the practices: no secret reaches output or git; outbound calls match an allowlist; retries capped; responses bounded. Each gets one suite, marked non-negotiable in `docs/testing.md`. Never weakened to make a feature pass; renegotiate with the user.
+Full text in `docs/architecture.md`, suites in `docs/testing.md`. Never weakened to make a feature pass; renegotiate with the user.
+
+- No outbound network: the built demo requests nothing outside its own origin.
+- Every route in the route table renders cleanly and links only inside the table.
+- No secret reaches git or output.
 
 ## Cross-cutting rules
 

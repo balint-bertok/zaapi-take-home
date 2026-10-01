@@ -1,0 +1,23 @@
+import type { ComponentType } from "react";
+import type { SectionKey } from "../shell/sections";
+
+/** Document titles from the catalog's seo.metaTitle, one per page family. */
+export const titles = {
+  login: "Welcome to Zaapi!",
+  register: "Register - Zaapi",
+  inbox: "Inbox - Zaapi",
+  ai: "AI training center - Zaapi",
+  automations: "Automations - Zaapi",
+  settings: "Settings - Zaapi",
+} as const;
+
+/**
+ * One page of the demo. `layout` picks the chrome around it: `auth` stands alone, `canvas` sits
+ * under the trial banner only (Flow Builder), a section key adds that section's rail and sidebar.
+ */
+export type AppRoute = {
+  path: string;
+  title: (typeof titles)[keyof typeof titles];
+  layout: "auth" | "canvas" | SectionKey;
+  Page: ComponentType;
+};

@@ -4,4 +4,5 @@ Answers: what was measured, when, and by what? The only place numbers live; ever
 
 | Date | What | Value | Source (command, script, or test) | Status |
 |---|---|---|---|---|
-| (none yet) | | | | |
+| 2026-10-01 | Distinct icon names in the saved pages | 106 names, 130 glyphs (name x style) | `node scripts/extract-icons.mjs "<path to Original files>"` | current |
+| 2026-10-01 | Routes in the route table | 13 | `cat src/features/*/routes.tsx \| grep -c 'path: "'` | current |

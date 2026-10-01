@@ -13,3 +13,9 @@ Original files/
 .DS_Store
 .idea/
 .vscode/
+
+# Node build and test output
+node_modules/
+dist/
+playwright-report/
+test-results/
