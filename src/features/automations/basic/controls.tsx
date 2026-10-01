@@ -1,0 +1,112 @@
+import { Icon } from "@/icons/Icon";
+import { cn } from "@/lib/cn";
+
+// Checkbox and radio cards of the Assign-to-agents form, class lists from the saved create page
+// (Radix checkbox and radio-group markup, rebuilt without the extra packages).
+
+export function Checkbox({
+  checked,
+  onCheckedChange,
+  className,
+  label,
+}: {
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+  className?: string;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={checked}
+      aria-label={label}
+      data-state={checked ? "checked" : "unchecked"}
+      onClick={(e) => {
+        e.stopPropagation();
+        onCheckedChange(!checked);
+      }}
+      className={cn(
+        "peer flex items-center justify-center shrink-0 rounded-md border-2 border-gray-200 focus-visible:opacity-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 hover:border-electric-green-500 focus-visible:ring-electric-green-500 data-[state=checked]:bg-electric-green-500 data-[state=checked]:border-electric-green-500 size-5",
+        className,
+      )}
+    >
+      {checked && <Icon name="check" variant="fas" className="size-3! text-white" />}
+    </button>
+  );
+}
+
+export type RadioOption<T extends string> = { value: T; title: string; description?: string; disabled?: boolean };
+
+/** A row of bordered cards, each a radio; the checked card gets the green border. */
+export function RadioCards<T extends string>({
+  label,
+  value,
+  onChange,
+  options,
+  className,
+}: {
+  label: string;
+  value: T;
+  onChange: (value: T) => void;
+  options: RadioOption<T>[];
+  className?: string;
+}) {
+  return (
+    <div role="radiogroup" aria-label={label} className={cn("flex flex-col md:flex-row gap-4", className)}>
+      {options.map((o) => {
+        const checked = o.value === value;
+        return (
+          <div
+            key={o.value}
+            onClick={() => !o.disabled && onChange(o.value)}
+            className={cn(
+              "flex flex-1 space-x-2 border rounded-lg p-3 transition-colors hover:bg-gray-100 hover:cursor-pointer",
+              o.description ? "items-start" : "items-center",
+              checked ? "border-electric-green-500" : "border-gray-200",
+              o.disabled && "pointer-events-none opacity-60",
+            )}
+          >
+            <button
+              type="button"
+              role="radio"
+              aria-checked={checked}
+              aria-label={o.title}
+              disabled={o.disabled}
+              data-state={checked ? "checked" : "unchecked"}
+              className={cn(
+                "aspect-square h-[18px] w-[18px] shrink-0 rounded-full border-2 text-electric-green-500 focus:outline-hidden disabled:cursor-not-allowed",
+                checked ? "border-electric-green-500" : "border-gray-300",
+              )}
+            >
+              {checked && (
+                <span className="flex items-center justify-center">
+                  <span className="h-[8px] w-[8px] bg-electric-green-500 rounded-full" />
+                </span>
+              )}
+            </button>
+            <div className="cursor-pointer text-sm font-medium">
+              {o.description ? (
+                <div className="flex flex-col pl-1">
+                  <div className="mb-1">{o.title}</div>
+                  <div className="text-gray-500 font-normal">{o.description}</div>
+                </div>
+              ) : (
+                o.title
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Initial on the gray circle the app draws for a user without a photo (saved create page). */
+export function Avatar({ name }: { name: string }) {
+  return (
+    <div className="relative flex items-center justify-center rounded-full select-none shrink-0 size-[24px] bg-gray-500">
+      <span className="text-[12px] text-white">{name[0]}</span>
+    </div>
+  );
+}

@@ -7,6 +7,12 @@ export type Automation = {
   createdBy: string;
   updatedBy: string | null;
   updatedAt: string; // ISO date
+  // Assign-to-agents settings (PR 4). Optional so automations saved before they existed still load;
+  // `automationSettings` in basic/settings.ts fills the defaults.
+  description?: string;
+  outsideHours?: "stop" | "continue";
+  preference?: "prioritize_last_assigned" | "round_robin_only";
+  assigneeIds?: string[];
 };
 
 // The automation from the Basic Automations screenshot; no flows yet.
@@ -21,6 +27,7 @@ export const automationsSeed: { automations: Automation[]; flows: Flow[] } = {
       createdBy: "Balint",
       updatedBy: null,
       updatedAt: "2026-10-01",
+      assigneeIds: ["user-1"],
     },
   ],
   flows: [],
