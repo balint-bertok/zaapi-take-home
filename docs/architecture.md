@@ -30,7 +30,7 @@ From the validated plan (`Original files/extracted/PLAN.md`), one PR each:
 - PR 3, AI Agent: knowledge source, scenario handling, personality, test chat.
 - PR 4, automations: basic automations list, template picker, assign-to-agents form.
 - PR 5, flow builder: flow list, template gallery, React Flow canvas, publish dialog.
-- PR 6, settings: settings sidebar, billing page.
+- PR 6, settings: settings sidebar, billing page. Built.
 - PR 7, fidelity pass against the live app.
 
 PRs 1 to 6 run in parallel after PR 0 merges; each touches only its own feature folder.

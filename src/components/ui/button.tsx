@@ -14,7 +14,7 @@ const variants = {
     "bg-[linear-gradient(79deg,#1D2939_50.01%,#52729F_101.43%)] hover:opacity-90 transition-opacity text-white disabled:opacity-50",
 } as const;
 
-const sizes = { default: "h-9 px-4 py-2", sm: "h-8 rounded-md px-3", icon: "h-9 w-9" } as const;
+const sizes = { default: "h-9 px-4 py-2", sm: "h-8 rounded-md px-3", lg: "h-10 rounded-lg px-8", icon: "h-9 w-9" } as const;
 
 export type ButtonProps = ComponentProps<"button"> & { variant?: keyof typeof variants; size?: keyof typeof sizes };
 
