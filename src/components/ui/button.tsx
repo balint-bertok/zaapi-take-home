@@ -12,6 +12,7 @@ const variants = {
   ghost: "bg-transparent hover:bg-gray-100 disabled:opacity-50 aria-selected:bg-gray-100 aria-selected:hover:opacity-80",
   subscribe:
     "bg-[linear-gradient(79deg,#1D2939_50.01%,#52729F_101.43%)] hover:opacity-90 transition-opacity text-white disabled:opacity-50",
+  ai: "bg-(image:--color-ai-gradient) hover:opacity-80 transition-opacity text-white disabled:opacity-50",
 } as const;
 
 const sizes = { default: "h-9 px-4 py-2", sm: "h-8 rounded-md px-3", lg: "h-10 rounded-lg px-8", icon: "h-9 w-9" } as const;

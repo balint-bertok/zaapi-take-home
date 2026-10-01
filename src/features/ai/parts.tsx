@@ -1,18 +1,14 @@
 // Building blocks shared by the AI Agent list pages and their sheets. Class lists are copied from
 // the saved Knowledge Source, Scenario Handling and Personality pages.
-import { Fragment, type ReactNode } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 import { Inert } from "@/components/Inert";
-import { buttonClass } from "@/components/ui/button";
+import { Button, buttonClass } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/menu";
-import { Switch } from "@/components/ui/switch";
+import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 import { Icon, type IconName } from "@/icons/Icon";
 import { asset } from "@/lib/asset";
 import { cn } from "@/lib/cn";
 import { useDemo } from "@/store/store";
-
-/** The teal-to-purple primary button of the AI pages ("Add personality", "Create"). */
-export const gradientButton =
-  "gap-x-2 inline-flex items-center justify-center whitespace-nowrap text-sm rounded-lg ease-(--ease-out-quart) duration-300 disabled:pointer-events-none disabled:cursor-not-allowed active:scale-[0.98] focus-visible:outline-0 focus-visible:ring-1 focus-visible:ring-gray-300 focus-visible:opacity-100 bg-(image:--color-ai-gradient) hover:opacity-80 transition-opacity text-white disabled:opacity-50";
 
 /** A catalog string with `<b>` markup, rendered as the app does (bold runs, newlines kept by the caller). */
 export function Rich({ text, bold }: { text: string; bold?: string }) {
@@ -22,9 +18,19 @@ export function Rich({ text, bold }: { text: string; bold?: string }) {
   });
 }
 
-export function SearchBox({ value, onChange, placeholder = "Search" }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+export function SearchBox({
+  value,
+  onChange,
+  placeholder = "Search",
+  className = "h-9 w-72",
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  className?: string;
+}) {
   return (
-    <div className="text-sm flex relative items-center flex-row-reverse h-9 w-72">
+    <div className={cn("text-sm flex relative items-center flex-row-reverse", className)}>
       <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none px-1 ml-2">
         <Icon name="magnifying-glass" className="size-4 text-gray-400" />
       </div>
@@ -118,18 +124,17 @@ export function DataTable<T extends { id: string }>({ columns, rows, sticky = fa
 
 /** Pager under every list. The demo never has a second page, so it always reads "No data". */
 export function Pagination({ className = "mt-4" }: { className?: string }) {
-  const pager = cn(buttonClass("outline", "sm"), "mr-2");
   return (
     <div className={cn("flex items-center justify-end", className)}>
       <div className="text-sm text-gray-800 mr-4">
         <span className="font-medium">No data</span>
       </div>
-      <button type="button" aria-label="Previous page" className={pager} disabled>
+      <Button variant="outline" size="sm" className="mr-2" aria-label="Previous page" disabled>
         <Icon name="chevron-left" className="size-3 text-gray-500" />
-      </button>
-      <button type="button" aria-label="Next page" className={pager} disabled>
+      </Button>
+      <Button variant="outline" size="sm" className="mr-2" aria-label="Next page" disabled>
         <Icon name="chevron-right" className="size-3 text-gray-500" />
-      </button>
+      </Button>
     </div>
   );
 }
@@ -145,23 +150,18 @@ export function PersonCell({ name }: { name: string }) {
   );
 }
 
-export function StatusSwitch({ checked, onCheckedChange, label }: { checked: boolean; onCheckedChange: (v: boolean) => void; label: string }) {
+/** The gradient "+" button of a list page and the create sheet it opens; `sheet` gets a close callback. */
+export function AddSheetButton({ label, sheet }: { label: string; sheet: (close: () => void) => ReactNode }) {
+  const [open, setOpen] = useState(false);
   return (
-    <Switch
-      aria-label={label}
-      checked={checked}
-      onCheckedChange={onCheckedChange}
-      className="h-7 w-12 border-none data-[state=checked]:bg-(image:--color-ai-gradient)"
-    />
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger className={buttonClass("ai")}>
+        <Icon name="plus" variant="fas" className="text-white size-4" />
+        {label}
+      </SheetTrigger>
+      {sheet(() => setOpen(false))}
+    </Sheet>
   );
-}
-
-/**
- * Body of an AI Agent page. ShellPage adds a gap above (mt-3) and below (mb-8) the content that the
- * saved AI pages do not have; the negative margins take them back so the layout matches the screenshots.
- */
-export function PageBody({ className = "space-y-8", children }: { className?: string; children: ReactNode }) {
-  return <section className={cn("-mt-3 -mb-8", className)}>{children}</section>;
 }
 
 /** Title row and description of a list page, with the gradient "+" button on the right. */
@@ -189,7 +189,7 @@ export function ListHeader({
 
 /** White card that groups one question in a sheet form. */
 export function FormCard({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cn("border border-gray-200 rounded-lg bg-white p-4 border-none", className)}>{children}</div>;
+  return <div className={cn("rounded-lg bg-white p-4", className)}>{children}</div>;
 }
 
 export function Counter({ value, max, className = "mt-2" }: { value: string; max: number; className?: string }) {
@@ -282,12 +282,12 @@ export function IntegrationPicker({ value, onChange }: { value: string[]; onChan
 export function SheetFooter({ onCancel, submitLabel, disabled, large }: { onCancel: () => void; submitLabel: string; disabled: boolean; large?: boolean }) {
   return (
     <div className="flex justify-end gap-4">
-      <button type="button" className={buttonClass("outline")} onClick={onCancel}>
+      <Button variant="outline" onClick={onCancel}>
         Cancel
-      </button>
-      <button type="submit" className={cn(gradientButton, large ? "h-10 rounded-lg px-8" : "h-9 px-4 py-2")} disabled={disabled}>
+      </Button>
+      <Button type="submit" variant="ai" size={large ? "lg" : "default"} disabled={disabled}>
         {submitLabel}
-      </button>
+      </Button>
     </div>
   );
 }

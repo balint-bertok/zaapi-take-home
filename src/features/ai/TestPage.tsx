@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import { Inert } from "@/components/Inert";
-import { buttonClass } from "@/components/ui/button";
+import { Button, buttonClass } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip } from "@/components/ui/tooltip";
@@ -10,7 +10,6 @@ import { asset } from "@/lib/asset";
 import { cn } from "@/lib/cn";
 import { ShellPage } from "@/shell/ShellPage";
 import { AiAvatar } from "./AiAvatar";
-import { PageBody } from "./parts";
 
 type Message = { id: number; from: "customer" | "ai"; text: string };
 
@@ -36,10 +35,20 @@ const cannedReplies = [
 const TYPING_DELAY_MS = 600;
 
 const bubble = "py-2 px-3 w-fit text-sm rounded-xl";
-const trashButton = "disabled:cursor-not-allowed mb-1.5 group-hover:opacity-80 opacity-0 focus-visible:opacity-80 transition-all duration-300";
 
-/** The question the AI answered: the closest customer message before it. */
-const questionFor = (messages: Message[], id: number) => messages.filter((m) => m.from === "customer" && m.id < id).at(-1)?.text ?? "";
+/** Trash icon beside a bubble, shown while its row is hovered. */
+function DeleteButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      aria-label="Delete message"
+      className="disabled:cursor-not-allowed mb-1.5 group-hover:opacity-80 opacity-0 focus-visible:opacity-80 transition-all duration-300"
+      onClick={onClick}
+    >
+      <Icon name="trash" className="size-4 text-gray-800" />
+    </button>
+  );
+}
 
 /** Steps of the AI's reasoning, with the labels of common.aiReasoning. Content is illustrative. */
 function Thinking({ question }: { question: string }) {
@@ -88,9 +97,7 @@ function AiMessage({ text, question, onDelete }: { text: string; question: strin
           {open && <Thinking question={question} />}
         </div>
       </div>
-      <button type="button" aria-label="Delete message" className={trashButton} onClick={onDelete}>
-        <Icon name="trash" className="size-4 text-gray-800" />
-      </button>
+      <DeleteButton onClick={onDelete} />
     </div>
   );
 }
@@ -99,9 +106,7 @@ function CustomerMessage({ text, onDelete }: { text: string; onDelete: () => voi
   return (
     <div className="flex items-end gap-2 max-w-[60%] group">
       <div className={cn("whitespace-pre-line bg-gray-100 text-gray-800", bubble)}>{text}</div>
-      <button type="button" aria-label="Delete message" className={trashButton} onClick={onDelete}>
-        <Icon name="trash" className="size-4 text-gray-800" />
-      </button>
+      <DeleteButton onClick={onDelete} />
     </div>
   );
 }
@@ -119,10 +124,40 @@ function Typing() {
   );
 }
 
+/** The tall message box with the send button; owns the draft so typing re-renders only itself. */
+function Composer({ onSend }: { onSend: (text: string) => void }) {
+  const [draft, setDraft] = useState("");
+  function send(e: FormEvent) {
+    e.preventDefault();
+    const text = draft.trim();
+    if (!text) return;
+    onSend(text);
+    setDraft("");
+  }
+  return (
+    <form className="px-4 pb-4 relative" onSubmit={send}>
+      <Textarea
+        aria-label="Message"
+        className="h-28 bg-white/80 resize-none pr-10"
+        placeholder="Type a message..."
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) send(e);
+        }}
+      />
+      <div className="absolute right-6 flex items-center gap-2 top-2">
+        <Button type="submit" variant="ghost" size="icon" aria-label="Send">
+          <Icon name="paper-plane-top" className="ai-gradient-icon size-5!" />
+        </Button>
+      </div>
+    </form>
+  );
+}
+
 /** AI Agent > Test (Step 14): a scripted test chat. Nothing is sent anywhere. */
 export default function TestPage() {
   const [messages, setMessages] = useState<Message[]>(seed);
-  const [draft, setDraft] = useState("");
   const [autoResponse, setAutoResponse] = useState(true);
   const [typing, setTyping] = useState(false);
   const nextId = useRef(seed.length + 1);
@@ -140,12 +175,8 @@ export default function TestPage() {
 
   const add = (from: Message["from"], text: string) => setMessages((m) => [...m, { id: nextId.current++, from, text }]);
 
-  function send(e?: FormEvent) {
-    e?.preventDefault();
-    const text = draft.trim();
-    if (!text) return;
+  function send(text: string) {
     add("customer", text);
-    setDraft("");
     if (!autoResponse) return;
     setTyping(true);
     window.clearTimeout(timer.current);
@@ -162,10 +193,15 @@ export default function TestPage() {
   }
 
   const remove = (id: number) => setMessages((m) => m.filter((x) => x.id !== id));
+  // The question each AI reply answers: the latest customer message above it.
+  const questions: string[] = [];
+  for (const m of messages) questions.push(m.from === "customer" ? m.text : (questions.at(-1) ?? ""));
 
   return (
-    <ShellPage breadcrumb={[{ label: "AI Agent" }, { label: "Test" }]}>
-      {/* Stands in for the app's /images/ai-gradient-bg.png, which was not saved with the page. */}
+    <ShellPage breadcrumb={[{ label: "AI Agent" }, { label: "Test" }]} className="pb-7">
+      {/* Stands in for the app's /images/ai-gradient-bg.png, which was not saved with the page. The app
+          paints it on the scroll container; here it is absolute against the shell's content card (the
+          nearest positioned ancestor), so it stays put while the page scrolls, as the original does. */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
@@ -174,7 +210,8 @@ export default function TestPage() {
             "radial-gradient(45% 80% at 100% 100%, rgba(30, 209, 187, 0.45) 0%, rgba(60, 180, 220, 0.22) 40%, transparent 100%), radial-gradient(35% 45% at 100% 55%, rgba(94, 64, 225, 0.07) 0%, transparent 100%), radial-gradient(35% 40% at 40% 65%, rgba(30, 209, 187, 0.06) 0%, transparent 100%)",
         }}
       />
-      <PageBody className="relative space-y-8 pb-7">
+      {/* Positioned so the page paints above the gradient layer. */}
+      <div className="relative space-y-8">
         <section>
           <h1 className="text-2xl font-medium">Test your AI agent</h1>
           <p className="text-sm text-gray-500 mt-2">
@@ -204,7 +241,7 @@ export default function TestPage() {
           <div className="flex flex-col flex-1 overflow-auto">
             <div className="p-4 flex justify-between">
               {/* Account picker: one integration exists and its list was never captured. */}
-              <Inert className={cn(buttonClass("outline"), "w-[320px] h-[36px] justify-start")}>
+              <Inert className={cn(buttonClass("outline"), "w-[320px] justify-start")}>
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center">
                     <div className="relative size-5">
@@ -225,43 +262,27 @@ export default function TestPage() {
                     </label>
                   </div>
                 </Tooltip>
-                <button type="button" className={cn(buttonClass("outline", "sm"), "flex items-center gap-2")} onClick={clear}>
+                <Button variant="outline" size="sm" className="flex items-center gap-2" onClick={clear}>
                   <Icon name="rotate-right" className="size-3.5 text-gray-500" />
                   Clear
-                </button>
+                </Button>
               </div>
             </div>
             <div ref={thread} className="flex flex-col gap-2 flex-1 overflow-auto pt-3 p-4">
-              {messages.map((m) =>
+              {messages.map((m, i) =>
                 m.from === "customer" ? (
                   <CustomerMessage key={m.id} text={m.text} onDelete={() => remove(m.id)} />
                 ) : (
-                  <AiMessage key={m.id} text={m.text} question={questionFor(messages, m.id)} onDelete={() => remove(m.id)} />
+                  <AiMessage key={m.id} text={m.text} question={questions[i]} onDelete={() => remove(m.id)} />
                 ),
               )}
               {typing && <Typing />}
               <div className="flex-1 flex items-end" />
             </div>
           </div>
-          <form className="px-4 pb-4 relative" onSubmit={send}>
-            <Textarea
-              aria-label="Message"
-              className="h-28 bg-white/80 resize-none pr-10"
-              placeholder="Type a message..."
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) send(e);
-              }}
-            />
-            <div className="absolute right-6 flex items-center gap-2 top-2">
-              <button type="submit" aria-label="Send" className={buttonClass("ghost", "icon")}>
-                <Icon name="paper-plane-top" className="ai-gradient-icon size-5!" />
-              </button>
-            </div>
-          </form>
+          <Composer onSend={send} />
         </div>
-      </PageBody>
+      </div>
     </ShellPage>
   );
 }

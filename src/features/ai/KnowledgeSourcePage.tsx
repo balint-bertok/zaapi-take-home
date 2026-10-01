@@ -1,24 +1,12 @@
 import { useState } from "react";
 import { Inert } from "@/components/Inert";
-import { Sheet, SheetTrigger } from "@/components/ui/sheet";
-import { Icon } from "@/icons/Icon";
 import { ShellPage } from "@/shell/ShellPage";
-import { updateDemo, useDemo } from "@/store/store";
+import { useDemo } from "@/store/store";
 import { AddKnowledgeSourceSheet } from "./AddKnowledgeSourceSheet";
 import type { KnowledgeSource, KnowledgeSourceType } from "./fixtures";
-import {
-  DataTable,
-  FilterChip,
-  gradientButton,
-  ListHeader,
-  PageBody,
-  Pagination,
-  PersonCell,
-  SearchBox,
-  StatusSwitch,
-  type Column,
-} from "./parts";
-import { integrationsLabel } from "./format";
+import { byName, integrationsLabel } from "./format";
+import { AddSheetButton, DataTable, FilterChip, ListHeader, Pagination, PersonCell, SearchBox, type Column } from "./parts";
+import { statusColumn } from "./statusColumn";
 
 const STORAGE_LIMIT = 7_500_000;
 
@@ -30,11 +18,9 @@ const typeLabel: Record<KnowledgeSourceType, string> = {
   manual_input: "Manual Input",
 };
 
-const setEnabled = (id: string, enabled: boolean) =>
-  updateDemo((s) => ({ ...s, knowledgeSources: s.knowledgeSources.map((k) => (k.id === id ? { ...k, enabled } : k)) }));
-
+// The `?? "-"` fallbacks cover rows a browser saved under PR 0's thinner knowledge-source shape.
 const columns: Column<KnowledgeSource>[] = [
-  { label: "Status", width: 70, cell: (k) => <StatusSwitch label={`${k.name} status`} checked={k.enabled} onCheckedChange={(v) => setEnabled(k.id, v)} /> },
+  statusColumn("knowledgeSources"),
   { label: "Source name", width: 140, cell: (k) => <span title={k.name}>{k.name}</span> },
   {
     label: "Sources",
@@ -50,7 +36,7 @@ const columns: Column<KnowledgeSource>[] = [
       ),
   },
   { label: "Source type", width: 150, cell: (k) => typeLabel[k.type] ?? "-" },
-  { label: "Integrations applied", width: 240, cell: (k) => <div>{integrationsLabel(k.integrations ?? [])}</div> },
+  { label: "Integrations applied", width: 240, cell: (k) => integrationsLabel(k.integrations ?? []) },
   { label: "Characters", width: 120, cell: (k) => (k.characters ? k.characters.toLocaleString("en-US") : "-") },
   { label: "Uploaded by", width: 150, cell: (k) => <PersonCell name={k.source} /> },
   { label: "Updated by", width: 120, cell: () => "-" },
@@ -68,24 +54,14 @@ const columns: Column<KnowledgeSource>[] = [
 export default function KnowledgeSourcePage() {
   const sources = useDemo((s) => s.knowledgeSources);
   const [query, setQuery] = useState("");
-  const [open, setOpen] = useState(false);
   const used = sources.reduce((sum, k) => sum + (k.characters ?? 0), 0);
-  const rows = sources.filter((k) => k.name.toLowerCase().includes(query.trim().toLowerCase()));
 
   return (
-    <ShellPage breadcrumb={[{ label: "AI Agent" }, { label: "Train" }, { label: "Knowledge source" }]}>
-      <PageBody>
+    <ShellPage breadcrumb={[{ label: "AI Agent" }, { label: "Train" }, { label: "Knowledge source" }]} className="space-y-7 pb-7">
+      <section className="space-y-8">
         <ListHeader
           title="Knowledge source"
-          action={
-            <Sheet open={open} onOpenChange={setOpen}>
-              <SheetTrigger className={`${gradientButton} h-9 px-4 py-2`}>
-                <Icon name="plus" variant="fas" className="text-white size-4" />
-                Add knowledge source
-              </SheetTrigger>
-              <AddKnowledgeSourceSheet onDone={() => setOpen(false)} />
-            </Sheet>
-          }
+          action={<AddSheetButton label="Add knowledge source" sheet={(close) => <AddKnowledgeSourceSheet onDone={close} />} />}
         >
           <div className="flex flex-col text-gray-500 text-sm gap-2 mt-2">
             <p>Help the AI respond better by adding key info—like policies, FAQs, and details about your business, products, or services.</p>
@@ -105,10 +81,10 @@ export default function KnowledgeSourcePage() {
           <FilterChip icon="user" label="Created by" />
         </div>
         <div>
-          <DataTable columns={columns} rows={rows} sticky />
+          <DataTable columns={columns} rows={byName(sources, query)} sticky />
           <Pagination className="mt-8" />
         </div>
-      </PageBody>
+      </section>
     </ShellPage>
   );
 }

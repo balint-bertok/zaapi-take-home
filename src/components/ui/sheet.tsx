@@ -8,7 +8,6 @@ import { cn } from "@/lib/cn";
 // gray-50 body under a bordered title row, close "x" top right, black/50 backdrop.
 export const Sheet = DialogPrimitive.Root;
 export const SheetTrigger = DialogPrimitive.Trigger;
-export const SheetClose = DialogPrimitive.Close;
 
 type Props = Omit<ComponentProps<typeof DialogPrimitive.Content>, "title"> & { title: ReactNode };
 

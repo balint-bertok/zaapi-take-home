@@ -1,7 +1,7 @@
 import { useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { Inert } from "@/components/Inert";
-import { buttonClass } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { SheetContent } from "@/components/ui/sheet";
 import { updateDemo, useDemo } from "@/store/store";
@@ -130,9 +130,9 @@ function KnowledgeSourceForm({ onDone }: { onDone: () => void }) {
                   >
                     <span className="text-gray-800">{file ? file.name : "Drop file"}</span>
                     <span className="text-gray-400">or</span>
-                    <button type="button" className={buttonClass("outline")} onClick={() => fileInput.current?.click()}>
+                    <Button variant="outline" onClick={() => fileInput.current?.click()}>
                       Choose file
-                    </button>
+                    </Button>
                     <input
                       ref={fileInput}
                       type="file"

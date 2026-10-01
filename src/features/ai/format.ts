@@ -15,3 +15,7 @@ export const handlingLabel: Record<ScenarioHandling, string> = {
   follow_instruction: "Follow instructions",
   escalate_to_human_agent: "Escalate to a human agent immediately",
 };
+
+/** Rows whose name contains the search text, ignoring case and surrounding spaces. */
+export const byName = <T extends { name: string }>(rows: T[], query: string) =>
+  rows.filter((r) => r.name.toLowerCase().includes(query.trim().toLowerCase()));

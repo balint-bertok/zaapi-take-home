@@ -30,14 +30,7 @@ export type Scenario = {
   createdAt: string;
 };
 
-export type Personality = {
-  id: string;
-  name: string;
-  enabled: boolean;
-  integrations: string[];
-  createdBy: string;
-  createdAt: string;
-};
+export type Personality = Omit<Scenario, "handling">;
 
 export const aiSeed: { knowledgeSources: KnowledgeSource[]; scenarios: Scenario[]; personalities: Personality[] } = {
   knowledgeSources: [
