@@ -36,9 +36,7 @@ export function ConfirmDialog({
           <Button variant="outline" onClick={onSecondary}>
             {secondary}
           </Button>
-          <Button onClick={onPrimary}>
-            {primary}
-          </Button>
+          <Button onClick={onPrimary}>{primary}</Button>
         </div>
       </DialogContent>
     </Dialog>

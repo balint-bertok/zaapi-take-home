@@ -8,7 +8,7 @@ export type Automation = {
   updatedBy: string | null;
   updatedAt: string; // ISO date
   // Assign-to-agents settings (PR 4). Optional so automations saved before they existed still load;
-  // `automationSettings` in basic/settings.ts fills the defaults.
+  // `automationSettings` in basic/automation.ts fills the defaults.
   description?: string;
   outsideHours?: "stop" | "continue";
   preference?: "prioritize_last_assigned" | "round_robin_only";

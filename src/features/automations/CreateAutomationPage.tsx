@@ -7,9 +7,9 @@ import { Icon } from "@/icons/Icon";
 import { asset } from "@/lib/asset";
 import { cn } from "@/lib/cn";
 import { Breadcrumb } from "@/shell/Breadcrumb";
-import { updateDemo, useDemo } from "@/store/store";
+import { useDemo } from "@/store/store";
 import type { Automation } from "./fixtures";
-import { automationSettings, listPath, today } from "./basic/automation";
+import { automationSettings, listPath, today, updateAutomations } from "./basic/automation";
 import { ConfirmDialog } from "./basic/ConfirmDialog";
 import { Avatar, Checkbox, RadioCards } from "./basic/controls";
 
@@ -84,7 +84,8 @@ export default function CreateAutomationPage() {
   const widgets = integrations.filter((i) => i.channel === "chat-widget");
 
   const [form, setForm] = useState(() => automationSettings(existing));
-  const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => setForm((f) => ({ ...f, [key]: value }));
+  const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
+    setForm((f) => ({ ...f, [key]: value }));
   const [expanded, setExpanded] = useState(false);
   const [activating, setActivating] = useState(false);
 
@@ -92,8 +93,8 @@ export default function CreateAutomationPage() {
   const allWidgets = widgets.length > 0 && widgets.every((w) => form.integrationIds.includes(w.id));
   const setAllWidgets = (on: boolean) => set("integrationIds", on ? widgets.map((w) => w.id) : []);
   const userSelected = form.assigneeIds.includes(user.id);
-  const valid = selected > 0 && form.assigneeIds.length > 0 && form.name.trim() !== "";
   const fields = { ...form, name: form.name.trim(), description: form.description.trim() || undefined };
+  const valid = selected > 0 && form.assigneeIds.length > 0 && fields.name !== "";
 
   const create = (enabled: boolean) => {
     const automation: Automation = {
@@ -105,19 +106,16 @@ export default function CreateAutomationPage() {
       updatedAt: today(),
       ...fields,
     };
-    updateDemo((s) => ({ ...s, automations: [...s.automations, automation] }));
+    updateAutomations((list) => [...list, automation]);
     toast.success("Successfully created automation");
     navigate(listPath);
   };
 
   const submit = () => {
     if (!existing) return setActivating(true);
-    updateDemo((s) => ({
-      ...s,
-      automations: s.automations.map((a) =>
-        a.id === existing.id ? { ...a, ...fields, updatedBy: user.name, updatedAt: today() } : a,
-      ),
-    }));
+    updateAutomations((list) =>
+      list.map((a) => (a.id === existing.id ? { ...a, ...fields, updatedBy: user.name, updatedAt: today() } : a)),
+    );
     toast.success("Successfully Updated");
     navigate(listPath);
   };
@@ -157,11 +155,18 @@ export default function CreateAutomationPage() {
                       <Icon
                         name="chevron-right"
                         variant="fas"
-                        className={cn("h-4 w-4 text-gray-400 transition-transform duration-200", expanded && "rotate-90")}
+                        className={cn(
+                          "h-4 w-4 text-gray-400 transition-transform duration-200",
+                          expanded && "rotate-90",
+                        )}
                       />
                       <span className="flex space-x-3 items-center min-w-0">
                         <span className="flex items-center justify-center shrink-0 size-[20px]">
-                          <img alt="widget icon" src={asset("images/channels/chat-widget.svg")} className="size-[22px] max-w-none" />
+                          <img
+                            alt="widget icon"
+                            src={asset("images/channels/chat-widget.svg")}
+                            className="size-[22px] max-w-none"
+                          />
                         </span>
                         <span className="text-gray-800 text-sm font-normal text-start truncate">Chat Widget</span>
                       </span>
@@ -205,31 +210,22 @@ export default function CreateAutomationPage() {
                     </p>
                   </div>
                 </div>
-                <div className="mt-2">
-                  <div className="text-sm font-medium mb-3">Assignment logic for tickets outside agents' working hours</div>
-                  <RadioCards
-                    label="Assignment logic for tickets outside agents' working hours"
-                    className="mb-2"
-                    value={form.outsideHours}
-                    onChange={(v) => set("outsideHours", v)}
-                    options={[...outsideHoursOptions]}
-                  />
-                </div>
-                <div className="mt-2">
-                  <div className="text-sm font-medium mb-3">Assignment preference</div>
-                  <RadioCards
-                    label="Assignment preference"
-                    className="mb-2"
-                    value={form.preference}
-                    onChange={(v) => set("preference", v)}
-                    options={[...preferenceOptions]}
-                  />
-                </div>
-                <div>
-                  <div className="text-sm font-medium mb-3">Assign to</div>
-                  {/* The workspace has no team, so "Team" stays disabled, as captured. */}
-                  <RadioCards label="Assign to" value="individualUsers" onChange={() => {}} options={[...assignToOptions]} />
-                </div>
+                <RadioCards
+                  label="Assignment logic for tickets outside agents' working hours"
+                  className="my-2"
+                  value={form.outsideHours}
+                  onChange={(v) => set("outsideHours", v)}
+                  options={outsideHoursOptions}
+                />
+                <RadioCards
+                  label="Assignment preference"
+                  className="my-2"
+                  value={form.preference}
+                  onChange={(v) => set("preference", v)}
+                  options={preferenceOptions}
+                />
+                {/* The workspace has no team, so "Team" stays disabled, as captured. */}
+                <RadioCards label="Assign to" value="individualUsers" onChange={() => {}} options={assignToOptions} />
                 <div>
                   <div className="flex items-center justify-between mt-2">
                     <p className="leading-5 text-gray-800 text-sm">{form.assigneeIds.length} agent selected</p>

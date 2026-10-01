@@ -41,7 +41,12 @@ const categories: { title: string; templates: Template[] }[] = [
         icon: "message-smile",
         tile: indigo,
       },
-      { title: "Out of hours message", description: "Reply to messages outside business hours.", icon: "clock", tile: indigo },
+      {
+        title: "Out of hours message",
+        description: "Reply to messages outside business hours.",
+        icon: "clock",
+        tile: indigo,
+      },
       {
         title: "Closing message",
         description: "Send a message into the ticket when an agent marks it as closed",

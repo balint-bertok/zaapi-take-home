@@ -6,9 +6,10 @@ import { Switch } from "@/components/ui/switch";
 import { Icon } from "@/icons/Icon";
 import { asset } from "@/lib/asset";
 import { cn } from "@/lib/cn";
-import { updateDemo, useDemo } from "@/store/store";
+import { useDemo } from "@/store/store";
+import type { Integration } from "@/store/fixtures";
 import type { Automation } from "../fixtures";
-import { editPath, formatDate } from "./automation";
+import { editPath, formatDate, updateAutomations } from "./automation";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { Avatar } from "./controls";
 
@@ -32,8 +33,13 @@ const th = "text-left align-middle font-medium p-1.5 bg-white h-[48px] text-gray
 // single-line cell centres its content on one 24px line, which matches the screenshot.
 const td = "px-4.5 py-5 align-top";
 const line = "flex items-center gap-x-2 min-h-7";
-const stickyRight = { right: 0, position: "sticky", zIndex: 1, background: "white" } as const;
-const stickyShadow = { ...stickyRight, filter: "drop-shadow(rgba(0, 0, 0, 0.04) -12px 0px 8px)" };
+const sticky = {
+  right: 0,
+  position: "sticky",
+  zIndex: 1,
+  background: "white",
+  filter: "drop-shadow(rgba(0, 0, 0, 0.04) -12px 0px 8px)",
+} as const;
 
 function SortHeader({ column, sort, onSort }: { column: Column; sort: Sort; onSort: (key: SortKey) => void }) {
   const active = column.sort && sort?.key === column.sort ? sort.dir : null;
@@ -49,7 +55,10 @@ function SortHeader({ column, sort, onSort }: { column: Column; sort: Sort; onSo
       {column.sort && (
         <div className="flex flex-col">
           <Icon name="chevron-up" className={cn("size-3", active === "asc" ? "text-gray-800" : "text-gray-400")} />
-          <Icon name="chevron-down" className={cn("size-3 -mt-1", active === "desc" ? "text-gray-800" : "text-gray-400")} />
+          <Icon
+            name="chevron-down"
+            className={cn("size-3 -mt-1", active === "desc" ? "text-gray-800" : "text-gray-400")}
+          />
         </div>
       )}
     </button>
@@ -58,13 +67,12 @@ function SortHeader({ column, sort, onSort }: { column: Column; sort: Sort; onSo
 
 type Sort = { key: SortKey; dir: "asc" | "desc" } | null;
 
-function Row({ a, onDelete }: { a: Automation; onDelete: () => void }) {
+function Row({ a, integrations, onDelete }: { a: Automation; integrations: Integration[]; onDelete: () => void }) {
   const navigate = useNavigate();
-  const integrations = useDemo((s) => s.integrations);
   const [open, setOpen] = useState(false);
   const accounts = integrations.filter((i) => a.integrationIds.includes(i.id));
   const setEnabled = (enabled: boolean) =>
-    updateDemo((s) => ({ ...s, automations: s.automations.map((x) => (x.id === a.id ? { ...x, enabled } : x)) }));
+    updateAutomations((list) => list.map((x) => (x.id === a.id ? { ...x, enabled } : x)));
 
   return (
     <tr className="border-b transition-colors">
@@ -134,7 +142,7 @@ function Row({ a, onDelete }: { a: Automation; onDelete: () => void }) {
       <td className={td}>
         <div className={line}>{formatDate(a.updatedAt)}</div>
       </td>
-      <td className="py-5 pr-4 align-top" style={stickyShadow}>
+      <td className="py-5 pr-4 align-top" style={sticky}>
         <DropdownMenu>
           <DropdownMenuTrigger
             aria-label="More"
@@ -155,6 +163,7 @@ function Row({ a, onDelete }: { a: Automation; onDelete: () => void }) {
 /** The "All automations" table: sortable headers, horizontal scroll, sticky row menu. */
 export function AutomationsTable({ query }: { query: string }) {
   const automations = useDemo((s) => s.automations);
+  const integrations = useDemo((s) => s.integrations);
   const [sort, setSort] = useState<Sort>(null);
   const [deleting, setDeleting] = useState<Automation | null>(null);
 
@@ -169,7 +178,7 @@ export function AutomationsTable({ query }: { query: string }) {
 
   const remove = () => {
     const id = deleting!.id;
-    updateDemo((s) => ({ ...s, automations: s.automations.filter((a) => a.id !== id) }));
+    updateAutomations((list) => list.filter((a) => a.id !== id));
     setDeleting(null);
     toast.success("Successfully deleted automation");
   };
@@ -184,18 +193,18 @@ export function AutomationsTable({ query }: { query: string }) {
                 <SortHeader column={c} sort={sort} onSort={onSort} />
               </th>
             ))}
-            <th className={th} style={{ width: 48, ...stickyShadow }} aria-label="Actions" />
+            <th className={th} style={{ width: 48, ...sticky }} aria-label="Actions" />
           </tr>
         </thead>
         <tbody className="[&_tr:last-child]:border-0">
           {rows.length === 0 ? (
             <tr className="border-b transition-colors">
-              <td className="p-4 align-middle h-96 text-center" colSpan={8}>
+              <td className="p-4 align-middle h-96 text-center" colSpan={columns.length + 1}>
                 No automations
               </td>
             </tr>
           ) : (
-            rows.map((a) => <Row key={a.id} a={a} onDelete={() => setDeleting(a)} />)
+            rows.map((a) => <Row key={a.id} a={a} integrations={integrations} onDelete={() => setDeleting(a)} />)
           )}
         </tbody>
       </table>

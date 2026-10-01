@@ -1,3 +1,4 @@
+import { updateDemo } from "@/store/store";
 import type { Automation } from "../fixtures";
 
 export const listPath = "/automations/basic-automations";
@@ -16,6 +17,10 @@ export function automationSettings(a: Automation | undefined) {
     assigneeIds: a?.assigneeIds ?? [],
   } satisfies Partial<Automation>;
 }
+
+/** Replace the automations list with `update(current)`; the store's only automations writer. */
+export const updateAutomations = (update: (current: Automation[]) => Automation[]) =>
+  updateDemo((s) => ({ ...s, automations: update(s.automations) }));
 
 /** Today as an ISO date in the viewer's time zone, the shape `updatedAt` stores. */
 export function today() {
