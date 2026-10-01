@@ -1,0 +1,15 @@
+# Secrets: .env is the only secret store. .env.example (placeholders only) is tracked.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+
+# Assignment reference material, ~432 MB of screenshots and saved pages; kept local (user decision, 2026-10-01)
+Original files/
+
+# OS and editor
+.DS_Store
+.idea/
+.vscode/
