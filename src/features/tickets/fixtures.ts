@@ -1,4 +1,25 @@
-export type Message = { id: string; from: "contact" | "agent" | "system"; text: string; time: string };
+/**
+ * One line of a ticket thread. `contact`/`agent` are chat bubbles, `comment` an internal comment,
+ * `ticket` an open/close line drawn between rules, `system` a plain centred line (assignment).
+ * Lines are stored already rendered from the catalog templates: the thread is a log.
+ */
+export type Message = {
+  id: string;
+  from: "contact" | "agent" | "comment" | "ticket" | "system";
+  text: string;
+  time: string;
+};
+
+/** Contact fields, in the details panel's order (labels live in DetailsPanel). */
+export type ContactFieldKey =
+  | "firstName"
+  | "lastName"
+  | "phone"
+  | "email"
+  | "secondaryPhone"
+  | "secondaryEmail"
+  | "shipping"
+  | "note";
 
 export type Ticket = {
   id: string;
@@ -7,10 +28,16 @@ export type Ticket = {
   integrationId: string;
   status: "open" | "closed";
   assigneeId: string | null;
+  followUp: boolean;
+  /** Epoch ms; the ticket-history timer runs from here until `closedAt`. */
+  openedAt: number;
+  closedAt: number | null;
+  conversionValue: string;
+  contact: Partial<Record<ContactFieldKey, string>>;
   messages: Message[];
 };
 
-// The visitor ticket from the inbox screenshot.
+// The visitor ticket from the inbox screenshot, whose timer read 00:00:34 when it was captured.
 export const ticketsSeed: { tickets: Ticket[] } = {
   tickets: [
     {
@@ -20,7 +47,13 @@ export const ticketsSeed: { tickets: Ticket[] } = {
       integrationId: "integration-1",
       status: "open",
       assigneeId: null,
+      followUp: false,
+      openedAt: Date.now() - 34_000,
+      closedAt: null,
+      conversionValue: "",
+      contact: { firstName: "Visitor 01 Oct 2026, 11:18" },
       messages: [
+        { id: "message-0", from: "ticket", text: "Ticket #261001DH7ET7 opened automatically at 11:18", time: "11:18" },
         { id: "message-1", from: "contact", text: "Hello 👋", time: "11:18" },
         { id: "message-2", from: "contact", text: "Hello, I have an issue I need solving", time: "11:18" },
       ],
