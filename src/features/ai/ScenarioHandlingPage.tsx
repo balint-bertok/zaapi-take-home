@@ -1,6 +1,51 @@
+import { useState } from "react";
+import { Inert } from "@/components/Inert";
 import { ShellPage } from "@/shell/ShellPage";
+import { useDemo } from "@/store/store";
+import { AddScenarioSheet } from "./AddScenarioSheet";
+import type { Scenario } from "./fixtures";
+import { byName, handlingLabel, integrationsLabel } from "./format";
+import { AddSheetButton, DataTable, FilterChip, ListHeader, Pagination, PersonCell, SearchBox, type Column } from "./parts";
+import { statusColumn } from "./statusColumn";
 
-/** Placeholder until the feature PR builds this page. */
+const columns: Column<Scenario>[] = [
+  statusColumn("scenarios"),
+  { label: "Scenario name", width: 320, cell: (x) => <span title={x.name}>{x.name}</span> },
+  { label: "How to handle", width: 200, cell: (x) => handlingLabel[x.handling] },
+  { label: "Integrations applied", width: 240, cell: (x) => integrationsLabel(x.integrations) },
+  { label: "Last updated", width: 180, sort: "desc", cell: (x) => x.createdAt },
+  { label: "Updated by", width: 120, cell: (x) => <PersonCell name={x.createdBy} /> },
+  { label: "Created at", width: 180, sort: "none", cell: (x) => x.createdAt },
+  { label: "Created by", width: 120, cell: (x) => <PersonCell name={x.createdBy} /> },
+];
+
+/** AI Agent > Train > Scenario handling (Step 10). */
 export default function ScenarioHandlingPage() {
-  return <ShellPage breadcrumb={[{ label: "AI Agent" }, { label: "Train" }, { label: "Scenario Handling" }]} />;
+  const scenarios = useDemo((s) => s.scenarios);
+  const [query, setQuery] = useState("");
+
+  return (
+    <ShellPage breadcrumb={[{ label: "AI Agent" }, { label: "Train" }, { label: "Scenario handling" }]} className="space-y-7 pb-7">
+      <section className="space-y-8">
+        <ListHeader title="Scenario handling" action={<AddSheetButton label="Add scenario" sheet={(close) => <AddScenarioSheet onDone={close} />} />}>
+          <p className="text-sm text-gray-500 mt-2">
+            Train your AI Agent to follow scenarios for common customer scenarios.{" "}
+            {/* Help-centre article, outside the demo. */}
+            <Inert className="underline">Learn how to set up your scenarios.</Inert>
+          </p>
+        </ListHeader>
+        <div className="flex gap-2 overflow-auto pt-2">
+          <SearchBox value={query} onChange={setQuery} placeholder="Search scenario name" className="h-10 w-[320px] min-w-[320px]" />
+          <FilterChip icon="rotate-exclamation" label="How to handle" />
+          <FilterChip icon="link" label="Integrations" iconClassName="size-5" />
+          <FilterChip icon="user" label="Created by" />
+        </div>
+        <div>
+          {/* Newest first, as the "Last updated" sort arrow says: rows are stored in creation order. */}
+          <DataTable columns={columns} rows={byName(scenarios, query).reverse()} sticky />
+          <Pagination className="mt-5" />
+        </div>
+      </section>
+    </ShellPage>
+  );
 }

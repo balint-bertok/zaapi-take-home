@@ -27,7 +27,7 @@ From the validated plan (`Original files/extracted/PLAN.md`), one PR each:
 - PR 0, scaffold and shell.
 - PR 1, auth and onboarding: register, verify-email redirect, login, onboarding modals, get-started card. Built.
 - PR 2, tickets: inbox sidebar, ticket list, conversation pane, contact panel.
-- PR 3, AI Agent: knowledge source, scenario handling, personality, test chat.
+- PR 3, AI Agent: knowledge source, scenario handling, personality, test chat; Deploy and Analyse stay inert. Built.
 - PR 4, automations: basic automations list, template picker, assign-to-agents form. Built.
 - PR 5, flow builder: flow list, template gallery, React Flow canvas (`@xyflow/react`, its stock stylesheet plus the app's one override), publish dialog; flows live in the `flows` slice. Built.
 - PR 6, settings: settings sidebar, billing page. Built.
