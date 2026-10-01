@@ -73,10 +73,13 @@ export function FlowCanvas({ flow }: { flow: Flow }) {
     moveTo(target);
   };
 
-  const onConnect = (c: Connection) =>
+  const onConnect = (c: Connection) => {
+    const sourceHandle = c.sourceHandle ?? null;
+    if (flow.edges.some((e) => e.source === c.source && e.target === c.target && e.sourceHandle === sourceHandle)) return;
     editFlow(flow.id, (f) => ({
-      edges: [...f.edges, { id: crypto.randomUUID(), source: c.source, target: c.target, sourceHandle: c.sourceHandle ?? null }],
+      edges: [...f.edges, { id: crypto.randomUUID(), source: c.source, target: c.target, sourceHandle }],
     }));
+  };
 
   return (
     <ReactFlow

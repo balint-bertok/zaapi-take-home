@@ -22,7 +22,7 @@ export function CheckItem({ checked, onToggle, children }: { checked: boolean; o
   return (
     <button
       type="button"
-      role="menuitemcheckbox"
+      role="checkbox"
       aria-checked={checked}
       onClick={onToggle}
       className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-gray-100"

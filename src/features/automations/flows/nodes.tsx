@@ -45,7 +45,8 @@ type ShellProps = {
 function NodeShell({ accent, tile, title, description, start, children }: ShellProps) {
   const a = accents[accent];
   return (
-    <div role="button" className={cn("group/node border border-gray-200 rounded-lg bg-white text-sm shadow-sm w-[320px] transition-all duration-200", a.hover)}>
+    // The saved page has role="button" here (hence its pointer cursor); dropped so the controls inside stay exposed.
+    <div className={cn("group/node cursor-pointer border border-gray-200 rounded-lg bg-white text-sm shadow-sm w-[320px] transition-all duration-200", a.hover)}>
       <div className="border-b border-gray-200 py-3">
         <div className="pr-3 flex gap-3">
           <div>

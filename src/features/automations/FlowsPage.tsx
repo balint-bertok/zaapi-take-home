@@ -139,7 +139,7 @@ export default function FlowsPage() {
                     >
                       <Cell>
                         <Switch
-                          aria-label={statusLabels[statusOf(f)]}
+                          aria-label={f.name}
                           checked={f.enabled}
                           disabled={f.status === "draft"}
                           onClick={(e) => e.stopPropagation()}

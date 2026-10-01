@@ -73,11 +73,12 @@ export function editFlow(id: string, change: (f: Flow) => Partial<Flow>) {
   updateFlow(id, (f) => ({ updatedAt: new Date().toISOString(), unpublishedChanges: f.status === "published", ...change(f) }));
 }
 
+/** Publishes or updates a flow. A first publish switches it on; an update keeps a paused flow paused. */
 export function publishFlow(id: string, user: string) {
   const at = new Date().toISOString();
   updateFlow(id, (f) => ({
     status: "published",
-    enabled: true,
+    enabled: f.status === "published" ? f.enabled : true,
     updatedAt: at,
     updatedBy: user,
     unpublishedChanges: false,
