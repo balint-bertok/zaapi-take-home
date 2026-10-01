@@ -3,12 +3,14 @@ import { seed, type DemoState } from "./fixtures";
 
 // The whole demo state lives in this module and in one localStorage key. Nothing leaves the browser.
 // Bump the key's version when a fixture changes shape incompatibly; old saved state is then ignored.
-export const STORAGE_KEY = "zaapi-demo-state-v1";
+const STORAGE_KEY = "zaapi-demo-state-v1";
 
 function load(): DemoState {
   try {
+    // `?reset=1` on any URL puts the demo back to its fixtures.
+    if (new URLSearchParams(location.search).get("reset") === "1") localStorage.removeItem(STORAGE_KEY);
     const saved = localStorage.getItem(STORAGE_KEY);
-    // Spread over the seed so a field added by a later PR gets its seed value in older saved state.
+    // Spread over the seed so a slice added by a later PR gets its seed value in older saved state.
     return saved ? { ...seed, ...(JSON.parse(saved) as Partial<DemoState>) } : seed;
   } catch {
     return seed;
@@ -31,17 +33,6 @@ export function updateDemo(update: (current: DemoState) => DemoState) {
   } catch {
     // Storage full or blocked (private mode): the demo keeps working in memory.
   }
-  listeners.forEach((l) => l());
-}
-
-/** Back to the fixtures, as `?reset=1` does on load. */
-export function resetDemo() {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // ignore, see updateDemo
-  }
-  state = seed;
   listeners.forEach((l) => l());
 }
 

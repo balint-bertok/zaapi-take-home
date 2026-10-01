@@ -1,6 +1,4 @@
-import { ShellPage } from "@/shell/ShellPage";
-
-/** Placeholder until the feature PR builds this page. */
+/** Placeholder until the feature PR builds this page. The inbox fills the card without a breadcrumb. */
 export default function TicketsPage() {
-  return <ShellPage section="tickets" />;
+  return <main className="h-(--height-page-content-with-banner)" />;
 }

@@ -2,5 +2,5 @@ import { ShellPage } from "@/shell/ShellPage";
 
 /** Placeholder until the feature PR builds this page. */
 export default function TestPage() {
-  return <ShellPage section="ai" breadcrumb={[{ label: "AI Agent" }, { label: "Test" }]} />;
+  return <ShellPage breadcrumb={[{ label: "AI Agent" }, { label: "Test" }]} />;
 }

@@ -1,8 +1,8 @@
-import { Outlet } from "react-router";
 import { Toaster } from "sonner";
 import { Banner } from "./Banner";
+import { SuspendedOutlet } from "./SuspendedOutlet";
 
-/** Everything after sign-in: the trial banner on top, the page below. */
+/** Everything after sign-in: the trial banner on top, the page (or section layout) below. */
 export function AppLayout() {
   return (
     <div className="flex flex-col w-full">
@@ -14,7 +14,7 @@ export function AppLayout() {
         </linearGradient>
       </svg>
       <Banner />
-      <Outlet />
+      <SuspendedOutlet />
       <Toaster />
     </div>
   );

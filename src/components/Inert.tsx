@@ -8,7 +8,7 @@ type Props = ComponentProps<"button">;
  * (user decision 2026-10-01: uncaptured pages are not built). Keeps its hover styles, has no
  * handler, and says so to assistive tech. Forwards props so it can be a Radix `asChild` trigger.
  */
-export function Inert({ className, children, ...props }: Props) {
+export function Inert({ className, ...props }: Props) {
   return (
     <button
       type="button"
@@ -17,8 +17,6 @@ export function Inert({ className, children, ...props }: Props) {
       {...props}
       onClick={undefined}
       className={cn(className, "cursor-default")}
-    >
-      {children}
-    </button>
+    />
   );
 }

@@ -1,19 +1,15 @@
-import { Link, useLocation } from "react-router";
+import { NavLink } from "react-router";
 import { Inert } from "@/components/Inert";
+import { cn } from "@/lib/cn";
 import { sections, type Section, type SectionKey } from "./sections";
 
 const item =
-  "flex w-full items-center overflow-hidden rounded-md p-3 text-left text-zinc-500 outline-hidden transition-[width,height,padding] focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-9 text-sm gap-2.5";
+  "flex w-full items-center overflow-hidden rounded-md p-3 text-left text-zinc-500 outline-hidden transition-[width,height,padding] focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-9 text-sm gap-2.5";
+const activeItem = "bg-sidebar-accent text-sidebar-accent-foreground";
 
-/** The 240px section menu next to the rail. The active entry is the longest `to` the URL starts with. */
+/** The 240px section menu next to the rail; an entry is active on its own URL and any below it. */
 export function SectionSidebar({ section }: { section: SectionKey }) {
   const { title, groups }: Section = sections[section];
-  const { pathname } = useLocation();
-  const active = groups
-    .flatMap((g) => g.items.map((i) => i.to ?? ""))
-    .filter((to) => to && pathname.startsWith(to))
-    .sort((a, b) => b.length - a.length)[0];
-
   return (
     <aside
       aria-label={title}
@@ -37,9 +33,9 @@ export function SectionSidebar({ section }: { section: SectionKey }) {
                 {group.items.map(({ label, to }) => (
                   <li key={label} className="relative">
                     {to ? (
-                      <Link to={to} data-active={to === active} className={item}>
+                      <NavLink to={to} className={({ isActive }) => cn(item, isActive && activeItem)}>
                         <span className="font-medium shrink-0">{label}</span>
-                      </Link>
+                      </NavLink>
                     ) : (
                       <Inert className={item}>
                         <span className="font-medium shrink-0">{label}</span>

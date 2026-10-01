@@ -23,7 +23,7 @@ A take-home assignment. Front-end only: no backend, no database, no cloud or VPS
 ```bash
 git config core.hooksPath .githooks   # once per clone; pre-commit secret scan, fails closed
 npm ci                                 # install exactly what package-lock.json pins
-npm run dev                            # dev server at the root path
+npm run dev                            # dev server, at /zaapi-take-home/ like Pages
 npm run build                          # dist/ under the Pages base path, plus 404.html for deep links
 scripts/gate                           # local gate: secret scan + scripts/test; same command CI runs
 node scripts/extract-icons.mjs "<path to Original files>"   # regenerate src/icons/registry.ts

@@ -8,7 +8,8 @@ export default defineConfig({
   testDir: "tests/e2e",
   forbidOnly: !!process.env.CI,
   reporter: process.env.CI ? "list" : [["list"], ["html", { open: "never" }]],
-  use: { baseURL: `http://localhost:${port}/zaapi-take-home/`, viewport: { width: 1440, height: 900 } },
+  fullyParallel: true,
+  use: { baseURL: `http://localhost:${port}/zaapi-take-home/` },
   projects: [
     {
       name: "chromium",

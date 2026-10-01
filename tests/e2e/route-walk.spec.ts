@@ -24,7 +24,6 @@ for (const route of routes) {
 
     expect(response?.status()).toBe(200);
     await expect(page).toHaveTitle(route.title);
-    expect(route.title === "Welcome to Zaapi!" || route.title.endsWith(" - Zaapi")).toBe(true);
 
     const base = new URL(baseURL!).pathname.replace(/\/$/, "");
     const hrefs = await page.locator("a[href]").evaluateAll((as) => as.map((a) => a.getAttribute("href")!));

@@ -15,14 +15,6 @@ const credentialShapes: [string, RegExp][] = [
   ["AWS access key id", /AKIA[0-9A-Z]{16}/],
 ];
 
-function* files(dir: string): Generator<string> {
-  for (const entry of readdirSync(dir)) {
-    const path = join(dir, entry);
-    if (statSync(path).isDirectory()) yield* files(path);
-    else yield path;
-  }
-}
-
 describe("secrets", () => {
   it(".env is git-ignored", () => {
     // check-ignore exits non-zero (and execFileSync throws) when the path is NOT ignored.
@@ -30,7 +22,10 @@ describe("secrets", () => {
   });
 
   it("no credential-shaped literal in src/", () => {
-    const hits = [...files("src")].flatMap((file) => {
+    const files = readdirSync("src", { recursive: true, encoding: "utf8" })
+      .map((f) => join("src", f))
+      .filter((f) => statSync(f).isFile());
+    const hits = files.flatMap((file) => {
       const text = readFileSync(file, "utf8");
       return credentialShapes.filter(([, re]) => re.test(text)).map(([name]) => `${file}: ${name}`);
     });

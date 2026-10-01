@@ -65,3 +65,7 @@ export const sections = {
 } satisfies Record<string, Section>;
 
 export type SectionKey = keyof typeof sections;
+
+/** Where a section's rail icon leads: its first linked sidebar entry. */
+export const sectionHome = (key: SectionKey) =>
+  sections[key].groups.flatMap((g) => g.items).find((i) => i.to)!.to!;

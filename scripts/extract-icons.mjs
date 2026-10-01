@@ -3,7 +3,7 @@
 // so the demo renders the exact glyphs (ADR 0001: identical icons, no icon library).
 // Inputs stay git-ignored under "Original files/"; pass another location as the first argument
 // (a worktree has no copy). Fails if the number of distinct icon names drifts from EXPECTED.
-import { readFileSync, readdirSync, writeFileSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -12,20 +12,13 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const source = resolve(process.argv[2] ?? join(root, "Original files"));
 const out = join(root, "src/icons/registry.ts");
 
-function* htmlFiles(dir) {
-  for (const entry of readdirSync(dir)) {
-    const p = join(dir, entry);
-    if (statSync(p).isDirectory()) yield* htmlFiles(p);
-    else if (/\.html?$/i.test(entry)) yield p;
-  }
-}
-
 const attr = (tag, name) => tag.match(new RegExp(`\\b${name}="([^"]*)"`))?.[1];
 
 // registry[name][prefix] = { viewBox, paths }. The same name can ship in several styles
 // (the rail shows far "bolt" when idle and fas "bolt" when active), so styles are kept apart.
 const registry = {};
-for (const file of [...htmlFiles(source)].sort()) {
+const htmlFiles = readdirSync(source, { recursive: true, encoding: "utf8" }).filter((f) => /\.html?$/i.test(f));
+for (const file of htmlFiles.sort().map((f) => join(source, f))) {
   const html = readFileSync(file, "utf8");
   for (const m of html.matchAll(/<svg\b[^>]*\bdata-icon="[^"]+"[^>]*>[\s\S]*?<\/svg>/g)) {
     const svg = m[0];

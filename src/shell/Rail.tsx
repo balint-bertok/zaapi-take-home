@@ -1,12 +1,12 @@
-import { Link, useLocation } from "react-router";
+import { Link } from "react-router";
 import { Inert } from "@/components/Inert";
 import { Tooltip } from "@/components/ui/tooltip";
 import { Icon, type IconName } from "@/icons/Icon";
-import type { IconStyle } from "@/icons/types";
 import { cn } from "@/lib/cn";
 import { useDemo } from "@/store/store";
+import { sectionHome, type SectionKey } from "./sections";
 
-type RailItem = { label: string; icon: IconName; to?: string; prefix?: string };
+type RailItem = { label: string; icon: IconName; section?: SectionKey };
 
 const button =
   "gap-x-2 whitespace-nowrap text-sm ease-(--ease-out-quart) duration-300 active:scale-[0.98] focus-visible:outline-0 focus-visible:ring-1 focus-visible:ring-gray-300 relative hover:bg-sidebar-accent flex items-center justify-center size-9 rounded-md transition-colors";
@@ -18,28 +18,30 @@ const top: RailItem[] = [
   { label: "Search", icon: "magnifying-glass" },
 ];
 const main: RailItem[] = [
-  { label: "Tickets", icon: "message-dots", to: "/tickets", prefix: "/tickets" },
-  { label: "AI Agent", icon: "ai-symbol", to: "/ai/train/knowledge-source", prefix: "/ai" },
+  { label: "Tickets", icon: "message-dots", section: "tickets" },
+  { label: "AI Agent", icon: "ai-symbol", section: "ai" },
   { label: "Analytics", icon: "chart-line" },
-  { label: "Automations", icon: "bolt", to: "/automations/basic-automations", prefix: "/automations" },
+  { label: "Automations", icon: "bolt", section: "automations" },
   { label: "Broadcast", icon: "bullhorn" },
   { label: "Contacts", icon: "user-group" },
-  { label: "Settings", icon: "gear", to: "/settings/billing", prefix: "/settings" },
+  { label: "Settings", icon: "gear", section: "settings" },
 ];
 
-function RailButton({ item }: { item: RailItem }) {
-  const { pathname } = useLocation();
-  const active = !!item.prefix && pathname.startsWith(item.prefix);
+function RailButton({ item, current }: { item: RailItem; current?: SectionKey }) {
+  const active = !!item.section && item.section === current;
   // The active entry switches to the solid glyph, as on app.zaapi.com (ai-symbol has only one).
-  const variant: IconStyle | undefined = active ? "fas" : undefined;
   const icon = (
-    <Icon name={item.icon} variant={variant} className={cn("size-4.5!", active ? "text-gray-500" : "text-gray-400")} />
+    <Icon
+      name={item.icon}
+      variant={active ? "fas" : undefined}
+      className={cn("size-4.5!", active ? "text-gray-500" : "text-gray-400")}
+    />
   );
   const className = cn(button, active ? "bg-sidebar-accent text-sidebar-accent-foreground" : "bg-transparent");
   return (
     <Tooltip content={item.label} side="right">
-      {item.to ? (
-        <Link to={item.to} aria-label={item.label} className={className}>
+      {item.section ? (
+        <Link to={sectionHome(item.section)} aria-label={item.label} className={className}>
           {icon}
         </Link>
       ) : (
@@ -51,8 +53,8 @@ function RailButton({ item }: { item: RailItem }) {
   );
 }
 
-/** The 56px icon rail on the left of every shell page. */
-export function Rail() {
+/** The 56px icon rail on the left of every section page. */
+export function Rail({ section }: { section: SectionKey }) {
   const workspace = useDemo((s) => s.workspace.name);
   return (
     <nav
@@ -77,7 +79,7 @@ export function Rail() {
       </div>
       <div className="flex flex-col items-center gap-4 flex-1 overflow-y-auto overflow-x-hidden">
         {main.map((item) => (
-          <RailButton key={item.label} item={item} />
+          <RailButton key={item.label} item={item} current={section} />
         ))}
       </div>
       <RailButton item={{ label: "Live Chat Support", icon: "circle-question" }} />

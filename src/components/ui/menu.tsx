@@ -47,14 +47,12 @@ export const PopoverTrigger = PopoverPrimitive.Trigger;
 
 export function PopoverContent({
   className,
-  align = "center",
   sideOffset = 4,
   ...props
 }: ComponentProps<typeof PopoverPrimitive.Content>) {
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Content
-        align={align}
         sideOffset={sideOffset}
         className={cn(floating, "w-72 origin-(--radix-popover-content-transform-origin)", className)}
         {...props}
