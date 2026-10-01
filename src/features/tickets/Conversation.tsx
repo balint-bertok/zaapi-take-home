@@ -25,7 +25,10 @@ export function Conversation({ ticket }: { ticket: Ticket }) {
       <Thread messages={ticket.messages} />
       <div className="h-px bg-gray-200 shrink-0" />
       <div className="relative flex flex-col flex-[36.913_1_0px] min-h-0">
-        <Composer key={ticket.id} ticketId={ticket.id} />
+        {/* Under the closed overlay the composer is out of reach for keyboard too, not just covered. */}
+        <div inert={ticket.status === "closed"} className="flex flex-col flex-1 min-h-0">
+          <Composer key={ticket.id} ticketId={ticket.id} />
+        </div>
         {ticket.status === "closed" && <ClosedState ticketId={ticket.id} />}
       </div>
     </div>
@@ -143,7 +146,7 @@ function Thread({ messages }: { messages: Message[] }) {
   const scroller = useRef<HTMLDivElement>(null);
   useEffect(() => {
     scroller.current?.scrollTo({ top: scroller.current.scrollHeight });
-  }, [messages.length]);
+  }, [messages]);
   return (
     <div ref={scroller} className="flex-[63.087_1_0px] min-h-0 overflow-y-auto bg-white">
       <div className="pt-[21px] pb-2">

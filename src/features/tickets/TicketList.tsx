@@ -173,7 +173,8 @@ function TicketCard({
       tabIndex={0}
       aria-current={selected || undefined}
       onClick={onSelect}
-      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), onSelect())}
+      // Only the card itself: Enter/Space on the nested assignee chip or checkbox must reach that control.
+      onKeyDown={(e) => e.target === e.currentTarget && (e.key === "Enter" || e.key === " ") && (e.preventDefault(), onSelect())}
       className={cn(
         "group/chat-card select-none flex flex-col items-start justify-center gap-2 pl-6 pr-3 mb-1 hover:bg-gray-100 rounded-lg relative w-full h-[96px] cursor-pointer",
         selected && "bg-gray-100",
