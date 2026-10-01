@@ -257,22 +257,22 @@ function ScenarioForm({ start, onDone }: { start: Template["form"]; onDone: () =
               ))}
             </div>
           </div>
-          {handling === "follow_instruction" ? (
-            <div>
-              <div className="space-y-1">
-                <h4 className="font-medium text-gray-800">Describe reply steps the AI should take</h4>
-                <p className="whitespace-pre-line text-gray-500">
-                  <Rich
-                    bold="font-medium"
-                    text="<b>Tip</b>: organize the text using proper headings (like H1, H2) and paragraphs into a step-by-step format like 1, 2, 3 for clarity."
-                  />
-                </p>
-              </div>
-              <div className="mt-4">
-                <StepsEditor markdown={start.instruction} />
-              </div>
+          {/* Hidden rather than unmounted, so edits to the steps survive switching to Escalate and back. */}
+          <div hidden={handling !== "follow_instruction"}>
+            <div className="space-y-1">
+              <h4 className="font-medium text-gray-800">Describe reply steps the AI should take</h4>
+              <p className="whitespace-pre-line text-gray-500">
+                <Rich
+                  bold="font-medium"
+                  text="<b>Tip</b>: organize the text using proper headings (like H1, H2) and paragraphs into a step-by-step format like 1, 2, 3 for clarity."
+                />
+              </p>
             </div>
-          ) : (
+            <div className="mt-4">
+              <StepsEditor markdown={start.instruction} />
+            </div>
+          </div>
+          {handling === "escalate_to_human_agent" && (
             <p className="text-gray-500">The AI Agent will send a message informing the customer that their ticket is being escalated to a human agent.</p>
           )}
         </FormCard>

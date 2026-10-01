@@ -41,7 +41,8 @@ export default function ScenarioHandlingPage() {
           <FilterChip icon="user" label="Created by" />
         </div>
         <div>
-          <DataTable columns={columns} rows={byName(scenarios, query)} sticky />
+          {/* Newest first, as the "Last updated" sort arrow says: rows are stored in creation order. */}
+          <DataTable columns={columns} rows={byName(scenarios, query).reverse()} sticky />
           <Pagination className="mt-5" />
         </div>
       </section>

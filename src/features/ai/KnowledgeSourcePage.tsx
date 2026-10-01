@@ -18,7 +18,6 @@ const typeLabel: Record<KnowledgeSourceType, string> = {
   manual_input: "Manual Input",
 };
 
-// The `?? "-"` fallbacks cover rows a browser saved under PR 0's thinner knowledge-source shape.
 const columns: Column<KnowledgeSource>[] = [
   statusColumn("knowledgeSources"),
   { label: "Source name", width: 140, cell: (k) => <span title={k.name}>{k.name}</span> },
@@ -35,8 +34,8 @@ const columns: Column<KnowledgeSource>[] = [
         </span>
       ),
   },
-  { label: "Source type", width: 150, cell: (k) => typeLabel[k.type] ?? "-" },
-  { label: "Integrations applied", width: 240, cell: (k) => integrationsLabel(k.integrations ?? []) },
+  { label: "Source type", width: 150, cell: (k) => typeLabel[k.type] },
+  { label: "Integrations applied", width: 240, cell: (k) => integrationsLabel(k.integrations) },
   { label: "Characters", width: 120, cell: (k) => (k.characters ? k.characters.toLocaleString("en-US") : "-") },
   { label: "Uploaded by", width: 150, cell: (k) => <PersonCell name={k.source} /> },
   { label: "Updated by", width: 120, cell: () => "-" },

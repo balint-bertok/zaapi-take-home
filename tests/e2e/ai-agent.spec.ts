@@ -67,3 +67,22 @@ test("the test chat replies from its script and clears", async ({ page }) => {
   await page.getByRole("button", { name: "Clear" }).click();
   await expect(page.getByText("Hello, I had a question")).toBeHidden();
 });
+
+test("every message sent while the AI is typing gets its own reply, and turning auto-response off cancels a pending one", async ({ page }) => {
+  await page.goto("ai/testing");
+  await page.getByRole("button", { name: "Clear" }).click();
+  const composer = page.getByRole("textbox", { name: "Message" });
+  await composer.fill("First question");
+  await composer.press("Enter");
+  await composer.fill("Second question");
+  await composer.press("Enter");
+  await expect(page.getByRole("button", { name: "Show thinking" })).toHaveCount(2);
+  await expect(page.getByRole("status", { name: "AI agent is typing" })).toBeHidden();
+
+  await composer.fill("Third question");
+  await composer.press("Enter");
+  await page.getByRole("switch", { name: "AI auto-response" }).click();
+  await expect(page.getByRole("status", { name: "AI agent is typing" })).toBeHidden();
+  await page.waitForTimeout(1000);
+  await expect(page.getByRole("button", { name: "Show thinking" })).toHaveCount(2);
+});

@@ -23,6 +23,8 @@ const manualInputDescription =
   "Write anything you want the AI to learn about your business to improve its response accuracy.\n\n<b>Tip</b>: For best results, organize the text using proper headings (like H1, H2) and paragraphs.";
 
 const link = "text-electric-green-600 font-medium hover:opacity-80";
+// The file input's `accept` list as a test on dropped names, which `accept` does not cover.
+const accepted = /\.(txt|csv|docx|xlsx)$/i;
 
 /** "Add New Knowledge Source" sheet (Step 9 (2)). Adding appends a row to the store; nothing is uploaded. */
 export function AddKnowledgeSourceSheet({ onDone }: { onDone: () => void }) {
@@ -44,8 +46,10 @@ function KnowledgeSourceForm({ onDone }: { onDone: () => void }) {
   const [text, setText] = useState("");
   const fileInput = useRef<HTMLInputElement>(null);
 
-  const urlInvalid = url !== "" && !/^https:\/\/\S+\.\S+/.test(url);
-  const content = { file: file?.name ?? "", website: urlInvalid ? "" : url.trim(), manual_input: text.trim() }[kind];
+  const site = url.trim();
+  // https://, then dot-separated non-empty host labels, then an optional path; no spaces anywhere.
+  const urlInvalid = site !== "" && !/^https:\/\/[^\s/.]+(\.[^\s/.]+)+(\/\S*)?$/.test(site);
+  const content = { file: file?.name ?? "", website: urlInvalid ? "" : site, manual_input: text.trim() }[kind];
   const ready = name.trim() !== "" && content !== "";
 
   function submit(e: FormEvent) {
@@ -125,7 +129,9 @@ function KnowledgeSourceForm({ onDone }: { onDone: () => void }) {
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={(e) => {
                       e.preventDefault();
-                      setFile(e.dataTransfer.files[0] ?? null);
+                      // One file of an accepted type, as the sheet states; any other drop is ignored.
+                      const dropped = e.dataTransfer.files;
+                      if (dropped.length === 1 && accepted.test(dropped[0].name)) setFile(dropped[0]);
                     }}
                   >
                     <span className="text-gray-800">{file ? file.name : "Drop file"}</span>

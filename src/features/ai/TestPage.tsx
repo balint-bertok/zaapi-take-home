@@ -159,13 +159,18 @@ function Composer({ onSend }: { onSend: (text: string) => void }) {
 export default function TestPage() {
   const [messages, setMessages] = useState<Message[]>(seed);
   const [autoResponse, setAutoResponse] = useState(true);
-  const [typing, setTyping] = useState(false);
+  // One timer per customer message awaiting its reply; the AI is "typing" while any is pending.
+  const [pending, setPending] = useState(0);
+  const typing = pending > 0;
   const nextId = useRef(seed.length + 1);
   const replies = useRef(0);
-  const timer = useRef<number | undefined>(undefined);
+  const timers = useRef(new Set<number>());
   const thread = useRef<HTMLDivElement>(null);
 
-  useEffect(() => () => window.clearTimeout(timer.current), []);
+  useEffect(() => {
+    const pendingTimers = timers.current;
+    return () => pendingTimers.forEach((t) => window.clearTimeout(t));
+  }, []);
   // Follow new messages, but open on the start of the seeded conversation as the screenshot does.
   const shown = useRef(seed.length);
   useEffect(() => {
@@ -178,17 +183,28 @@ export default function TestPage() {
   function send(text: string) {
     add("customer", text);
     if (!autoResponse) return;
-    setTyping(true);
-    window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => {
+    const t = window.setTimeout(() => {
+      timers.current.delete(t);
       add("ai", cannedReplies[replies.current++ % cannedReplies.length]);
-      setTyping(false);
+      setPending((n) => n - 1);
     }, TYPING_DELAY_MS);
+    timers.current.add(t);
+    setPending((n) => n + 1);
+  }
+
+  function cancelReplies() {
+    timers.current.forEach((t) => window.clearTimeout(t));
+    timers.current.clear();
+    setPending(0);
+  }
+
+  function toggleAutoResponse(on: boolean) {
+    setAutoResponse(on);
+    if (!on) cancelReplies();
   }
 
   function clear() {
-    window.clearTimeout(timer.current);
-    setTyping(false);
+    cancelReplies();
     setMessages([]);
   }
 
@@ -256,7 +272,7 @@ export default function TestPage() {
               <div className="flex items-center gap-4">
                 <Tooltip content="If enabled, the AI agent will automatically generate a response when a customer message is sent.">
                   <div className="flex items-center gap-1.5">
-                    <Switch id="autoResponse" checked={autoResponse} onCheckedChange={setAutoResponse} />
+                    <Switch id="autoResponse" checked={autoResponse} onCheckedChange={toggleAutoResponse} />
                     <label htmlFor="autoResponse" className="text-sm text-gray-700 whitespace-nowrap cursor-pointer">
                       AI auto-response
                     </label>
