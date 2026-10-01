@@ -25,7 +25,7 @@ Each has one suite in `docs/testing.md` and is never weakened to make a feature 
 From the validated plan (`Original files/extracted/PLAN.md`), one PR each:
 
 - PR 0, scaffold and shell.
-- PR 1, auth and onboarding: register, verify-email redirect, login, onboarding modals.
+- PR 1, auth and onboarding: register, verify-email redirect, login, onboarding modals, get-started card. Built.
 - PR 2, tickets: inbox sidebar, ticket list, conversation pane, contact panel.
 - PR 3, AI Agent: knowledge source, scenario handling, personality, test chat.
 - PR 4, automations: basic automations list, template picker, assign-to-agents form. Built.
