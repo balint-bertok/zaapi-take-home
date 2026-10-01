@@ -14,7 +14,7 @@ export const sections = {
         items: [{ label: "My Inbox" }, { label: "Unassigned" }, { label: "All", to: "/tickets" }],
       },
       { label: "Saved views", items: [{ label: "Pinned by me" }, { label: "All saved views" }] },
-      { label: "Completed", items: [{ label: "Closed" }, { label: "Spam" }] },
+      { label: "Completed", items: [{ label: "Closed", to: "/tickets?inbox=closed" }, { label: "Spam" }] },
     ],
   },
   ai: {

@@ -3,7 +3,7 @@ import { seed, type DemoState } from "./fixtures";
 
 // The whole demo state lives in this module and in one localStorage key. Nothing leaves the browser.
 // Bump the key's version when a fixture changes shape incompatibly; old saved state is then ignored.
-const STORAGE_KEY = "zaapi-demo-state-v2";
+const STORAGE_KEY = "zaapi-demo-state-v3";
 
 function load(): DemoState {
   try {
