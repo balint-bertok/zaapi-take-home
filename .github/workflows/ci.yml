@@ -27,5 +27,11 @@ jobs:
           curl -fsSL "https://github.com/gitleaks/gitleaks/releases/download/v${v}/gitleaks_${v}_linux_x64.tar.gz" | tar -xz gitleaks
           sudo install gitleaks /usr/local/bin/gitleaks
           gitleaks version
-      # Runtime setup for tests is added here per runtime version in use, once the stack is chosen.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24 # same major as the dev machine
+          cache: npm
+      - run: npm ci
+      - name: Install the Playwright browser the invariant suites drive
+        run: npx playwright install --with-deps chromium
       - run: scripts/gate

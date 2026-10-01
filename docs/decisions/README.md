@@ -6,4 +6,4 @@ Index, newest first:
 
 | ADR | Title | Status | Date |
 |---|---|---|---|
-| 0001 | Stack for this take-home (reserved, not yet written) | open | |
+| [0001](0001-stack-vite-react-tailwind-gh-pages.md) | Stack: Vite + React + Tailwind v4, published on GitHub Pages | accepted | 2026-10-01 |
