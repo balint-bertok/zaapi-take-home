@@ -1,0 +1,5 @@
+/* The one override the real app layers on React Flow's stylesheet (saved builder page, 2np6or35q67-y.css). */
+.react-flow__panel.top.center,
+.react-flow__panel.bottom.center {
+  transform: translate(0) translate(-50%) !important;
+}
