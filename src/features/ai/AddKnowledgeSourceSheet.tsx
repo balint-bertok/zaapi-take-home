@@ -1,0 +1,183 @@
+import { useRef, useState, type FormEvent } from "react";
+import { toast } from "sonner";
+import { Inert } from "@/components/Inert";
+import { buttonClass } from "@/components/ui/button";
+import { Input, Textarea } from "@/components/ui/input";
+import { SheetContent } from "@/components/ui/sheet";
+import { updateDemo, useDemo } from "@/store/store";
+import type { KnowledgeSourceType } from "./fixtures";
+import { stamp } from "./format";
+import { Counter, FormCard, IntegrationPicker, Rich, RadioCard, SheetFooter } from "./parts";
+
+type Kind = Exclude<KnowledgeSourceType, "quickReplies">;
+
+// ai.knowledgeSource.addNewDialog.* and ai.knowledgeSource.manualInput.description, verbatim.
+const options: { kind: Kind; label: string }[] = [
+  { kind: "file", label: "Upload File" },
+  { kind: "website", label: "Add Website" },
+  { kind: "manual_input", label: "Write it yourself" },
+];
+const webDisclaimer =
+  "<b>Note:</b> Do not upload Shopee, Lazada, or similar links.\n\n<b>How the crawler works</b>\nThe crawler will scan up to <b>3 levels deep</b> and <b>100 pages max</b>, starting from the URL you enter. It will only visit pages that <b>begin with that URL</b>.\n\n<b>Example:</b>\nIf you enter https://zaapi.com, the crawler will scan:\n- https://zaapi.com (level 0)\n- https://zaapi.com/features (level 1)\n- https://zaapi.com/features/analytics (level 2)\n- ...up to 3 levels deep.";
+const manualInputDescription =
+  "Write anything you want the AI to learn about your business to improve its response accuracy.\n\n<b>Tip</b>: For best results, organize the text using proper headings (like H1, H2) and paragraphs.";
+
+const link = "text-electric-green-600 font-medium hover:opacity-80";
+
+/** "Add New Knowledge Source" sheet (Step 9 (2)). Adding appends a row to the store; nothing is uploaded. */
+export function AddKnowledgeSourceSheet({ onDone }: { onDone: () => void }) {
+  return (
+    <SheetContent title="Add New Knowledge Source">
+      {/* Inside the content, so the form state resets every time the sheet closes. */}
+      <KnowledgeSourceForm onDone={onDone} />
+    </SheetContent>
+  );
+}
+
+function KnowledgeSourceForm({ onDone }: { onDone: () => void }) {
+  const user = useDemo((s) => s.user);
+  const [name, setName] = useState("");
+  const [integrations, setIntegrations] = useState<string[]>([]);
+  const [kind, setKind] = useState<Kind>("file");
+  const [file, setFile] = useState<File | null>(null);
+  const [url, setUrl] = useState("");
+  const [text, setText] = useState("");
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  const urlInvalid = url !== "" && !/^https:\/\/\S+\.\S+/.test(url);
+  const content = { file: file?.name ?? "", website: urlInvalid ? "" : url.trim(), manual_input: text.trim() }[kind];
+  const ready = name.trim() !== "" && content !== "";
+
+  function submit(e: FormEvent) {
+    e.preventDefault();
+    if (!ready) return;
+    updateDemo((s) => ({
+      ...s,
+      knowledgeSources: [
+        ...s.knowledgeSources,
+        {
+          id: crypto.randomUUID(),
+          name: name.trim(),
+          enabled: true,
+          source: user.name,
+          type: kind,
+          detail: kind === "manual_input" ? name.trim() : content,
+          integrations,
+          characters: kind === "manual_input" ? content.length : null,
+          createdAt: stamp(),
+        },
+      ],
+    }));
+    toast.success("Knowledge source successfully added");
+    onDone();
+  }
+
+  return (
+      <section className="flex flex-col gap-5 bg-gray-50 overflow-auto px-7 py-4 text-sm">
+        <form className="space-y-5" onSubmit={submit}>
+          <FormCard>
+            <label htmlFor="source-name" className="text-base font-medium text-gray-800 mb-2">
+              Source name
+            </label>
+            <Input
+              id="source-name"
+              className="mt-2 rounded-md"
+              placeholder="Enter source name to identify it."
+              maxLength={100}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <Counter value={name} max={100} className="mt-0" />
+          </FormCard>
+
+          <FormCard className="space-y-3">
+            <div className="space-y-1">
+              <label className="text-base font-medium text-gray-800 mb-2">Where should AI use this source?</label>
+              <p className="text-gray-500 whitespace-pre-line">Choose the integrations where this source will be active.</p>
+            </div>
+            <IntegrationPicker value={integrations} onChange={setIntegrations} />
+          </FormCard>
+
+          <FormCard>
+            <h3 className="text-base font-medium text-gray-800">Select source type</h3>
+            <div role="radiogroup" aria-label="Select source type" className="grid grid-cols-3 gap-4 mt-3">
+              {options.map((o) => (
+                <RadioCard key={o.kind} checked={kind === o.kind} onSelect={() => setKind(o.kind)} className="hover:bg-white hover:border-gray-300 aria-checked:hover:border-electric-green-500">
+                  {o.label}
+                </RadioCard>
+              ))}
+            </div>
+
+            <div className="mt-6 space-y-4">
+              {kind === "file" && (
+                <>
+                  <p className="text-gray-600">
+                    To help AI find information better, keep your files well-organized. For Excel files, use the first row for headers and start your data from the second row.
+                  </p>
+                  {/* Template downloads point at files that were never captured. */}
+                  <div className="flex items-center gap-3">
+                    <Inert className={link}>Download General Q&amp;A Template</Inert>
+                    <div className="h-4 w-px bg-gray-200" />
+                    <Inert className={link}>Download Product Details Template</Inert>
+                  </div>
+                  <div
+                    className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-gray-200 py-7"
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setFile(e.dataTransfer.files[0] ?? null);
+                    }}
+                  >
+                    <span className="text-gray-800">{file ? file.name : "Drop file"}</span>
+                    <span className="text-gray-400">or</span>
+                    <button type="button" className={buttonClass("outline")} onClick={() => fileInput.current?.click()}>
+                      Choose file
+                    </button>
+                    <input
+                      ref={fileInput}
+                      type="file"
+                      hidden
+                      accept=".txt,.csv,.docx,.xlsx"
+                      onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                    />
+                  </div>
+                  <p className="text-gray-600">You can only upload 1 file at a time, and we accept the following formats: .txt, .csv, .docx, and .xlsx.</p>
+                </>
+              )}
+              {kind === "website" && (
+                <>
+                  <div className="space-y-2">
+                    <label htmlFor="source-url" className="font-medium text-gray-800">
+                      Website URL
+                    </label>
+                    <Input
+                      id="source-url"
+                      className="rounded-md"
+                      placeholder="https://"
+                      value={url}
+                      aria-invalid={urlInvalid}
+                      onChange={(e) => setUrl(e.target.value)}
+                    />
+                    {urlInvalid && <p className="text-error-500">Invalid website URL. Please ensure it starts with 'https://'.</p>}
+                  </div>
+                  <p className="text-gray-600 whitespace-pre-line">
+                    <Rich text={webDisclaimer} />
+                  </p>
+                </>
+              )}
+              {kind === "manual_input" && (
+                <>
+                  <p className="text-gray-600 whitespace-pre-line">
+                    <Rich text={manualInputDescription} />
+                  </p>
+                  <Textarea aria-label="Knowledge source text" className="min-h-[200px]" value={text} onChange={(e) => setText(e.target.value)} />
+                </>
+              )}
+            </div>
+          </FormCard>
+
+          <SheetFooter onCancel={onDone} submitLabel="Add knowledge source" disabled={!ready} />
+        </form>
+      </section>
+  );
+}

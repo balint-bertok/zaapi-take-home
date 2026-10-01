@@ -11,6 +11,7 @@ Answers: which suite guards which invariant? One line per suite. Scenario detail
 | `tests/unit/secrets.test.ts` | `.env` stays git-ignored; no credential-shaped literal in `src/` | yes |
 | `tests/e2e/automations.spec.ts` | Basic Automations click paths: template sheet filter, assign-to-agents form gating, activation dialog adds an active or inactive row, search, edit, delete | no |
 | `tests/e2e/auth-onboarding.spec.ts` | Register, verify redirect, login check and both onboarding modals click through; the typed password never reaches storage; `?reset=1` brings onboarding back | no |
+| `tests/e2e/ai-agent.spec.ts` | AI Agent click paths: each create sheet appends its row, the test chat replies from its script and clears | no |
 
 `scripts/test` runs typecheck, lint (zero warnings), vitest, the production build, then Playwright against `vite preview` of that build. `scripts/gate` runs the secret scan and then `scripts/test`, locally and in CI.
 
