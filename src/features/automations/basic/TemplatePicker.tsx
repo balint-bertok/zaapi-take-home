@@ -90,20 +90,20 @@ const card =
 function TemplateCard({ t }: { t: Template }) {
   const body: ReactNode = (
     <>
-      <div className={cn("flex items-center justify-center p-3 rounded-lg h-[64px] w-[64px] relative", t.tile)}>
-        <Icon name={t.icon} variant="fas" className="size-7!" />
-        {t.badge && (
-          <img
-            alt={`${t.badge} icon`}
-            src={asset(`images/channels/${t.badge}.svg`)}
-            className="absolute bottom-0 right-0 size-[20px]"
-          />
-        )}
-      </div>
-      <div>
-        <div className="font-medium text-gray-800 text-sm">{t.title}</div>
-        <div className="mt-2 text-gray-500 text-sm">{t.description}</div>
-      </div>
+    <div className={cn("flex items-center justify-center p-3 rounded-lg h-[64px] w-[64px] relative", t.tile)}>
+      <Icon name={t.icon} variant="fas" className="size-7!" />
+      {t.badge && (
+        <img
+          alt={`${t.badge} icon`}
+          src={asset(`images/channels/${t.badge}.svg`)}
+          className="absolute bottom-0 right-0 size-[20px]"
+        />
+      )}
+    </div>
+    <div>
+      <div className="font-medium text-gray-800 text-sm">{t.title}</div>
+      <div className="mt-2 text-gray-500 text-sm">{t.description}</div>
+    </div>
     </>
   );
   return (
@@ -121,10 +121,19 @@ function TemplateCard({ t }: { t: Template }) {
 
 /** The "Create new automation" sheet: category chips on the left filter the template sections. */
 export function TemplatePicker() {
+  return (
+    <SheetContent className="gap-4 p-0! max-w-[990px]! w-3/4">
+      <PickerBody />
+    </SheetContent>
+  );
+}
+
+// Inside SheetContent, which unmounts on close, so every reopen starts at "All templates".
+function PickerBody() {
   const [category, setCategory] = useState(ALL);
   const shown = category === ALL ? categories : categories.filter((c) => c.title === category);
   return (
-    <SheetContent className="gap-4 p-0! max-w-[990px]! w-3/4">
+    <>
       <div className="flex flex-col space-y-2 text-left px-6 pt-4">
         <DialogTitle className="font-semibold text-gray-800 text-lg">Create new automation</DialogTitle>
         <DialogDescription className="text-gray-500 text-sm">
@@ -168,6 +177,6 @@ export function TemplatePicker() {
         <Icon name="x" className="size-4! m-auto" />
         <span className="sr-only">Close</span>
       </DialogClose>
-    </SheetContent>
+    </>
   );
 }

@@ -30,6 +30,13 @@ test("create an automation from the template sheet, with and without activating"
   await expect(sheet.getByText("Assign to agents")).toBeHidden();
   await sheet.getByRole("button", { name: "All templates" }).click();
 
+  // A reopened sheet starts unfiltered again.
+  await sheet.getByRole("button", { name: "Ticket Management" }).click();
+  await page.keyboard.press("Escape");
+  await expect(sheet).toBeHidden();
+  await page.getByRole("button", { name: "New automation" }).click();
+  await expect(sheet.getByText("Assign to agents")).toBeVisible();
+
   await sheet.getByRole("link", { name: /Assign to agents/ }).click();
   await expect(page).toHaveURL(/\/create\?type=chatAssignment$/);
   await fillForm(page, "Brand One assignment");
@@ -53,6 +60,10 @@ test("create an automation from the template sheet, with and without activating"
 test("edit and delete the seeded automation", async ({ page }) => {
   await page.goto(list);
   const row = page.getByRole("row").filter({ hasText: "Assignment" });
+
+  // An edit link to a missing automation returns to the list instead of opening a create form.
+  await page.goto(`${list}/create?type=chatAssignment&id=missing`);
+  await expect(page).toHaveURL(new RegExp(`${list}$`));
 
   await row.getByRole("button", { name: "More" }).click();
   await page.getByRole("menuitem", { name: "Edit" }).click();

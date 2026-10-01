@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { Navigate, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { Inert } from "@/components/Inert";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import type { Automation } from "./fixtures";
 import { automationSettings, listPath, today, updateAutomations } from "./basic/automation";
 import { ConfirmDialog } from "./basic/ConfirmDialog";
 import { Avatar, Checkbox, RadioCards } from "./basic/controls";
+import { toggleIn } from "./flows/shared";
 
 // Texts verbatim from the catalog (automations.*, common.general.*), markup from the saved create page.
 const outsideHoursOptions = [
@@ -71,19 +72,34 @@ function TextField(props: { label: string; placeholder: string; value: string; o
   );
 }
 
-const toggle = (ids: string[], id: string, on: boolean) => (on ? [...ids, id] : ids.filter((x) => x !== id));
-
 /** /automations/basic-automations/create?type=chatAssignment, also the edit form with `&id=`. */
 export default function CreateAutomationPage() {
-  const navigate = useNavigate();
   const [params] = useSearchParams();
-  const existing = useDemo((s) => s.automations.find((a) => a.id === params.get("id")));
+  const id = params.get("id");
+  const existing = useDemo((s) => s.automations.find((a) => a.id === id));
+  // An edit link whose automation is gone returns to the list rather than creating a new one.
+  if (id && !existing) return <Navigate to={listPath} replace />;
+  // Keyed so a different `id` on the same mounted route reseeds the form.
+  return <AutomationForm key={id ?? "new"} existing={existing} />;
+}
+
+function AutomationForm({ existing }: { existing: Automation | undefined }) {
+  const navigate = useNavigate();
   const user = useDemo((s) => s.user);
   // The chat widget accounts are the only integrations the demo workspace has.
   const integrations = useDemo((s) => s.integrations);
   const widgets = integrations.filter((i) => i.channel === "chat-widget");
 
-  const [form, setForm] = useState(() => automationSettings(existing));
+  // Saved ids the form cannot show (a removed integration or agent) are dropped, so they neither
+  // count as selections nor satisfy validation.
+  const [form, setForm] = useState(() => {
+    const settings = automationSettings(existing);
+    return {
+      ...settings,
+      integrationIds: settings.integrationIds.filter((i) => widgets.some((w) => w.id === i)),
+      assigneeIds: settings.assigneeIds.filter((i) => i === user.id),
+    };
+  });
   const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
   const [expanded, setExpanded] = useState(false);
@@ -97,6 +113,9 @@ export default function CreateAutomationPage() {
   const valid = selected > 0 && form.assigneeIds.length > 0 && fields.name !== "";
 
   const create = (enabled: boolean) => {
+    // The dialog stays clickable while it animates out; only the first answer creates a row.
+    if (!activating) return;
+    setActivating(false);
     const automation: Automation = {
       id: crypto.randomUUID(),
       type: "assign-to-agents",
@@ -181,7 +200,7 @@ export default function CreateAutomationPage() {
                           <Checkbox
                             label={w.name}
                             checked={form.integrationIds.includes(w.id)}
-                            onCheckedChange={(on) => set("integrationIds", toggle(form.integrationIds, w.id, on))}
+                            onCheckedChange={() => set("integrationIds", toggleIn(form.integrationIds, w.id))}
                           />
                         </li>
                       ))}
@@ -245,7 +264,7 @@ export default function CreateAutomationPage() {
                     <Checkbox
                       label={user.name}
                       checked={userSelected}
-                      onCheckedChange={(on) => set("assigneeIds", toggle(form.assigneeIds, user.id, on))}
+                      onCheckedChange={() => set("assigneeIds", toggleIn(form.assigneeIds, user.id))}
                     />
                   </div>
                 </div>

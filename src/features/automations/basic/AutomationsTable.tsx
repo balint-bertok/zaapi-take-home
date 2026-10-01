@@ -42,25 +42,27 @@ const sticky = {
 } as const;
 
 function SortHeader({ column, sort, onSort }: { column: Column; sort: Sort; onSort: (key: SortKey) => void }) {
-  const active = column.sort && sort?.key === column.sort ? sort.dir : null;
+  const box = "text-sm rounded-md px-3 flex items-center justify-between gap-2 whitespace-normal text-left h-full py-1 w-full";
+  const label = (
+    <div className="flex items-center gap-2">
+      <span className="block">{column.label}</span>
+    </div>
+  );
+  // Unsortable columns are plain text, not a button that does nothing.
+  if (!column.sort) return <div className={box}>{label}</div>;
+  const key = column.sort;
+  const active = sort?.key === key ? sort.dir : null;
   return (
     <button
       type="button"
-      onClick={() => column.sort && onSort(column.sort)}
-      className="text-sm transition-all duration-300 bg-transparent hover:bg-gray-100 rounded-md px-3 flex items-center justify-between gap-2 whitespace-normal text-left h-full py-1 w-full"
+      onClick={() => onSort(key)}
+      className={cn(box, "transition-all duration-300 bg-transparent hover:bg-gray-100")}
     >
-      <div className="flex items-center gap-2">
-        <span className="block">{column.label}</span>
+      {label}
+      <div className="flex flex-col">
+        <Icon name="chevron-up" className={cn("size-3", active === "asc" ? "text-gray-800" : "text-gray-400")} />
+        <Icon name="chevron-down" className={cn("size-3 -mt-1", active === "desc" ? "text-gray-800" : "text-gray-400")} />
       </div>
-      {column.sort && (
-        <div className="flex flex-col">
-          <Icon name="chevron-up" className={cn("size-3", active === "asc" ? "text-gray-800" : "text-gray-400")} />
-          <Icon
-            name="chevron-down"
-            className={cn("size-3 -mt-1", active === "desc" ? "text-gray-800" : "text-gray-400")}
-          />
-        </div>
-      )}
     </button>
   );
 }
@@ -177,8 +179,9 @@ export function AutomationsTable({ query }: { query: string }) {
     setSort((cur) => (cur?.key === key && cur.dir === "asc" ? { key, dir: "desc" } : { key, dir: "asc" }));
 
   const remove = () => {
-    const id = deleting!.id;
-    updateAutomations((list) => list.filter((a) => a.id !== id));
+    // The dialog stays clickable while it animates out; a second click finds nothing to delete.
+    if (!deleting) return;
+    updateAutomations((list) => list.filter((a) => a.id !== deleting.id));
     setDeleting(null);
     toast.success("Successfully deleted automation");
   };
@@ -189,7 +192,12 @@ export function AutomationsTable({ query }: { query: string }) {
         <thead className="[&_tr]:border-b">
           <tr className="border-b transition-colors">
             {columns.map((c) => (
-              <th key={c.label} className={th} style={{ width: c.width }}>
+              <th
+                key={c.label}
+                className={th}
+                style={{ width: c.width }}
+                aria-sort={c.sort ? (sort?.key === c.sort ? `${sort.dir}ending` : "none") : undefined}
+              >
                 <SortHeader column={c} sort={sort} onSort={onSort} />
               </th>
             ))}
