@@ -2,6 +2,7 @@
 // their own fixtures file. Names follow the fixture convention ("Brand One") or are copied from
 // the reference screenshots; nothing here is real customer data.
 import { aiSeed } from "../features/ai/fixtures";
+import { authSeed } from "../features/auth/fixtures";
 import { automationsSeed } from "../features/automations/fixtures";
 import { ticketsSeed } from "../features/tickets/fixtures";
 
@@ -35,5 +36,5 @@ const sharedSeed: {
   freeTrialDaysLeft: 6,
 };
 
-export const seed = { ...sharedSeed, ...ticketsSeed, ...aiSeed, ...automationsSeed };
+export const seed = { ...sharedSeed, ...authSeed, ...ticketsSeed, ...aiSeed, ...automationsSeed };
 export type DemoState = typeof seed;
