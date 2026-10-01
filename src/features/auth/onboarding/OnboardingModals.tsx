@@ -41,13 +41,16 @@ export function OnboardingModals() {
   return (
     <DialogPrimitive.Root open>
       <DialogPrimitive.Portal>
-        <DialogOverlay />
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-8">
-          {step === 1 ? <DetailsStep onContinue={() => setStep(2)} /> : <TryInboxStep />}
-          <p className="text-sm text-white" aria-hidden="true">
-            Step {step} of 2
-          </p>
-        </div>
+        {/* The steps sit inside the overlay, which scrolls, so a window smaller than a step can
+            still reach its buttons; the modals cannot be dismissed any other way. */}
+        <DialogOverlay className="overflow-auto">
+          <div className="flex min-h-full min-w-fit flex-col items-center justify-center gap-8 p-4">
+            {step === 1 ? <DetailsStep onContinue={() => setStep(2)} /> : <TryInboxStep />}
+            <p className="text-sm text-white" aria-hidden="true">
+              Step {step} of 2
+            </p>
+          </div>
+        </DialogOverlay>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
   );

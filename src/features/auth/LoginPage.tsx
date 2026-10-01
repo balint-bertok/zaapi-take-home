@@ -30,7 +30,7 @@ export default function LoginPage() {
     const form = e.currentTarget;
     const filled = (selector: string) => !!form.querySelector<HTMLInputElement>(selector)?.value.trim();
     const next: Errors = {};
-    if (!filled("#loginId"))
+    if (!filled(method === "email" ? "#loginEmail" : "#loginPhone"))
       next.id = method === "email" ? "Please enter your email" : "Please enter your phone number";
     if (!filled("#password")) next.password = "Please enter your password";
     setErrors(next);
@@ -70,25 +70,22 @@ export default function LoginPage() {
       </div>
       <form noValidate onSubmit={submit} className="flex flex-col space-y-4 text-start">
         <div>
-          {method === "email" ? (
-            <>
-              <Label htmlFor="loginId">Email</Label>
-              <Input
-                key="email"
-                type="email"
-                id="loginId"
-                autoComplete="email"
-                defaultValue={registeredEmail}
-                aria-invalid={!!errors.id || undefined}
-                className="mt-2"
-              />
-            </>
-          ) : (
-            <>
-              <Label htmlFor="loginId">Phone number</Label>
-              <PhoneInput id="loginId" aria-invalid={!!errors.id || undefined} />
-            </>
-          )}
+          {/* Both stay mounted, the other one hidden, so switching tabs keeps what was typed. */}
+          <div hidden={method !== "email"}>
+            <Label htmlFor="loginEmail">Email</Label>
+            <Input
+              type="email"
+              id="loginEmail"
+              autoComplete="email"
+              defaultValue={registeredEmail}
+              aria-invalid={!!errors.id || undefined}
+              className="mt-2"
+            />
+          </div>
+          <div hidden={method !== "phone"}>
+            <Label htmlFor="loginPhone">Phone number</Label>
+            <PhoneInput id="loginPhone" aria-invalid={!!errors.id || undefined} />
+          </div>
           {errors.id && <FieldError>{errors.id}</FieldError>}
         </div>
         <div>

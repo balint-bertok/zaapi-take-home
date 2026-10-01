@@ -28,9 +28,11 @@ test("register, verify, log in and finish onboarding", async ({ page }) => {
   await expect(page.getByText("Please enter your password")).toBeVisible();
   await expect(page).toHaveURL(/\/login/);
 
+  await page.getByLabel("Email").fill("hello@brand-two.example");
   await page.getByRole("button", { name: "Phone no." }).click();
   await expect(page.getByLabel("Phone number")).toBeVisible();
   await page.getByRole("button", { name: "Email" }).click();
+  await expect(page.getByLabel("Email")).toHaveValue("hello@brand-two.example");
 
   await page.getByLabel("Password", { exact: true }).fill("not-stored-anywhere");
   await page.getByRole("button", { name: "Log in" }).click();
@@ -41,7 +43,7 @@ test("register, verify, log in and finish onboarding", async ({ page }) => {
   await expect(next).toBeDisabled();
   await page.keyboard.press("Escape");
   await expect(step1).toBeVisible();
-  await step1.getByLabel("What's your name?").fill("Balint");
+  await step1.getByLabel("What's your name?").fill("Brand One");
   await step1.getByText("2-10").click();
   await next.click();
 
@@ -51,8 +53,12 @@ test("register, verify, log in and finish onboarding", async ({ page }) => {
   await expect(step2).toBeHidden();
   await expect(page.getByText("Ready to get started?")).toBeVisible();
 
-  const saved = await page.evaluate(() => localStorage.getItem("zaapi-demo-state-v1") ?? "");
-  expect(saved).not.toContain("not-stored-anywhere");
+  const stored = await page.evaluate(() =>
+    [localStorage, sessionStorage].flatMap((s) => Object.keys(s).map((k) => `${k}=${s.getItem(k)}`)).join("\n"),
+  );
+  expect(stored).toContain("onboardingDone");
+  expect(stored).not.toContain("not-stored-anywhere");
+  expect(page.url()).not.toContain("not-stored-anywhere");
 
   await page.reload();
   await expect(page.getByText("Ready to get started?")).toBeVisible();

@@ -68,7 +68,8 @@ function TurnstileSuccess() {
 export default function RegisterPage() {
   const navigate = useNavigate();
 
-  // No validation and no account: remember only the email, for the verify page to echo back.
+  // No app validation (the browser's own email-format check stays, as on the saved page) and no
+  // account: remember only the email, for the verify page to echo back.
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const email = String(new FormData(e.currentTarget).get("email") ?? "").trim();
