@@ -21,10 +21,16 @@ export type Channel =
 export type Integration = { id: string; channel: Channel; name: string };
 
 /** State every section shares: who is signed in, where, with which channels and plan. */
-const sharedSeed = {
+const sharedSeed: {
+  workspace: { name: string };
+  user: { id: string; name: string };
+  integrations: Integration[];
+  aiTokens: number;
+  freeTrialDaysLeft: number;
+} = {
   workspace: { name: "Brand One" },
   user: { id: "user-1", name: "Balint" },
-  integrations: [{ id: "integration-1", channel: "chat-widget", name: "Test (Demo)" }] as Integration[],
+  integrations: [{ id: "integration-1", channel: "chat-widget", name: "Test (Demo)" }],
   aiTokens: 300,
   freeTrialDaysLeft: 6,
 };

@@ -12,7 +12,8 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const source = resolve(process.argv[2] ?? join(root, "Original files"));
 const out = join(root, "src/icons/registry.ts");
 
-const attr = (tag, name) => tag.match(new RegExp(`\\b${name}="([^"]*)"`))?.[1];
+// Anchored on whitespace: a bare \b would let `opacity` match `fill-opacity` and `d` match `data-d`.
+const attr = (tag, name) => tag.match(new RegExp(`\\s${name}="([^"]*)"`))?.[1];
 
 // registry[name][prefix] = { viewBox, paths }. The same name can ship in several styles
 // (the rail shows far "bolt" when idle and fas "bolt" when active), so styles are kept apart.

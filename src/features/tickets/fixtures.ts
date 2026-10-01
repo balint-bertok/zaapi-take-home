@@ -11,7 +11,7 @@ export type Ticket = {
 };
 
 // The visitor ticket from the inbox screenshot.
-export const ticketsSeed = {
+export const ticketsSeed: { tickets: Ticket[] } = {
   tickets: [
     {
       id: "ticket-1",
@@ -25,5 +25,5 @@ export const ticketsSeed = {
         { id: "message-2", from: "contact", text: "Hello, I have an issue I need solving", time: "11:18" },
       ],
     },
-  ] as Ticket[],
+  ],
 };

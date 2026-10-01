@@ -12,7 +12,7 @@ export type Automation = {
 export type Flow = { id: string; name: string; status: "draft" | "published"; updatedAt: string };
 
 // The automation from the Basic Automations screenshot; no flows yet.
-export const automationsSeed = {
+export const automationsSeed: { automations: Automation[]; flows: Flow[] } = {
   automations: [
     {
       id: "automation-1",
@@ -24,6 +24,6 @@ export const automationsSeed = {
       updatedBy: null,
       updatedAt: "2026-10-01",
     },
-  ] as Automation[],
-  flows: [] as Flow[],
+  ],
+  flows: [],
 };

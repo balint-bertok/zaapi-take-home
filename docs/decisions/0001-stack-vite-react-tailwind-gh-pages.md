@@ -18,7 +18,7 @@ Fidelity comes from three things the saved pages give us verbatim: the theme tok
 - **Radix primitives** with hand-written shadcn-style wrappers in `src/components/ui/`, class lists copied from the app's own wrappers; `sonner` for toasts; `clsx` + `tailwind-merge` for `cn()`; `tw-animate-css` for the `animate-in`/`fade-in-0` classes the saved markup uses.
 - **Icons**: the inline Font Awesome SVGs in the saved pages are extracted by `scripts/extract-icons.mjs` into `src/icons/registry.ts` and rendered by one `<Icon>` component. The same name can ship in several styles (`far`, `fas`, `fal`, `fak`), so the registry keeps each style.
 - **Inter, self-hosted** from `public/fonts/`. The built demo makes no request to any other host, which is a tested invariant (`docs/testing.md`).
-- **Hosting**: GitHub Pages from `.github/workflows/pages.yml` on push to `main`; Vite `base` is `/zaapi-take-home/` in dev, build and preview alike.
+- **Hosting**: GitHub Pages from `.github/workflows/pages.yml` after the ci gate passes on a push to `main`; Vite `base` is `/zaapi-take-home/` in dev, build and preview alike.
 - **Data**: one in-memory store (`src/store/`) seeded from fixtures, persisted to one localStorage key, reset with `?reset=1`.
 
 ## Consequences

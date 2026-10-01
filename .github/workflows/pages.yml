@@ -1,8 +1,11 @@
-# Publishes the demo to GitHub Pages. A push to main is the release (CLAUDE.md, step 8; ADR 0001).
+# Publishes the demo to GitHub Pages. A push to main is the release (CLAUDE.md, step 8; ADR 0001),
+# but only once the ci gate has passed on that exact commit: a red main is never published.
 name: pages
 
 on:
-  push:
+  workflow_run:
+    workflows: [ci]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -18,12 +21,19 @@ concurrency:
 
 jobs:
   deploy:
+    # Only ci runs started by a push to this repo's main (not a fork PR whose branch is named main,
+    # not the weekly schedule), and only green ones. Manual dispatch deploys the current main.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@v7
         with:
           node-version: 24

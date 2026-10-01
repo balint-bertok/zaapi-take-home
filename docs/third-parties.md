@@ -5,4 +5,4 @@ Answers: which external services does this project talk to, and which identifier
 | Service | Purpose | Safe identifiers | Rotation steps |
 |---|---|---|---|
 | GitHub | repo `balint-bertok/zaapi-take-home`, CI | account `balint-bertok` | n/a |
-| GitHub Pages | public demo, published by `.github/workflows/pages.yml` on push to `main` | URL `https://balint-bertok.github.io/zaapi-take-home/` | n/a |
+| GitHub Pages | public demo, published by `.github/workflows/pages.yml` after ci passes on `main` | URL `https://balint-bertok.github.io/zaapi-take-home/` | n/a |
