@@ -4,9 +4,10 @@ import { buttonClass } from "@/components/ui/button";
 import { Icon } from "@/icons/Icon";
 import { cn } from "@/lib/cn";
 import { ShellPage } from "@/shell/ShellPage";
+import { setupSteps } from "./content";
 
 /**
- * The frame every guided-setup page shares: breadcrumb, "Step N of 5" (none on the intro, step 0),
+ * The frame every guided-setup page shares: breadcrumb, "Step N of M" (none on the intro, step 0),
  * the title and description, the page's own content, and an optional footer row (Back, Continue).
  */
 export function SetupPage({
@@ -25,7 +26,7 @@ export function SetupPage({
   return (
     <ShellPage breadcrumb={[{ label: "AI Agent" }, { label: "Set up" }, { label: title }]} className="space-y-8 pb-7">
       <section>
-        {step > 0 && <div className="text-xs font-medium text-gray-400">Step {step} of 5</div>}
+        {step > 0 && <div className="text-xs font-medium text-gray-400">Step {step} of {setupSteps.length}</div>}
         <h1 className="text-2xl font-medium">{title}</h1>
         {description && <div className="text-sm text-gray-500 mt-2">{description}</div>}
       </section>

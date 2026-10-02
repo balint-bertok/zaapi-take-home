@@ -2,19 +2,14 @@ import { Link } from "react-router";
 import { buttonClass } from "@/components/ui/button";
 import { Icon } from "@/icons/Icon";
 import { useDemo } from "@/store/store";
-import { setupSeed } from "./fixtures";
+import { shares } from "./content";
 import { SetupPage } from "./SetupPage";
-
-// The Go live page's share options, as the sentence reads them.
-const shareLabel: Record<number, string> = { 20: "1 in 5", 50: "half", 100: "all" };
 
 /** After "Go live": what the agent now does, and the way out into the opened dashboard. */
 export default function LiveDonePage() {
-  const live = useDemo((s) => s.agentLive);
-  const stored = useDemo((s) => s.agentShare);
   // Opened by URL before going live, the page describes the seeded share.
-  const share = live ? stored : setupSeed.agentShare;
-  const label = shareLabel[share] ?? shareLabel[setupSeed.agentShare];
+  const share = useDemo((s) => s.agentShare);
+  const label = (shares.find((s) => s.value === share) ?? shares[0]).label.toLowerCase();
   return (
     <SetupPage step={5} title="Your agent is live">
       <div className="flex flex-col items-center text-center gap-4 py-10">

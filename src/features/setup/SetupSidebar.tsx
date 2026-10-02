@@ -4,18 +4,9 @@ import { Icon } from "@/icons/Icon";
 import { cn } from "@/lib/cn";
 import { sidebarActiveItem, sidebarAside, sidebarItem } from "@/shell/SectionSidebar";
 import { useDemo } from "@/store/store";
-import type { SetupStep } from "./fixtures";
+import { setupSteps as steps } from "./content";
 
 const title = "Set up your AI Agent";
-
-// The five steps in tour order; "Go live" has no SetupStep, `agentLive` marks it done.
-const steps: { label: string; to: string; step?: SetupStep }[] = [
-  { label: "Persona", to: "/ai/setup/persona", step: "persona" },
-  { label: "Scenarios", to: "/ai/setup/scenarios", step: "scenarios" },
-  { label: "Knowledge", to: "/ai/setup/knowledge", step: "knowledge" },
-  { label: "Test", to: "/ai/setup/test", step: "test" },
-  { label: "Go live", to: "/ai/setup/live" },
-];
 
 /**
  * The setup's step menu, in the section sidebar's frame. Done steps and the current one link (an
@@ -50,7 +41,7 @@ export function SetupSidebar() {
               return (
                 <li key={label} className="relative">
                   {reachable ? (
-                    <NavLink to={to} end={false} className={({ isActive }) => cn(sidebarItem, "justify-between", isActive && sidebarActiveItem)}>
+                    <NavLink to={to} className={({ isActive }) => cn(sidebarItem, "justify-between", isActive && sidebarActiveItem)}>
                       {body}
                     </NavLink>
                   ) : (

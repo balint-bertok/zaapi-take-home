@@ -1,16 +1,10 @@
 import { useState } from "react";
 import { Icon } from "@/icons/Icon";
-import { asset } from "@/lib/asset";
 import { updateDemo, useDemo } from "@/store/store";
 import { FormCard, RadioCard } from "../ai/parts";
+import { AccountLabel } from "../ai/TestChat";
+import { shares } from "./content";
 import { BackLink, ContinueButton, SetupPage } from "./SetupPage";
-
-/** Share of new conversations the agent takes, as a percentage. */
-const shares = [
-  { value: 20, label: "1 in 5" },
-  { value: 50, label: "Half" },
-  { value: 100, label: "All" },
-];
 
 const card = "border border-gray-200";
 const cardTitle = "text-base font-medium text-gray-800";
@@ -37,14 +31,8 @@ export default function GoLivePage() {
       <FormCard className={card}>
         <h2 className={cardTitle}>Channel</h2>
         {/* The account row of the Test chat's account picker. */}
-        <div className="flex items-center text-sm text-gray-800 mt-3">
-          <div className="relative">
-            <img alt="Test (Demo)" className="rounded-full object-cover size-[20px]" src={asset("images/default-chat-account.png")} />
-            <div className="absolute -right-1 -bottom-1">
-              <img alt="widget icon" className="size-[12px]" src={asset("images/channels/chat-widget.svg")} />
-            </div>
-          </div>
-          <div className="ml-3 font-medium">Test (Demo)</div>
+        <div className="text-sm text-gray-800 mt-3">
+          <AccountLabel />
         </div>
         <p className="text-sm text-gray-500 mt-1">Chat Widget</p>
       </FormCard>

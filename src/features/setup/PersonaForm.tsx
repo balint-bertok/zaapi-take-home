@@ -6,7 +6,7 @@ import { Input, Textarea } from "@/components/ui/input";
 import { Icon } from "@/icons/Icon";
 import { cn } from "@/lib/cn";
 import { Counter, FormCard, RadioCard } from "../ai/parts";
-import { languages, personaSuggestion, type Language } from "./content";
+import { languageNote, languages, type Language } from "./content";
 
 export type Persona = { name: string; style: string; guidelines: string; language: Language | null };
 
@@ -98,7 +98,7 @@ export function PersonaForm({ value, onChange, onFocus }: { value: Persona; onCh
           </div>
           <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-2">
             <Icon name="circle-exclamation" className="size-3.5! text-gray-400" />
-            {personaSuggestion.languageNote}
+            {languageNote}
           </div>
         </div>
       </FormCard>

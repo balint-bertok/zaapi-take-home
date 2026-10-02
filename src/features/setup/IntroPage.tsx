@@ -1,15 +1,8 @@
 import { asset } from "@/lib/asset";
 import { useDemo } from "@/store/store";
 import { FormCard } from "../ai/parts";
+import { setupSteps } from "./content";
 import { ContinueButton, SetupPage } from "./SetupPage";
-
-const ahead: { label: string; text: string }[] = [
-  { label: "Persona", text: "Name your agent and pick how it sounds and which language it answers in." },
-  { label: "Scenarios", text: "Pick what the agent should handle, from ready-made templates." },
-  { label: "Knowledge", text: "Answer the few policy questions those scenarios need." },
-  { label: "Test", text: "See what's covered and try a conversation." },
-  { label: "Go live", text: "Start on a small share of conversations, widen when you're ready." },
-];
 
 /** Step 0: which channel the agent starts on, and the five steps ahead. */
 export default function IntroPage() {
@@ -48,7 +41,7 @@ export default function IntroPage() {
         <FormCard className="border border-gray-200 space-y-3">
           <h2 className="text-base font-medium text-gray-800">What's ahead</h2>
           <ol className="space-y-3">
-            {ahead.map((s, i) => (
+            {setupSteps.map((s, i) => (
               <li key={s.label} className="flex gap-3">
                 <span className="size-6 shrink-0 rounded-full bg-gray-100 text-xs font-medium text-gray-600 flex items-center justify-center">{i + 1}</span>
                 <div>

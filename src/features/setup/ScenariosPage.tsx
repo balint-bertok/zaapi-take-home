@@ -1,35 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Icon } from "@/icons/Icon";
-import { cn } from "@/lib/cn";
 import { updateDemo, useDemo } from "@/store/store";
 import { stamp } from "../ai/format";
+import { ChoiceCard } from "../ai/AddScenarioSheet";
 import { FormCard } from "../ai/parts";
-import { templates, type Template } from "../ai/scenarioTemplates";
+import { templates } from "../ai/scenarioTemplates";
+import { ConfirmDialog } from "../automations/basic/ConfirmDialog";
+import { skipConsequence } from "./content";
+import { withStep } from "./fixtures";
 import { BackLink, ContinueButton, SetupPage } from "./SetupPage";
-import { SkipDialog } from "./SkipDialog";
-import type { SetupStep } from "./fixtures";
-
-const withStep = (done: SetupStep[], step: SetupStep) => (done.includes(step) ? done : [...done, step]);
-
-// The "Add scenario" sheet's template card (`ChoiceCard`), as a toggle: selected keeps the hover ring.
-const card =
-  "relative transition-all flex flex-col gap-4 p-4 rounded-lg border border-gray-200 hover:border-electric-green-500 hover:ring-[3px] hover:ring-electric-green-500/20";
-
-function TemplateCard({ template, checked, onToggle }: { template: Template; checked: boolean; onToggle: () => void }) {
-  return (
-    <button type="button" role="checkbox" aria-checked={checked} className={cn(card, checked && "border-electric-green-500 ring-[3px] ring-electric-green-500/20")} onClick={onToggle}>
-      {checked && <Icon name="check" className="absolute top-3 right-3 size-3.5! text-electric-green-600" />}
-      <div className="size-20 flex items-center rounded-lg justify-center bg-(image:--color-ai-gradient-light)">
-        <Icon name={template.icon} variant="fas" className="size-7! ai-gradient-icon" />
-      </div>
-      <div className="text-left text-sm">
-        <h4 className="font-medium text-gray-800">{template.title}</h4>
-        <p className="text-gray-400 font-normal mt-1 text-sm">{template.description}</p>
-      </div>
-    </button>
-  );
-}
 
 /** Step 2: pick the scenario templates the agent should handle. Coming back shows what was picked. */
 export default function ScenariosPage() {
@@ -81,12 +60,28 @@ export default function ScenariosPage() {
       <FormCard className="space-y-4 border border-gray-200">
         <div className="grid grid-cols-3 gap-4">
           {templates.map((t) => (
-            <TemplateCard key={t.id} template={t} checked={picked.includes(t.id)} onToggle={() => toggle(t.id)} />
+            <ChoiceCard key={t.id} icon={t.icon} title={t.title} description={t.description} checked={picked.includes(t.id)} onClick={() => toggle(t.id)} />
           ))}
         </div>
         <p className="text-sm text-gray-500">The complaint scenario hands the conversation to your team straight away.</p>
       </FormCard>
-      <SkipDialog open={skipping} onOpenChange={setSkipping} onSkip={skip} />
+      {/* The activation step's question dialog, stating what skipping costs and where to add scenarios later. */}
+      <ConfirmDialog
+        open={skipping}
+        onOpenChange={setSkipping}
+        title="Skip scenarios?"
+        description={
+          <>
+            {skipConsequence}
+            <br />
+            You can add them any time from Scenario Handling.
+          </>
+        }
+        secondary="Go back"
+        onSecondary={() => setSkipping(false)}
+        primary="Skip anyway"
+        onPrimary={skip}
+      />
     </SetupPage>
   );
 }

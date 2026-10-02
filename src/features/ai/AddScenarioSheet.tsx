@@ -27,9 +27,32 @@ function ScenarioFlow({ onDone }: { onDone: () => void }) {
 const card =
   "relative transition-all disabled:opacity-80 flex flex-col gap-4 p-4 rounded-lg border border-gray-200 disabled:pointer-events-none hover:border-electric-green-500 hover:ring-[3px] hover:ring-electric-green-500/20";
 
-function ChoiceCard({ icon, title, description, onClick, plain }: { icon: IconName; title: string; description: string; onClick: () => void; plain?: boolean }) {
+/** A start option. With `checked` set (the guided setup's scenario step) it is a toggle that keeps the hover ring while selected. */
+export function ChoiceCard({
+  icon,
+  title,
+  description,
+  onClick,
+  plain,
+  checked,
+}: {
+  icon: IconName;
+  title: string;
+  description: string;
+  onClick: () => void;
+  plain?: boolean;
+  checked?: boolean;
+}) {
+  const toggle = checked !== undefined;
   return (
-    <button type="button" className={card} onClick={onClick}>
+    <button
+      type="button"
+      role={toggle ? "checkbox" : undefined}
+      aria-checked={checked}
+      className={cn(card, checked && "border-electric-green-500 ring-[3px] ring-electric-green-500/20")}
+      onClick={onClick}
+    >
+      {checked && <Icon name="check" className="absolute top-3 right-3 size-3.5! text-electric-green-600" />}
       <div className={cn("size-20 flex items-center rounded-lg justify-center", plain ? "bg-gray-50" : "bg-(image:--color-ai-gradient-light)")}>
         <Icon name={icon} variant="fas" className={cn("size-7!", plain ? "text-gray-500" : "ai-gradient-icon")} />
       </div>

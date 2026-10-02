@@ -1,11 +1,11 @@
 import { asset } from "@/lib/asset";
 import { updateDemo } from "@/store/store";
 import { TestChat } from "../ai/TestChat";
+import { withStep } from "./fixtures";
 import { Readiness } from "./Readiness";
 import { BackLink, ContinueButton, SetupPage } from "./SetupPage";
 
-const markTested = () =>
-  updateDemo((s) => (s.setupDone.includes("test") ? s : { ...s, setupDone: [...s.setupDone, "test"] }));
+const markTested = () => updateDemo((s) => ({ ...s, setupDone: withStep(s.setupDone, "test") }));
 
 /** Step 4: what the agent covers so far, then the AI Agent > Test chat to try it. */
 export default function SetupTestPage() {

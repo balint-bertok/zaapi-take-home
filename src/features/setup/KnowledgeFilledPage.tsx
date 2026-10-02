@@ -2,6 +2,7 @@ import { useState } from "react";
 import { updateDemo } from "@/store/store";
 import { stamp } from "../ai/format";
 import { policies } from "./content";
+import { withStep } from "./fixtures";
 import { KnowledgeForm, type Answers } from "./KnowledgeForm";
 import { BackLink, ContinueButton, SetupPage } from "./SetupPage";
 
@@ -32,7 +33,7 @@ export default function KnowledgeFilledPage() {
             createdAt: now,
           })),
       ],
-      setupDone: s.setupDone.includes("knowledge") ? s.setupDone : [...s.setupDone, "knowledge"],
+      setupDone: withStep(s.setupDone, "knowledge"),
     }));
   }
 

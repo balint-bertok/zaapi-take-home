@@ -287,7 +287,7 @@ export function TestChat() {
 }
 
 /** The selected chat account: its avatar with the channel badge, and its name. */
-function AccountLabel({ bold = true }: { bold?: boolean }) {
+export function AccountLabel({ bold = true }: { bold?: boolean }) {
   return (
     <div className="flex items-center">
       <div className="relative">

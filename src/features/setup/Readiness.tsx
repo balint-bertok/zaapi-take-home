@@ -3,18 +3,12 @@ import { cn } from "@/lib/cn";
 import { useDemo } from "@/store/store";
 import { templates } from "../ai/scenarioTemplates";
 import { FormCard } from "../ai/parts";
-import { policies, type Language } from "./content";
-
-// The channel's customers write in Thai (the persona step's language note); the summary checks the
-// agent's language against it.
-const channelLanguage: Language = "Thai";
-
-const templateNames = templates.map((t) => t.form.name);
+import { channelLanguage, policies, type Language } from "./content";
 
 type Row = { ok: boolean; text: string };
 
 function readiness(scenarioNames: string[], sourceNames: string[], language: Language): Row[] {
-  const covered = [...new Set(scenarioNames.filter((n) => templateNames.includes(n)))];
+  const covered = templates.map((t) => t.form.name).filter((n) => scenarioNames.includes(n));
   const answered = policies.filter((p) => sourceNames.includes(p.label)).length;
   return [
     covered.length
