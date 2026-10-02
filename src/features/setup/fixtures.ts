@@ -12,7 +12,7 @@ export const setupSeed: { agentLive: boolean; agentShare: number; setupDone: Set
   agentShare: shares[0].value,
   setupDone: [],
   personaLanguage: channelLanguage,
-  // "Do it later" closed the setup modal; the page's Start button and the step list reopen it.
+  // "Finish later" closed the setup modal; the page's Start button and the step list reopen it.
   setupModalDismissed: false,
 };
 
