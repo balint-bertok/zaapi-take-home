@@ -27,7 +27,16 @@ const main: RailItem[] = [
   { label: "Settings", icon: "gear", section: "settings" },
 ];
 
+// Demo tour: until the first AI Agent is live, AI Agent leads into the guided setup and every other
+// section but Tickets is inert; the dashboard opens up once the agent goes live.
+function railTarget(section: SectionKey | undefined, agentLive: boolean) {
+  if (!section || agentLive || section === "tickets") return section && sectionHome(section);
+  return section === "ai" ? "/ai/setup" : undefined;
+}
+
 function RailButton({ item, current }: { item: RailItem; current?: SectionKey }) {
+  const agentLive = useDemo((s) => s.agentLive);
+  const to = railTarget(item.section, agentLive);
   const active = !!item.section && item.section === current;
   // The active entry switches to the solid glyph, as on app.zaapi.com (ai-symbol has only one).
   const icon = (
@@ -40,8 +49,8 @@ function RailButton({ item, current }: { item: RailItem; current?: SectionKey })
   const className = cn(button, active ? "bg-sidebar-accent text-sidebar-accent-foreground" : "bg-transparent");
   return (
     <Tooltip content={item.label} side="right" plain>
-      {item.section ? (
-        <Link to={sectionHome(item.section)} aria-label={item.label} className={className}>
+      {to ? (
+        <Link to={to} aria-label={item.label} className={className}>
           {icon}
         </Link>
       ) : (

@@ -3,18 +3,18 @@ import { Inert } from "@/components/Inert";
 import { cn } from "@/lib/cn";
 import { sections, type Section, type SectionKey } from "./sections";
 
-const item =
+// Shared with the guided setup's step sidebar (src/features/setup/SetupSidebar.tsx).
+export const sidebarAside =
+  "fixed inset-y-0 z-30 flex flex-col bg-sidebar border-gray-200 gap-4 pt-[6px] pb-[8px] h-(--height-page-content-with-banner) top-(--banner-height) left-[56px] w-[240px]";
+export const sidebarItem =
   "flex w-full items-center overflow-hidden rounded-md p-3 text-left text-zinc-500 outline-hidden transition-[width,height,padding] focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground h-9 text-sm gap-2.5";
-const activeItem = "bg-sidebar-accent text-sidebar-accent-foreground";
+export const sidebarActiveItem = "bg-sidebar-accent text-sidebar-accent-foreground";
 
 /** The 240px section menu next to the rail; an entry is active on its own URL and any below it. */
 export function SectionSidebar({ section }: { section: SectionKey }) {
   const { title, groups }: Section = sections[section];
   return (
-    <aside
-      aria-label={title}
-      className="fixed inset-y-0 z-30 flex flex-col bg-sidebar border-gray-200 gap-4 pt-[6px] pb-[8px] h-(--height-page-content-with-banner) top-(--banner-height) left-[56px] w-[240px]"
-    >
+    <aside aria-label={title} className={sidebarAside}>
       <div className="flex gap-2 p-2 pt-5 px-3 pb-2 flex-row items-center justify-between">
         <h2 className="pl-2 font-semibold text-base text-gray-900">{title}</h2>
       </div>
@@ -33,11 +33,11 @@ export function SectionSidebar({ section }: { section: SectionKey }) {
                 {group.items.map(({ label, to }) => (
                   <li key={label} className="relative">
                     {to ? (
-                      <NavLink to={to} className={({ isActive }) => cn(item, isActive && activeItem)}>
+                      <NavLink to={to} className={({ isActive }) => cn(sidebarItem, isActive && sidebarActiveItem)}>
                         <span className="font-medium shrink-0">{label}</span>
                       </NavLink>
                     ) : (
-                      <Inert className={item}>
+                      <Inert className={sidebarItem}>
                         <span className="font-medium shrink-0">{label}</span>
                       </Inert>
                     )}

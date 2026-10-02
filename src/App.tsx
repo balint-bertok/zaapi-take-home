@@ -1,6 +1,7 @@
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { useEffect, type ComponentType } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
+import { SetupLayout } from "./features/setup/SetupLayout";
 import type { AppRoute } from "./lib/route";
 import { routes } from "./routes";
 import { AppLayout } from "./shell/AppLayout";
@@ -29,6 +30,7 @@ export function App() {
           <Route element={<SuspendedOutlet />}>{pages("auth")}</Route>
           <Route element={<AppLayout />}>
             {pages("canvas")}
+            <Route element={<SetupLayout />}>{pages("setup")}</Route>
             {(Object.keys(sections) as SectionKey[]).map((s) => (
               <Route key={s} element={<ShellLayout section={s} />}>
                 {pages(s)}
