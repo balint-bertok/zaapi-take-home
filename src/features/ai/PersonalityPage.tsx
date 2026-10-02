@@ -22,6 +22,7 @@ const columns: Column<Personality>[] = [
 export default function PersonalityPage() {
   const personalities = useDemo((s) => s.personalities);
   const [query, setQuery] = useState("");
+  const rows = byName(personalities, query);
 
   return (
     <ShellPage breadcrumb={[{ label: "AI Agent" }, { label: "Train" }, { label: "Personality" }]} className="space-y-7 pb-7">
@@ -41,8 +42,8 @@ export default function PersonalityPage() {
           <FilterChip icon="user" label="Created by" />
         </div>
         <div>
-          <DataTable columns={columns} rows={byName(personalities, query)} />
-          <Pagination count={personalities.length} className="mt-8" />
+          <DataTable columns={columns} rows={rows} />
+          <Pagination count={rows.length} className="mt-8" />
         </div>
       </section>
     </ShellPage>

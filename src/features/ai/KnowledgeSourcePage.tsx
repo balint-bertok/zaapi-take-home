@@ -54,6 +54,7 @@ const columns: Column<KnowledgeSource>[] = [
 export default function KnowledgeSourcePage() {
   const sources = useDemo((s) => s.knowledgeSources);
   const [query, setQuery] = useState("");
+  const rows = byName(sources, query);
   const used = sources.reduce((sum, k) => sum + (k.characters ?? 0), 0);
 
   return (
@@ -81,8 +82,8 @@ export default function KnowledgeSourcePage() {
           <FilterChip icon="user" label="Created by" />
         </div>
         <div>
-          <DataTable columns={columns} rows={byName(sources, query)} sticky />
-          <Pagination count={sources.filter((k) => k.type !== "quickReplies").length} className="mt-8" />
+          <DataTable columns={columns} rows={rows} sticky />
+          <Pagination count={rows.filter((k) => k.type !== "quickReplies").length} className="mt-8" />
         </div>
       </section>
     </ShellPage>

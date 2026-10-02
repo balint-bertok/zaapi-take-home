@@ -15,7 +15,7 @@ import { CheckItem } from "./flows/Checkbox";
 import { toggleIn } from "./flows/shared";
 import { CreateFlowSheet } from "./flows/CreateFlowSheet";
 import { StatusBadge } from "./flows/StatusBadge";
-import { formatDate } from "./basic/automation";
+import { formatDate, today } from "./basic/automation";
 
 type StatusFilter = "active" | "paused" | "draft";
 const statusLabels: Record<StatusFilter, string> = { active: "Active", paused: "Paused", draft: "Draft" };
@@ -152,7 +152,7 @@ export default function FlowsPage() {
                         <Person name={f.createdBy} />
                       </td>
                       <td className={td}>{f.status === "draft" ? "-" : <Person name={f.updatedBy} />}</td>
-                      <td className={td}>{formatDate(f.updatedAt.slice(0, 10))}</td>
+                      <td className={td}>{formatDate(today(new Date(f.updatedAt)))}</td>
                       <td className={td}>
                         <div className="text-end">
                           <Inert

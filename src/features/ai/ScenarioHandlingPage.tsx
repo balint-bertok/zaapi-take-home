@@ -24,6 +24,8 @@ const columns: Column<Scenario>[] = [
 export default function ScenarioHandlingPage() {
   const scenarios = useDemo((s) => s.scenarios);
   const [query, setQuery] = useState("");
+  // Newest first, as the "Last updated" sort arrow says: rows are stored in creation order.
+  const rows = byName(scenarios, query).reverse();
 
   return (
     <ShellPage breadcrumb={[{ label: "AI Agent" }, { label: "Train" }, { label: "Scenario handling" }]} className="space-y-7 pb-7">
@@ -42,9 +44,8 @@ export default function ScenarioHandlingPage() {
           <FilterChip icon="user" label="Created by" />
         </div>
         <div>
-          {/* Newest first, as the "Last updated" sort arrow says: rows are stored in creation order. */}
-          <DataTable columns={columns} rows={byName(scenarios, query).reverse()} sticky />
-          <Pagination count={scenarios.length} className="mt-5" />
+          <DataTable columns={columns} rows={rows} sticky />
+          <Pagination count={rows.length} className="mt-5" />
         </div>
       </section>
     </ShellPage>

@@ -113,6 +113,14 @@ function KnowledgeSourceForm({ onDone }: { onDone: () => void }) {
             </div>
 
             <div className="space-y-4">
+              {/* Hidden rather than unmounted, so the editor keeps the text that `text` still holds when
+                  switching type and back. First, so a hidden last child adds no gap under the others. */}
+              <div hidden={kind !== "manual_input"} className="space-y-4">
+                <p className="text-gray-500 whitespace-pre-line">
+                  <Rich text={manualInputDescription} />
+                </p>
+                <RichTextEditor label="Knowledge source text" onText={setText} />
+              </div>
               {kind === "file" && (
                 <>
                   <p className="text-gray-500 whitespace-pre-line">
@@ -175,14 +183,6 @@ function KnowledgeSourceForm({ onDone }: { onDone: () => void }) {
                   <p className="text-gray-400 whitespace-pre-line">
                     <Rich text={webDisclaimer} />
                   </p>
-                </>
-              )}
-              {kind === "manual_input" && (
-                <>
-                  <p className="text-gray-500 whitespace-pre-line">
-                    <Rich text={manualInputDescription} />
-                  </p>
-                  <RichTextEditor label="Knowledge source text" onText={setText} />
                 </>
               )}
             </div>
