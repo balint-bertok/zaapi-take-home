@@ -6,4 +6,5 @@ Index, newest first:
 
 | ADR | Title | Status | Date |
 |---|---|---|---|
+| [0002](0002-guided-setup-path.md) | A guided setup path for the first AI Agent, with the dashboard gated until go-live | accepted | 2026-10-02 |
 | [0001](0001-stack-vite-react-tailwind-gh-pages.md) | Stack: Vite + React + Tailwind v4, published on GitHub Pages | accepted | 2026-10-01 |
