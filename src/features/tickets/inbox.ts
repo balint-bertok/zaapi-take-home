@@ -1,8 +1,9 @@
 import type { Ticket } from "./fixtures";
 
 /**
- * The two live inboxes: `all` (Open tickets / All, `/tickets`) and `closed` (Completed / Closed,
- * `/tickets?inbox=closed`). Every other sidebar entry is inert.
+ * The two inboxes the page renders: `all` (Open tickets / All, `/tickets`) and `closed` (Completed /
+ * Closed, `/tickets?inbox=closed`, reached by URL only: its sidebar entry is inert, like every entry
+ * but All).
  */
 export type Inbox = "all" | "closed";
 

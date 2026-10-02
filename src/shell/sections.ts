@@ -14,7 +14,9 @@ export const sections = {
         items: [{ label: "My Inbox" }, { label: "Unassigned" }, { label: "All", to: "/tickets" }],
       },
       { label: "Saved views", items: [{ label: "Pinned by me" }, { label: "All saved views" }] },
-      { label: "Completed", items: [{ label: "Closed", to: "/tickets?inbox=closed" }, { label: "Spam" }] },
+      // Closed stays inert so the demo tour keeps to its path; `/tickets?inbox=closed` is still read by
+      // the page when typed (user decision, 2026-10-02).
+      { label: "Completed", items: [{ label: "Closed" }, { label: "Spam" }] },
     ],
   },
   ai: {

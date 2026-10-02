@@ -1,6 +1,7 @@
 /**
  * The inbox's main click path, driven only by the in-memory store: select the visitor ticket,
- * reply, assign it to the signed-in user, close it, find it under Completed / Closed, reopen it.
+ * reply, assign it to the signed-in user, close it, find it in the closed inbox (by URL: the
+ * Completed / Closed entry is inert), reopen it.
  */
 import { expect, test } from "@playwright/test";
 
@@ -31,8 +32,10 @@ test("tickets inbox: reply, assign, close and reopen", async ({ page }) => {
   await expect(page.getByText("This ticket is closed.")).toBeVisible();
   await expect(list.getByText("All tickets are closed")).toBeVisible();
 
-  await page.getByRole("link", { name: "Closed" }).click();
-  await expect(page).toHaveURL(/inbox=closed/);
+  // The Closed entry is inert; the closed inbox is still there by URL.
+  await expect(page.getByRole("link", { name: "Closed" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Closed" })).toHaveAttribute("aria-disabled", "true");
+  await page.goto("tickets?inbox=closed");
   await list.getByText("Visitor 01 Oct 2026, 11:18").click();
   await page.getByRole("button", { name: "Reopen ticket" }).click();
   await expect(page.getByText("This ticket is closed.")).toHaveCount(0);
