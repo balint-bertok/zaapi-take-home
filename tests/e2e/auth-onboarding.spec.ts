@@ -3,11 +3,13 @@
  * (`src/features/auth/demoCredentials.ts`), so one click on either lands on the inbox; login keeps
  * its required-field check for a cleared field. Over the (still empty) inbox the two onboarding
  * modals run; finishing them sets `onboardingDone`, so a reload shows the inbox without them and
- * `?reset=1` brings them back. The verify page is off the click path but still reachable by URL.
- * The demo password must never reach storage or the URL.
+ * `?reset=1` brings them back. The first modal opens prefilled too, so Continue is enabled on
+ * arrival. The verify page is off the click path but still reachable by URL. The demo password
+ * must never reach storage or the URL.
  */
 import { expect, test } from "@playwright/test";
 import { demoCredentials as demo } from "../../src/features/auth/demoCredentials";
+import { seed } from "../../src/store/fixtures";
 
 test("register and log in with one click each, then finish onboarding", async ({ page }) => {
   await page.goto("register?reset=1");
@@ -49,12 +51,22 @@ test("register and log in with one click each, then finish onboarding", async ({
   // Behind the modals the workspace is still empty: the get-started card, no ticket yet.
   await expect(page.getByText("Ready to get started?")).toBeVisible();
   await expect(page.getByRole("link", { name: "All (0)", includeHidden: true })).toBeVisible();
+  // Step 1 opens prefilled with the demo user and a staff count, so Continue is enabled at once;
+  // both stay editable, and an emptied name disables Continue again.
+  const name = step1.getByLabel("What's your name?");
   const next = step1.getByRole("button", { name: "Continue" });
-  await expect(next).toBeDisabled();
+  await expect(name).toHaveValue(seed.user.name);
+  await expect(name).toBeFocused();
+  expect(await name.evaluate((el: HTMLInputElement) => el.selectionStart === el.selectionEnd)).toBe(true);
+  await expect(step1.getByRole("radio", { name: demo.staffCount })).toBeChecked();
+  await expect(next).toBeEnabled();
   await page.keyboard.press("Escape");
   await expect(step1).toBeVisible();
-  await step1.getByLabel("What's your name?").fill("Brand One");
-  await step1.getByText("2-10").click();
+  await name.clear();
+  await expect(next).toBeDisabled();
+  await name.fill("Brand One");
+  await step1.getByText("11-25").click();
+  await expect(step1.getByRole("radio", { name: "11-25" })).toBeChecked();
   await next.click();
 
   const step2 = page.getByRole("dialog", { name: "Try the inbox for yourself" });
