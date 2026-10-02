@@ -1,14 +1,13 @@
-import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { useRef, useState, type ReactNode } from "react";
+import { useRef, useState } from "react";
 import { Inert } from "@/components/Inert";
 import { Button } from "@/components/ui/button";
-import { DialogOverlay } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Icon } from "@/icons/Icon";
 import { asset } from "@/lib/asset";
 import { cn } from "@/lib/cn";
 import { updateDemo, useDemo } from "@/store/store";
 import { demoCredentials } from "../demoCredentials";
+import { fieldLabel, ModalTour, StepCard } from "./ModalTour";
 import { qrPath, qrSize } from "./qr";
 
 // Strings from the catalog's chats.onboardingModal; markup and classes from the saved tickets pages.
@@ -40,54 +39,9 @@ export function OnboardingModals() {
   const [step, setStep] = useState<1 | 2>(1);
   if (done) return null;
   return (
-    <DialogPrimitive.Root open>
-      <DialogPrimitive.Portal>
-        {/* The steps sit inside the overlay, which scrolls, so a window smaller than a step can
-            still reach its buttons; the modals cannot be dismissed any other way. */}
-        <DialogOverlay className="overflow-auto">
-          <div className="flex min-h-full min-w-fit flex-col items-center justify-center gap-8 p-4">
-            {step === 1 ? <DetailsStep onContinue={() => setStep(2)} /> : <TryInboxStep />}
-            <p className="text-sm text-white" aria-hidden="true">
-              Step {step} of 2
-            </p>
-          </div>
-        </DialogOverlay>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
+    <ModalTour counter={`Step ${step} of 2`}>{step === 1 ? <DetailsStep onContinue={() => setStep(2)} /> : <TryInboxStep />}</ModalTour>
   );
 }
-
-function Step({
-  width,
-  title,
-  subtitle,
-  onOpenAutoFocus,
-  children,
-}: {
-  width: string;
-  title: string;
-  subtitle: string;
-  onOpenAutoFocus?: (e: Event) => void;
-  children: ReactNode;
-}) {
-  return (
-    <DialogPrimitive.Content
-      aria-describedby={undefined}
-      onOpenAutoFocus={onOpenAutoFocus}
-      onEscapeKeyDown={(e) => e.preventDefault()}
-      onInteractOutside={(e) => e.preventDefault()}
-      className={cn("rounded-lg border bg-white shadow-lg overflow-hidden", width)}
-    >
-      <div className="flex flex-col items-center justify-center border-b px-6 py-4 text-center">
-        <DialogPrimitive.Title className="text-base font-semibold text-gray-800">{title}</DialogPrimitive.Title>
-        <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
-      </div>
-      {children}
-    </DialogPrimitive.Content>
-  );
-}
-
-const fieldLabel = "text-gray-800 font-medium text-sm mb-2 inline-block";
 
 function DetailsStep({ onContinue }: { onContinue: () => void }) {
   // Opens prefilled with the demo user and a staff count, so Continue is enabled on arrival.
@@ -103,7 +57,7 @@ function DetailsStep({ onContinue }: { onContinue: () => void }) {
     nameRef.current?.setSelectionRange(name.length, name.length);
   };
   return (
-    <Step
+    <StepCard
       width="w-[410px]"
       title="Tell us a bit about yourself"
       subtitle="This helps customize your experience"
@@ -156,7 +110,7 @@ function DetailsStep({ onContinue }: { onContinue: () => void }) {
           Continue
         </Button>
       </div>
-    </Step>
+    </StepCard>
   );
 }
 
@@ -164,7 +118,7 @@ const column = "flex flex-col items-center text-center w-[264px] shrink-0 gap-4 
 
 function TryInboxStep() {
   return (
-    <Step width="w-[668px]" title="Try the inbox for yourself" subtitle="See a message land in Zaapi in real time">
+    <StepCard width="w-[668px]" title="Try the inbox for yourself" subtitle="See a message land in Zaapi in real time">
       <div className="px-6 py-5">
         <div className="flex items-start gap-8">
           <div className={column}>
@@ -222,7 +176,7 @@ function TryInboxStep() {
           <Icon name="arrow-right" variant="far" className="text-[10px]" />
         </button>
       </div>
-    </Step>
+    </StepCard>
   );
 }
 

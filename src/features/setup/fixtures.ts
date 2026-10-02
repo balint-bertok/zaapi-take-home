@@ -7,11 +7,13 @@ import { channelLanguage, shares, type Language } from "./content";
 
 export type SetupStep = "persona" | "scenarios" | "knowledge" | "test";
 
-export const setupSeed: { agentLive: boolean; agentShare: number; setupDone: SetupStep[]; personaLanguage: Language } = {
+export const setupSeed: { agentLive: boolean; agentShare: number; setupDone: SetupStep[]; personaLanguage: Language; setupModalDismissed: boolean } = {
   agentLive: false,
   agentShare: shares[0].value,
   setupDone: [],
   personaLanguage: channelLanguage,
+  // "Do it later" closed the setup modal; the page's Start button and the step list reopen it.
+  setupModalDismissed: false,
 };
 
 /** `done` with `step` added once. */
