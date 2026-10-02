@@ -182,6 +182,7 @@ function ScenariosStep() {
       <div className={footer}>
         <div className="flex items-center gap-4">
           <BackLink to={filledPath} />
+          <LaterButton />
           {skipping ? (
             <p className="text-sm text-gray-600">
               {skipConsequence}{" "}
