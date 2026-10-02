@@ -8,6 +8,7 @@ import { Icon } from "@/icons/Icon";
 import { asset } from "@/lib/asset";
 import { updateDemo } from "@/store/store";
 import { LanguageButton } from "./AuthChrome";
+import { demoCredentials } from "./demoCredentials";
 import { FieldError, Label, PasswordInput, PhoneInput } from "./fields";
 import "./outfit.css";
 
@@ -72,12 +73,13 @@ export default function RegisterPage() {
   const navigate = useNavigate();
 
   // No app validation (the browser's own email-format check stays, as on the saved page) and no
-  // account: remember only the email, for the verify page to echo back.
+  // account: remember only the email, which the login and verify pages echo back.
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const email = String(new FormData(e.currentTarget).get("email") ?? "").trim();
     updateDemo((s) => ({ ...s, registeredEmail: email }));
-    navigate("/register/verify");
+    // Straight to the inbox; /register/verify stays routable by URL but off the click path (user decision 2026-10-02).
+    navigate("/tickets");
   }
 
   return (
@@ -103,20 +105,28 @@ export default function RegisterPage() {
                       name="businessName"
                       type="text"
                       autoComplete="organization"
+                      defaultValue={demoCredentials.businessName}
                     />
                   </div>
                   <div>
                     <Label htmlFor="email">Email</Label>
-                    <Input className="mt-2" id="email" name="email" type="email" autoComplete="email" />
+                    <Input
+                      className="mt-2"
+                      id="email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      defaultValue={demoCredentials.email}
+                    />
                   </div>
                   <div className="mt-2">
                     <Label htmlFor="phoneNumber">Phone number</Label>
-                    <PhoneInput id="phoneNumber" />
+                    <PhoneInput id="phoneNumber" defaultValue={demoCredentials.phone} />
                   </div>
                   <div>
                     <Label htmlFor="password">Password</Label>
                     {/* No name attribute: the password never joins the form data. */}
-                    <PasswordInput id="password" autoComplete="new-password" />
+                    <PasswordInput id="password" autoComplete="new-password" defaultValue={demoCredentials.password} />
                     <FieldError />
                   </div>
                   <Collapsible.Root>

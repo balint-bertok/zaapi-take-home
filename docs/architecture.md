@@ -32,6 +32,7 @@ From the validated plan (`Original files/extracted/PLAN.md`), one PR each:
 - PR 5, flow builder: flow list, template gallery, React Flow canvas (`@xyflow/react`, its stock stylesheet plus the app's one override), publish dialog; flows live in the `flows` slice. Built.
 - PR 6, settings: settings sidebar, billing page. Built.
 - PR 7, fidelity pass against the live app. Built; differences and waivers in `docs/fidelity.md`.
+- Prefilled login: register and login open with fake demo credentials (`src/features/auth/demoCredentials.ts`), so one click on "Get started" or "Log in" lands on `/tickets`; `/register/verify` stays routable but leaves the click path (user decision, 2026-10-02). Built.
 
 PRs 1 to 6 run in parallel after PR 0 merges; each touches only its own feature folder.
 
