@@ -25,7 +25,7 @@ The memo to leadership proposes one product change: a guided path to a merchant'
 
 ## Amendment, 2026-10-02: hybrid modal
 
-Status stays accepted. The intro, persona, scenarios and knowledge steps now run in the inbox onboarding's modal frame (`ModalTour` and `StepCard` in `src/components/ModalTour.tsx`) over the setup page; test and go live stay pages. Each step keeps its URL, and the empty and filled twins still move on first touch. "Finish later" closes the modal onto the setup page, and the page's button (at the first step not done) or the step list reopens it. Skipping scenarios asks inline, in the same card, because a dialog inside a modal is avoided. The file-or-website sheet is not offered inside the modal; Knowledge Source keeps it.
+Status stays accepted. The intro, persona, scenarios and knowledge steps now run in the inbox onboarding's modal frame (`ModalTour` and `StepCard` in `src/components/ModalTour.tsx`) over the setup page; test and go live stay pages. Each step keeps its URL, and the empty and filled twins still move on first touch. "Finish later" closes the modal onto the setup page, and the page's button (at the first step not done) or the step list reopens it. Skipping scenarios asks inline, in the same card, because a dialog inside a modal is avoided. The file-or-website sheet is not offered inside the modal; Knowledge Source keeps it. The card has a colour-coded step bar at its top and one size for every screen, so the footer does not move between steps. Continue on an empty form fills it, like touching a field.
 
 Why: the user wanted the first AI Agent click to feel like the product's existing onboarding pop-ups; the heavier steps stay pages because a modal suits short, focused steps (user decision, 2026-10-02).
 

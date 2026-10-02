@@ -3,8 +3,8 @@ import { Inert } from "@/components/Inert";
 import { Icon } from "@/icons/Icon";
 import { cn } from "@/lib/cn";
 import { sidebarActiveItem, sidebarAside, sidebarItem } from "@/shell/SectionSidebar";
-import { useDemo } from "@/store/store";
 import { setupSteps as steps } from "./content";
+import { useStepsDone } from "./stepsDone";
 
 const title = "Set up your AI Agent";
 
@@ -14,10 +14,8 @@ const title = "Set up your AI Agent";
  * forward. The current step is the page on screen, or else the first one not done.
  */
 export function SetupSidebar() {
-  const setupDone = useDemo((s) => s.setupDone);
-  const agentLive = useDemo((s) => s.agentLive);
   const { pathname } = useLocation();
-  const done = steps.map(({ step }) => (step ? setupDone.includes(step) : agentLive));
+  const done = useStepsDone();
   const next = done.indexOf(false);
   return (
     <aside aria-label={title} className={sidebarAside}>

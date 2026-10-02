@@ -35,17 +35,20 @@ export function ModalTour({ counter, children }: { counter?: string; children: R
 }
 
 /**
- * One modal card: centred title and subtitle over the body. Escape and outside clicks do nothing.
- * The card takes focus itself when a step opens with no field focused, without the browser's ring.
+ * One modal card: centred title and subtitle over the body, with `top` (the setup's step bar) above
+ * them. Escape and outside clicks do nothing. The card takes focus itself when a step opens with no
+ * field focused, without the browser's ring.
  */
 export function StepCard({
   width,
+  top,
   title,
   subtitle,
   onOpenAutoFocus,
   children,
 }: {
   width: string;
+  top?: ReactNode;
   title: string;
   subtitle: string;
   onOpenAutoFocus?: (e: Event) => void;
@@ -59,6 +62,7 @@ export function StepCard({
       onInteractOutside={(e) => e.preventDefault()}
       className={cn("rounded-lg border bg-white shadow-lg overflow-hidden outline-none", width)}
     >
+      {top}
       <div className="flex flex-col items-center justify-center border-b px-6 py-4 text-center">
         <DialogPrimitive.Title className="text-base font-semibold text-gray-800">{title}</DialogPrimitive.Title>
         <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
