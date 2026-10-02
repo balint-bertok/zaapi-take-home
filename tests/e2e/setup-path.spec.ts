@@ -7,7 +7,7 @@
  * empty form moves to its filled twin on first touch. Continue appends to the Personality,
  * Scenario Handling and Knowledge Source lists, once: a second Continue adds no duplicate. The
  * readiness summary on the Test step reads the store. "Go live" opens the dashboard; `?reset=1`
- * restores the path. "Do it later" closes the modal onto the page, whose button reopens it.
+ * restores the path. "Finish later" closes the modal onto the page, whose button reopens it.
  * Skipping scenarios states the consequence inline, in the same dialog, and changes what the
  * knowledge step asks.
  */
@@ -43,7 +43,7 @@ test("the guided setup runs from sign-up to a live agent, then opens the dashboa
   // The welcome opens as a modal over the setup page.
   const welcome = page.getByRole("dialog", { name: "Set up your first AI Agent" });
   await expect(welcome.getByText("Test (Demo)", { exact: true })).toBeVisible();
-  await expect(welcome.getByRole("button", { name: "Do it later" })).toBeVisible();
+  await expect(welcome.getByRole("button", { name: "Finish later" })).toBeVisible();
   await welcome.getByRole("link", { name: "Start" }).click();
 
   // Persona: touching the form moves to its filled twin.
@@ -127,18 +127,18 @@ test("the guided setup runs from sign-up to a live agent, then opens the dashboa
 
   // `?reset=1` brings the gated path back, welcome modal included.
   await page.goto("ai/setup?reset=1");
-  await welcome.getByRole("button", { name: "Do it later" }).click();
+  await welcome.getByRole("button", { name: "Finish later" }).click();
   await expect(sidebar.locator('button[aria-disabled="true"]', { hasText: "Scenarios" })).toBeVisible();
   await expect(rail.locator('button[aria-disabled="true"][aria-label="Automations"]')).toBeVisible();
 
   expect(errors).toEqual([]);
 });
 
-test("Do it later closes the setup modal onto the page, whose Start reopens it", async ({ page }) => {
+test("Finish later closes the setup modal onto the page, whose Start reopens it", async ({ page }) => {
   const errors = collectErrors(page);
 
   await page.goto("ai/setup?reset=1");
-  await page.getByRole("dialog", { name: "Set up your first AI Agent" }).getByRole("button", { name: "Do it later" }).click();
+  await page.getByRole("dialog", { name: "Set up your first AI Agent" }).getByRole("button", { name: "Finish later" }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page).toHaveURL(/\/ai\/setup$/);
   await expect(page.getByRole("heading", { name: "Set up your first AI Agent" })).toBeVisible();

@@ -46,7 +46,7 @@ function SetupCard(props: Omit<ComponentProps<typeof StepCard>, "width" | "onOpe
 }
 
 /**
- * Shown on the welcome, persona, scenarios and knowledge URLs; on the welcome alone, "Do it later" keeps it
+ * Shown on the welcome, persona, scenarios and knowledge URLs; on the welcome alone, "Finish later" keeps it
  * closed. Mounted once by SetupShell, so it survives moving between its screens.
  */
 export default function SetupModal() {
@@ -72,7 +72,7 @@ function useFilledState<T>(filled: boolean, initial: () => T) {
   return [value, setValue] as const;
 }
 
-/** "Do it later": closes the modal onto the setup page, and keeps it closed there. */
+/** "Finish later": closes the modal onto the setup page, and keeps it closed there. */
 function LaterButton() {
   const navigate = useNavigate();
   const later = () => {
@@ -81,7 +81,7 @@ function LaterButton() {
   };
   return (
     <button type="button" onClick={later} className="text-sm font-medium text-gray-800 hover:text-gray-600 transition-colors">
-      Do it later
+      Finish later
     </button>
   );
 }
@@ -139,7 +139,7 @@ function PersonaStep({ filled }: { filled: boolean }) {
       </div>
       <div className={footer}>
         <div className="flex items-center gap-4">
-          {/* After "Do it later" the welcome stays closed, so Back lands on the page Start came from. */}
+          {/* After "Finish later" the welcome stays closed, so Back lands on the page Start came from. */}
           <BackLink to="/ai/setup" />
           <LaterButton />
         </div>
