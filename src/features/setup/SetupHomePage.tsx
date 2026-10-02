@@ -7,9 +7,9 @@ const card = "border border-gray-200 space-y-3";
 const cardTitle = "text-base font-medium text-gray-800";
 
 /**
- * The page behind the setup modal, on the welcome, persona and scenarios URLs alike: which channel
- * the agent starts on, and the five steps ahead. Its button leads to the first step not done.
- * After "Do it later" closed the modal, Start and "Continue with scenarios" open it again: the modal
+ * The page behind the setup modal, on the welcome, persona, scenarios and knowledge URLs alike:
+ * which channel the agent starts on, and the five steps ahead. Its button leads to the first step not done.
+ * After "Do it later" closed the modal, Start and the "Continue with" buttons open it again: the modal
  * shows on those URLs whatever the flag says, so nothing here needs to clear it.
  */
 export default function SetupHomePage() {
@@ -18,7 +18,9 @@ export default function SetupHomePage() {
     ? ["/ai/setup/persona", "Start"]
     : !setupDone.includes("scenarios")
       ? ["/ai/setup/scenarios", "Continue with scenarios"]
-      : ["/ai/setup/knowledge", "Continue to knowledge"];
+      : !setupDone.includes("knowledge")
+        ? ["/ai/setup/knowledge", "Continue with knowledge"]
+        : ["/ai/setup/test", "Continue to test"];
   return (
     <SetupPage
       step={0}

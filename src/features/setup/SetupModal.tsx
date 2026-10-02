@@ -6,22 +6,27 @@ import { updateDemo, useDemo } from "@/store/store";
 import { ModalTour, StepCard } from "../auth/onboarding/ModalTour";
 import { ChoiceCard } from "../ai/AddScenarioSheet";
 import { templates } from "../ai/scenarioTemplates";
-import { personaSuggestion, setupSteps, skipConsequence, type Language } from "./content";
+import { personaSuggestion, policies, setupSteps, skipConsequence, type Language } from "./content";
 import { ChannelRow, StepsAhead } from "./Intro";
+import { KnowledgeForm, type Answers } from "./KnowledgeForm";
 import { PersonaForm, type Persona } from "./PersonaForm";
-import { savePersona, saveScenarios, skipScenarios } from "./save";
+import { saveKnowledge, savePersona, saveScenarios, skipScenarios } from "./save";
 import { BackLink } from "./SetupPage";
 
-// The setup's first three screens, in the inbox onboarding's modal frame, over the setup page.
+// The setup's first four screens, in the inbox onboarding's modal frame, over the setup page.
 // Copy is not from the catalog (see content.ts).
 
 const personaPath = "/ai/setup/persona";
 const filledPath = "/ai/setup/persona/filled";
-const screens: Record<string, "welcome" | "persona" | "scenarios"> = {
+const knowledgePath = "/ai/setup/knowledge";
+const knowledgeFilledPath = "/ai/setup/knowledge/filled";
+const screens: Record<string, "welcome" | "persona" | "scenarios" | "knowledge"> = {
   "/ai/setup": "welcome",
   [personaPath]: "persona",
   [filledPath]: "persona",
   "/ai/setup/scenarios": "scenarios",
+  [knowledgePath]: "knowledge",
+  [knowledgeFilledPath]: "knowledge",
 };
 
 const footer = "border-t bg-gray-50 px-6 py-3 flex justify-between items-center gap-4";
@@ -36,7 +41,7 @@ const focusCard = (e: Event) => {
 };
 
 /**
- * Shown on the welcome, persona and scenarios URLs; on the welcome alone, "Do it later" keeps it
+ * Shown on the welcome, persona, scenarios and knowledge URLs; on the welcome alone, "Do it later" keeps it
  * closed. Mounted once by SetupShell, so it survives moving between its screens.
  */
 export function SetupModal() {
@@ -55,11 +60,32 @@ export function SetupModal() {
         <PersonaStep filled={pathname === filledPath} />
       </ModalTour>
     );
+  if (screen === "scenarios")
+    return (
+      <ModalTour counter={counter(2)}>
+        <ScenariosStep />
+      </ModalTour>
+    );
   return (
-    <ModalTour counter={counter(2)}>
-      <ScenariosStep />
+    <ModalTour counter={counter(3)}>
+      <KnowledgeStep filled={pathname === knowledgeFilledPath} />
     </ModalTour>
   );
+}
+
+/**
+ * A filled form's local state: `initial()` on mount, and again each time the filled URL is entered
+ * (a new history entry has a new key), reset during render rather than in an effect.
+ */
+function useFilledState<T>(filled: boolean, initial: () => T) {
+  const { key } = useLocation();
+  const [value, setValue] = useState(initial);
+  const [shownKey, setShownKey] = useState(key);
+  if (shownKey !== key) {
+    setShownKey(key);
+    if (filled) setValue(initial());
+  }
+  return [value, setValue] as const;
 }
 
 /** "Do it later": closes the modal onto the setup page, and keeps it closed there. */
@@ -127,16 +153,9 @@ const suggestion = (language?: Language) => ({ ...personaSuggestion, language: l
  */
 function PersonaStep({ filled }: { filled: boolean }) {
   const navigate = useNavigate();
-  const location = useLocation();
   // A language picked on the empty form arrives as navigation state and wins over the suggestion.
-  const picked = (location.state as Pick<Persona, "language"> | null)?.language ?? undefined;
-  const [persona, setPersona] = useState<Persona>(() => suggestion(picked));
-  // Reset during render when the filled URL is entered again (a new history entry has a new key).
-  const [shownKey, setShownKey] = useState(location.key);
-  if (shownKey !== location.key) {
-    setShownKey(location.key);
-    if (filled) setPersona(suggestion(picked));
-  }
+  const picked = (useLocation().state as Pick<Persona, "language"> | null)?.language ?? undefined;
+  const [persona, setPersona] = useFilledState<Persona>(filled, () => suggestion(picked));
   const fill = (patch?: Partial<Persona>) => navigate(filledPath, { state: patch?.language ? { language: patch.language } : undefined });
   const name = persona.name.trim();
   return (
@@ -180,7 +199,7 @@ function ScenariosStep() {
   };
   const skip = () => {
     skipScenarios();
-    navigate("/ai/setup/knowledge");
+    navigate(knowledgePath);
   };
   return (
     <StepCard
@@ -213,8 +232,47 @@ function ScenariosStep() {
             </button>
           )}
         </div>
-        <NextLink to="/ai/setup/knowledge" disabled={!picked.length} onClick={() => saveScenarios(picked)}>
+        <NextLink to={knowledgePath} disabled={!picked.length} onClick={() => saveScenarios(picked)}>
           Continue to knowledge
+        </NextLink>
+      </div>
+    </StepCard>
+  );
+}
+
+const noAnswers: Answers = { shipping: "", returns: "", cancellations: "" };
+const suggestedAnswers = Object.fromEntries(policies.map((p) => [p.key, p.answer])) as Answers;
+
+/**
+ * Step 3, on both knowledge URLs. Empty, focusing any answer moves to the filled URL, as on the
+ * persona; filled, Brand One's answers sit in local state, editable. Continue saves each answered
+ * policy as a written knowledge source and leaves the modal for the test page.
+ */
+function KnowledgeStep({ filled }: { filled: boolean }) {
+  const navigate = useNavigate();
+  const [answers, setAnswers] = useFilledState(filled, () => suggestedAnswers);
+  const answered = policies.some((p) => answers[p.key].trim() !== "");
+  return (
+    <StepCard
+      width="w-[668px]"
+      title="Knowledge"
+      subtitle="Answer the policies your scenarios need. Short answers are fine; the agent fills in the wording."
+      onOpenAutoFocus={focusCard}
+    >
+      <div className="px-6 py-5">
+        {filled ? (
+          <KnowledgeForm answers={answers} onChange={(key, value) => setAnswers((a) => ({ ...a, [key]: value }))} />
+        ) : (
+          <KnowledgeForm answers={noAnswers} onFocus={() => navigate(knowledgeFilledPath)} />
+        )}
+      </div>
+      <div className={footer}>
+        <div className="flex items-center gap-4">
+          <BackLink to="/ai/setup/scenarios" />
+          <LaterButton />
+        </div>
+        <NextLink to="/ai/setup/test" disabled={!filled || !answered} onClick={() => saveKnowledge(answers)}>
+          Continue to test
         </NextLink>
       </div>
     </StepCard>

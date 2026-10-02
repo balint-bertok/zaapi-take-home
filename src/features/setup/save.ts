@@ -1,9 +1,10 @@
-// The writes behind the setup modal's persona and scenarios screens: one `updateDemo` call each.
+// The writes behind the setup modal's persona, scenarios and knowledge screens: one `updateDemo` call each.
 import { updateDemo } from "@/store/store";
 import { stamp } from "../ai/format";
 import { templates } from "../ai/scenarioTemplates";
-import { channelLanguage } from "./content";
+import { channelLanguage, policies } from "./content";
 import { withStep } from "./fixtures";
+import type { Answers } from "./KnowledgeForm";
 import type { Persona } from "./PersonaForm";
 
 /**
@@ -43,4 +44,30 @@ export function saveScenarios(pickedIds: string[]) {
 /** The step marked done with no scenario rows. */
 export function skipScenarios() {
   updateDemo((s) => ({ ...s, setupDone: withStep(s.setupDone, "scenarios") }));
+}
+
+/** Each answered policy as a written knowledge source (once per policy), and the step marked done. */
+export function saveKnowledge(answers: Answers) {
+  const answered = policies.filter((p) => answers[p.key].trim() !== "");
+  const now = stamp();
+  updateDemo((s) => ({
+    ...s,
+    knowledgeSources: [
+      ...s.knowledgeSources,
+      ...answered
+        .filter((p) => !s.knowledgeSources.some((k) => k.name === p.label))
+        .map((p) => ({
+          id: crypto.randomUUID(),
+          name: p.label,
+          enabled: true,
+          source: s.user.name,
+          type: "manual_input" as const,
+          detail: p.label,
+          integrations: [],
+          characters: answers[p.key].trim().length,
+          createdAt: now,
+        })),
+    ],
+    setupDone: withStep(s.setupDone, "knowledge"),
+  }));
 }
