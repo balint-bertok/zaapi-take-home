@@ -1,15 +1,16 @@
-import { useState, type ComponentProps, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { ModalTour, StepCard } from "@/components/ModalTour";
 import { updateDemo, useDemo } from "@/store/store";
 import { ChoiceCard } from "../ai/AddScenarioSheet";
 import { templates } from "../ai/scenarioTemplates";
-import { personaSuggestion, policies, skipConsequence, stepCounter, type Language } from "./content";
+import { personaSuggestion, policies, skipConsequence, type Language } from "./content";
 import { ChannelRow, StepsAhead } from "./Intro";
 import { KnowledgeForm, type Answers } from "./KnowledgeForm";
 import { PersonaForm, type Persona } from "./PersonaForm";
 import { saveKnowledge, savePersona, saveScenarios, skipScenarios } from "./save";
 import { BackLink, ContinueButton } from "./SetupPage";
+import { SetupProgress } from "./SetupProgress";
 
 // The setup's first four screens, in the inbox onboarding's modal frame, over the setup page.
 // Copy is not from the catalog (see content.ts).
@@ -20,7 +21,7 @@ const scenariosPath = "/ai/setup/scenarios";
 const knowledgePath = "/ai/setup/knowledge";
 const knowledgeFilledPath = "/ai/setup/knowledge/filled";
 
-/** Each modal URL's screen, and the step number under the card (none on the welcome). */
+/** Each modal URL's screen, and its step number, current in the step bar (none on the welcome). */
 const screens: Record<string, { step?: number; body: () => ReactNode }> = {
   "/ai/setup": { body: () => <WelcomeStep /> },
   [personaPath]: { step: 1, body: () => <PersonaStep filled={false} /> },
@@ -30,7 +31,11 @@ const screens: Record<string, { step?: number; body: () => ReactNode }> = {
   [knowledgeFilledPath]: { step: 3, body: () => <KnowledgeStep filled /> },
 };
 
-const footer = "border-t bg-gray-50 px-6 py-3 flex justify-between items-center gap-4";
+// The screens' body height, so the card is one size and its footer sits at the same place on every
+// screen: the tallest body, the persona form's with the step bar above it, measured in Chrome at
+// 1440×900 and rounded up to 4px. Shorter bodies leave space under their content.
+const bodyHeight = "min-h-[492px]";
+const footerClass = "border-t bg-gray-50 px-6 py-3 flex justify-between items-center gap-4";
 const sectionTitle = "text-base font-medium text-gray-800";
 
 // The screens open with the card itself focused: Radix would focus the first field, and focusing
@@ -40,9 +45,18 @@ const focusCard = (e: Event) => {
   (e.target as HTMLElement).focus();
 };
 
-/** The modal's card: one width for every screen, opened with the card focused. */
-function SetupCard(props: Omit<ComponentProps<typeof StepCard>, "width" | "onOpenAutoFocus">) {
-  return <StepCard width="w-[668px]" onOpenAutoFocus={focusCard} {...props} />;
+/**
+ * The modal's card: one size for every screen, so the footer does not move between steps; the
+ * step bar on top, the screen's body, the gray footer row. Opened with the card focused.
+ */
+function SetupCard({ title, subtitle, footer, children }: { title: string; subtitle: string; footer: ReactNode; children: ReactNode }) {
+  const step = screens[useLocation().pathname]?.step;
+  return (
+    <StepCard width="w-[668px]" top={<SetupProgress step={step} />} title={title} subtitle={subtitle} onOpenAutoFocus={focusCard}>
+      <div className={bodyHeight}>{children}</div>
+      <div className={footerClass}>{footer}</div>
+    </StepCard>
+  );
 }
 
 /**
@@ -54,7 +68,7 @@ export default function SetupModal() {
   const dismissed = useDemo((s) => s.setupModalDismissed);
   const screen = screens[pathname];
   if (!screen || (!screen.step && dismissed)) return null;
-  return <ModalTour counter={screen.step ? stepCounter(screen.step) : undefined}>{screen.body()}</ModalTour>;
+  return <ModalTour>{screen.body()}</ModalTour>;
 }
 
 /**
@@ -91,6 +105,12 @@ function WelcomeStep() {
     <SetupCard
       title="Set up your first AI Agent"
       subtitle="Five short steps, then your agent answers customers on one channel."
+      footer={
+        <>
+          <LaterButton />
+          <ContinueButton variant="default" to={personaPath}>Start</ContinueButton>
+        </>
+      }
     >
       <div className="px-6 py-5 space-y-5 text-sm">
         <div className="space-y-3">
@@ -102,10 +122,6 @@ function WelcomeStep() {
           <StepsAhead />
         </div>
       </div>
-      <div className={footer}>
-        <LaterButton />
-        <ContinueButton variant="default" to={personaPath}>Start</ContinueButton>
-      </div>
     </SetupCard>
   );
 }
@@ -115,8 +131,9 @@ const suggestion = (language?: Language) => ({ ...personaSuggestion, language: l
 
 /**
  * Step 1, on both persona URLs. Empty, the demo fills the form in for the viewer rather than making
- * them type: touching any field or language card moves to the filled URL, carrying a picked language
- * along. Filled, the suggestion sits in local state, editable; arriving on the filled URL resets it.
+ * them type, whichever way they reach for it: touching any field or language card, or Continue,
+ * moves to the filled URL, a picked language carried along. Filled, the suggestion sits in local
+ * state, editable; arriving on the filled URL resets it.
  */
 function PersonaStep({ filled }: { filled: boolean }) {
   const navigate = useNavigate();
@@ -129,6 +146,18 @@ function PersonaStep({ filled }: { filled: boolean }) {
     <SetupCard
       title="Persona"
       subtitle="Name your agent and decide how it sounds. Language defaults to what your customers write in."
+      footer={
+        <>
+          <div className="flex items-center gap-4">
+            {/* After "Finish later" the welcome stays closed, so Back lands on the page Start came from. */}
+            <BackLink to="/ai/setup" />
+            <LaterButton />
+          </div>
+          <ContinueButton variant="default" to={filled ? scenariosPath : filledPath} disabled={filled && !name} onClick={filled ? () => savePersona(persona) : undefined}>
+            Continue
+          </ContinueButton>
+        </>
+      }
     >
       <div className="px-6 py-5">
         <PersonaForm
@@ -136,16 +165,6 @@ function PersonaStep({ filled }: { filled: boolean }) {
           onChange={filled ? (patch) => setPersona((p) => ({ ...p, ...patch })) : fill}
           onFocus={filled ? undefined : () => fill()}
         />
-      </div>
-      <div className={footer}>
-        <div className="flex items-center gap-4">
-          {/* After "Finish later" the welcome stays closed, so Back lands on the page Start came from. */}
-          <BackLink to="/ai/setup" />
-          <LaterButton />
-        </div>
-        <ContinueButton variant="default" to={scenariosPath} disabled={!filled || !name} onClick={() => savePersona(persona)}>
-          Continue
-        </ContinueButton>
       </div>
     </SetupCard>
   );
@@ -170,6 +189,29 @@ function ScenariosStep() {
     <SetupCard
       title="Scenarios"
       subtitle="Pick what your agent should handle. Each one comes with ready-made steps you can edit later."
+      footer={
+        <>
+          <div className="flex items-center gap-4">
+            <BackLink to={filledPath} />
+            <LaterButton />
+            {skipping ? (
+              <p className="text-sm text-gray-600">
+                {skipConsequence}{" "}
+                <button type="button" onClick={skip} className="text-gray-800 font-medium underline-offset-2 hover:underline">
+                  Skip anyway
+                </button>
+              </p>
+            ) : (
+              <button type="button" className="text-sm text-gray-500 hover:text-gray-700 underline-offset-2 hover:underline" onClick={() => setSkipping(true)}>
+                Skip this step
+              </button>
+            )}
+          </div>
+          <ContinueButton variant="default" to={knowledgePath} disabled={!picked.length} onClick={() => saveScenarios(picked)}>
+            Continue to knowledge
+          </ContinueButton>
+        </>
+      }
     >
       <div className="px-6 py-5 space-y-4">
         <div className="grid grid-cols-3 gap-4">
@@ -179,27 +221,6 @@ function ScenariosStep() {
         </div>
         <p className="text-sm text-gray-500">The complaint scenario hands the conversation to your team straight away.</p>
       </div>
-      <div className={footer}>
-        <div className="flex items-center gap-4">
-          <BackLink to={filledPath} />
-          <LaterButton />
-          {skipping ? (
-            <p className="text-sm text-gray-600">
-              {skipConsequence}{" "}
-              <button type="button" onClick={skip} className="text-gray-800 font-medium underline-offset-2 hover:underline">
-                Skip anyway
-              </button>
-            </p>
-          ) : (
-            <button type="button" className="text-sm text-gray-500 hover:text-gray-700 underline-offset-2 hover:underline" onClick={() => setSkipping(true)}>
-              Skip this step
-            </button>
-          )}
-        </div>
-        <ContinueButton variant="default" to={knowledgePath} disabled={!picked.length} onClick={() => saveScenarios(picked)}>
-          Continue to knowledge
-        </ContinueButton>
-      </div>
     </SetupCard>
   );
 }
@@ -208,8 +229,8 @@ const noAnswers: Answers = { shipping: "", returns: "", cancellations: "" };
 const suggestedAnswers = Object.fromEntries(policies.map((p) => [p.key, p.answer])) as Answers;
 
 /**
- * Step 3, on both knowledge URLs. Empty, focusing any answer moves to the filled URL, as on the
- * persona; filled, Brand One's answers sit in local state, editable. Continue saves each answered
+ * Step 3, on both knowledge URLs. Empty, focusing any answer or Continue moves to the filled URL,
+ * as on the persona; filled, Brand One's answers sit in local state, editable. Continue saves each answered
  * policy as a written knowledge source and leaves the modal for the test page.
  */
 function KnowledgeStep({ filled }: { filled: boolean }) {
@@ -220,6 +241,22 @@ function KnowledgeStep({ filled }: { filled: boolean }) {
     <SetupCard
       title="Knowledge"
       subtitle="Answer the policies your scenarios need. Short answers are fine; the agent fills in the wording."
+      footer={
+        <>
+          <div className="flex items-center gap-4">
+            <BackLink to={scenariosPath} />
+            <LaterButton />
+          </div>
+          <ContinueButton
+            variant="default"
+            to={filled ? "/ai/setup/test" : knowledgeFilledPath}
+            disabled={filled && !answered}
+            onClick={filled ? () => saveKnowledge(answers) : undefined}
+          >
+            Continue to test
+          </ContinueButton>
+        </>
+      }
     >
       <div className="px-6 py-5">
         <KnowledgeForm
@@ -227,15 +264,6 @@ function KnowledgeStep({ filled }: { filled: boolean }) {
           onChange={(key, value) => filled && setAnswers((a) => ({ ...a, [key]: value }))}
           onFocus={filled ? undefined : () => navigate(knowledgeFilledPath)}
         />
-      </div>
-      <div className={footer}>
-        <div className="flex items-center gap-4">
-          <BackLink to={scenariosPath} />
-          <LaterButton />
-        </div>
-        <ContinueButton variant="default" to="/ai/setup/test" disabled={!filled || !answered} onClick={() => saveKnowledge(answers)}>
-          Continue to test
-        </ContinueButton>
       </div>
     </SetupCard>
   );
