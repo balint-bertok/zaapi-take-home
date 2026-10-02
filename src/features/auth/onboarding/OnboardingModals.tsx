@@ -7,7 +7,7 @@ import { asset } from "@/lib/asset";
 import { cn } from "@/lib/cn";
 import { updateDemo, useDemo } from "@/store/store";
 import { demoCredentials } from "../demoCredentials";
-import { fieldLabel, ModalTour, StepCard } from "./ModalTour";
+import { fieldLabel, ModalTour, StepCard } from "@/components/ModalTour";
 import { qrPath, qrSize } from "./qr";
 
 // Strings from the catalog's chats.onboardingModal; markup and classes from the saved tickets pages.

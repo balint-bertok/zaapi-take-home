@@ -1,6 +1,9 @@
+import { lazy, Suspense } from "react";
 import { ShellLayout } from "@/shell/ShellLayout";
-import { SetupModal } from "./SetupModal";
 import { SetupSidebar } from "./SetupSidebar";
+
+// Its own chunk, so pages outside the setup do not load the modal's forms.
+const SetupModal = lazy(() => import("./SetupModal"));
 
 /**
  * The setup's layout route: the AI section's shell with the step list, and the setup modal mounted
@@ -11,7 +14,9 @@ export function SetupShell() {
   return (
     <>
       <ShellLayout section="ai" sidebar={<SetupSidebar />} />
-      <SetupModal />
+      <Suspense fallback={null}>
+        <SetupModal />
+      </Suspense>
     </>
   );
 }

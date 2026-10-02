@@ -1,5 +1,6 @@
 import { useDemo } from "@/store/store";
 import { FormCard } from "../ai/parts";
+import { setupSteps } from "./content";
 import { ChannelRow, StepsAhead } from "./Intro";
 import { ContinueButton, SetupPage } from "./SetupPage";
 
@@ -14,16 +15,14 @@ const cardTitle = "text-base font-medium text-gray-800";
  */
 export default function SetupHomePage() {
   const setupDone = useDemo((s) => s.setupDone);
-  const [to, label] = !setupDone.includes("persona")
-    ? ["/ai/setup/persona", "Start"]
-    : !setupDone.includes("scenarios")
-      ? ["/ai/setup/scenarios", "Continue with scenarios"]
-      : !setupDone.includes("knowledge")
-        ? ["/ai/setup/knowledge", "Continue with knowledge"]
-        : ["/ai/setup/test", "Continue to test"];
+  const next = setupSteps.find((s) => s.step && s.step !== "test" && !setupDone.includes(s.step));
+  const [to, label] = !next
+    ? ["/ai/setup/test", "Continue to test"]
+    : next === setupSteps[0]
+      ? [next.to, "Start"]
+      : [next.to, `Continue with ${next.label.toLowerCase()}`];
   return (
     <SetupPage
-      step={0}
       title="Set up your first AI Agent"
       description="Five short steps, then your agent answers customers on one channel. You can stop and come back; progress is saved."
       footer={

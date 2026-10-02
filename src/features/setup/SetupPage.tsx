@@ -4,10 +4,10 @@ import { buttonClass } from "@/components/ui/button";
 import { Icon } from "@/icons/Icon";
 import { cn } from "@/lib/cn";
 import { ShellPage } from "@/shell/ShellPage";
-import { setupSteps } from "./content";
+import { stepCounter } from "./content";
 
 /**
- * The frame every guided-setup page shares: breadcrumb, "Step N of M" (none on the intro, step 0),
+ * The frame every guided-setup page shares: breadcrumb, "Step N of M" (none on the setup home),
  * the title and description, the page's own content, and an optional footer row (Back, Continue).
  */
 export function SetupPage({
@@ -17,7 +17,7 @@ export function SetupPage({
   children,
   footer,
 }: {
-  step: 0 | 1 | 2 | 3 | 4 | 5;
+  step?: 4 | 5;
   title: string;
   description?: ReactNode;
   children?: ReactNode;
@@ -26,7 +26,7 @@ export function SetupPage({
   return (
     <ShellPage breadcrumb={[{ label: "AI Agent" }, { label: "Set up" }, { label: title }]} className="space-y-8 pb-7">
       <section>
-        {step > 0 && <div className="text-xs font-medium text-gray-400">Step {step} of {setupSteps.length}</div>}
+        {step && <div className="text-xs font-medium text-gray-400">{stepCounter(step)}</div>}
         <h1 className="text-2xl font-medium">{title}</h1>
         {description && <div className="text-sm text-gray-500 mt-2">{description}</div>}
       </section>
@@ -48,28 +48,31 @@ export function BackLink({ to }: { to: string }) {
 }
 
 /**
- * Gradient "Continue" to the next step. `onClick` runs before the link navigates (mark the step
- * done, save the form). Disabled, it renders a dimmed button that does nothing.
+ * "Continue" to the next step: the gradient button on a page, the inbox onboarding's dark one in the
+ * setup modal. `onClick` runs before the link navigates (mark the step done, save the form).
+ * Disabled, it renders a dimmed button that does nothing.
  */
 export function ContinueButton({
   to,
   disabled,
   onClick,
+  variant = "ai",
   children = "Continue",
 }: {
   to: string;
   disabled?: boolean;
   onClick?: () => void;
+  variant?: "ai" | "default";
   children?: ReactNode;
 }) {
   if (disabled)
     return (
-      <button type="button" disabled className={cn(buttonClass("ai"), "opacity-50 pointer-events-none")}>
+      <button type="button" disabled className={cn(buttonClass(variant), "opacity-50 pointer-events-none")}>
         {children}
       </button>
     );
   return (
-    <Link to={to} onClick={onClick} className={buttonClass("ai")}>
+    <Link to={to} onClick={onClick} className={buttonClass(variant)}>
       {children}
     </Link>
   );

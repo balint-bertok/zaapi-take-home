@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { DialogOverlay } from "@/components/ui/dialog";
 import { cn } from "@/lib/cn";
 
-// The frame of the first-visit inbox modals, shared with the guided setup's modal: markup and
+// The frame of the first-visit inbox modals (auth onboarding) and the guided setup's modal: markup and
 // classes from the saved tickets pages.
 
 /** The inbox modals' field label. */

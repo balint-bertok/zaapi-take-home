@@ -1,37 +1,37 @@
-import { useState, type ReactNode } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
-import { buttonClass } from "@/components/ui/button";
-import { cn } from "@/lib/cn";
+import { useState, type ComponentProps, type ReactNode } from "react";
+import { useLocation, useNavigate } from "react-router";
+import { ModalTour, StepCard } from "@/components/ModalTour";
 import { updateDemo, useDemo } from "@/store/store";
-import { ModalTour, StepCard } from "../auth/onboarding/ModalTour";
 import { ChoiceCard } from "../ai/AddScenarioSheet";
 import { templates } from "../ai/scenarioTemplates";
-import { personaSuggestion, policies, setupSteps, skipConsequence, type Language } from "./content";
+import { personaSuggestion, policies, skipConsequence, stepCounter, type Language } from "./content";
 import { ChannelRow, StepsAhead } from "./Intro";
 import { KnowledgeForm, type Answers } from "./KnowledgeForm";
 import { PersonaForm, type Persona } from "./PersonaForm";
 import { saveKnowledge, savePersona, saveScenarios, skipScenarios } from "./save";
-import { BackLink } from "./SetupPage";
+import { BackLink, ContinueButton } from "./SetupPage";
 
 // The setup's first four screens, in the inbox onboarding's modal frame, over the setup page.
 // Copy is not from the catalog (see content.ts).
 
 const personaPath = "/ai/setup/persona";
 const filledPath = "/ai/setup/persona/filled";
+const scenariosPath = "/ai/setup/scenarios";
 const knowledgePath = "/ai/setup/knowledge";
 const knowledgeFilledPath = "/ai/setup/knowledge/filled";
-const screens: Record<string, "welcome" | "persona" | "scenarios" | "knowledge"> = {
-  "/ai/setup": "welcome",
-  [personaPath]: "persona",
-  [filledPath]: "persona",
-  "/ai/setup/scenarios": "scenarios",
-  [knowledgePath]: "knowledge",
-  [knowledgeFilledPath]: "knowledge",
+
+/** Each modal URL's screen, and the step number under the card (none on the welcome). */
+const screens: Record<string, { step?: number; body: () => ReactNode }> = {
+  "/ai/setup": { body: () => <WelcomeStep /> },
+  [personaPath]: { step: 1, body: () => <PersonaStep filled={false} /> },
+  [filledPath]: { step: 1, body: () => <PersonaStep filled /> },
+  [scenariosPath]: { step: 2, body: () => <ScenariosStep /> },
+  [knowledgePath]: { step: 3, body: () => <KnowledgeStep filled={false} /> },
+  [knowledgeFilledPath]: { step: 3, body: () => <KnowledgeStep filled /> },
 };
 
 const footer = "border-t bg-gray-50 px-6 py-3 flex justify-between items-center gap-4";
 const sectionTitle = "text-base font-medium text-gray-800";
-const counter = (step: number) => `Step ${step} of ${setupSteps.length}`;
 
 // The screens open with the card itself focused: Radix would focus the first field, and focusing
 // a persona field fills the form in.
@@ -40,37 +40,21 @@ const focusCard = (e: Event) => {
   (e.target as HTMLElement).focus();
 };
 
+/** The modal's card: one width for every screen, opened with the card focused. */
+function SetupCard(props: Omit<ComponentProps<typeof StepCard>, "width" | "onOpenAutoFocus">) {
+  return <StepCard width="w-[668px]" onOpenAutoFocus={focusCard} {...props} />;
+}
+
 /**
  * Shown on the welcome, persona, scenarios and knowledge URLs; on the welcome alone, "Do it later" keeps it
  * closed. Mounted once by SetupShell, so it survives moving between its screens.
  */
-export function SetupModal() {
+export default function SetupModal() {
   const { pathname } = useLocation();
   const dismissed = useDemo((s) => s.setupModalDismissed);
   const screen = screens[pathname];
-  if (!screen || (screen === "welcome" && dismissed)) return null;
-  if (screen === "welcome") return (
-      <ModalTour>
-        <WelcomeStep />
-      </ModalTour>
-    );
-  if (screen === "persona")
-    return (
-      <ModalTour counter={counter(1)}>
-        <PersonaStep filled={pathname === filledPath} />
-      </ModalTour>
-    );
-  if (screen === "scenarios")
-    return (
-      <ModalTour counter={counter(2)}>
-        <ScenariosStep />
-      </ModalTour>
-    );
-  return (
-    <ModalTour counter={counter(3)}>
-      <KnowledgeStep filled={pathname === knowledgeFilledPath} />
-    </ModalTour>
-  );
+  if (!screen || (!screen.step && dismissed)) return null;
+  return <ModalTour counter={screen.step ? stepCounter(screen.step) : undefined}>{screen.body()}</ModalTour>;
 }
 
 /**
@@ -102,28 +86,11 @@ function LaterButton() {
   );
 }
 
-/** The inbox onboarding's dark Continue as a link; disabled, a dimmed button that does nothing. */
-function NextLink({ to, disabled, onClick, children }: { to: string; disabled?: boolean; onClick?: () => void; children: ReactNode }) {
-  if (disabled)
-    return (
-      <button type="button" disabled className={cn(buttonClass("default"), "opacity-50 pointer-events-none")}>
-        {children}
-      </button>
-    );
-  return (
-    <Link to={to} onClick={onClick} className={buttonClass("default")}>
-      {children}
-    </Link>
-  );
-}
-
 function WelcomeStep() {
   return (
-    <StepCard
-      width="w-[668px]"
+    <SetupCard
       title="Set up your first AI Agent"
       subtitle="Five short steps, then your agent answers customers on one channel."
-      onOpenAutoFocus={focusCard}
     >
       <div className="px-6 py-5 space-y-5 text-sm">
         <div className="space-y-3">
@@ -137,9 +104,9 @@ function WelcomeStep() {
       </div>
       <div className={footer}>
         <LaterButton />
-        <NextLink to={personaPath}>Start</NextLink>
+        <ContinueButton variant="default" to={personaPath}>Start</ContinueButton>
       </div>
-    </StepCard>
+    </SetupCard>
   );
 }
 
@@ -159,18 +126,16 @@ function PersonaStep({ filled }: { filled: boolean }) {
   const fill = (patch?: Partial<Persona>) => navigate(filledPath, { state: patch?.language ? { language: patch.language } : undefined });
   const name = persona.name.trim();
   return (
-    <StepCard
-      width="w-[668px]"
+    <SetupCard
       title="Persona"
       subtitle="Name your agent and decide how it sounds. Language defaults to what your customers write in."
-      onOpenAutoFocus={focusCard}
     >
       <div className="px-6 py-5">
-        {filled ? (
-          <PersonaForm compact value={persona} onChange={(patch) => setPersona((p) => ({ ...p, ...patch }))} />
-        ) : (
-          <PersonaForm compact value={empty} onChange={fill} onFocus={() => fill()} />
-        )}
+        <PersonaForm
+          value={filled ? persona : empty}
+          onChange={filled ? (patch) => setPersona((p) => ({ ...p, ...patch })) : fill}
+          onFocus={filled ? undefined : () => fill()}
+        />
       </div>
       <div className={footer}>
         <div className="flex items-center gap-4">
@@ -178,11 +143,11 @@ function PersonaStep({ filled }: { filled: boolean }) {
           <BackLink to="/ai/setup" />
           <LaterButton />
         </div>
-        <NextLink to="/ai/setup/scenarios" disabled={!filled || !name} onClick={() => savePersona(persona)}>
+        <ContinueButton variant="default" to={scenariosPath} disabled={!filled || !name} onClick={() => savePersona(persona)}>
           Continue
-        </NextLink>
+        </ContinueButton>
       </div>
-    </StepCard>
+    </SetupCard>
   );
 }
 
@@ -202,11 +167,9 @@ function ScenariosStep() {
     navigate(knowledgePath);
   };
   return (
-    <StepCard
-      width="w-[668px]"
+    <SetupCard
       title="Scenarios"
       subtitle="Pick what your agent should handle. Each one comes with ready-made steps you can edit later."
-      onOpenAutoFocus={focusCard}
     >
       <div className="px-6 py-5 space-y-4">
         <div className="grid grid-cols-3 gap-4">
@@ -232,11 +195,11 @@ function ScenariosStep() {
             </button>
           )}
         </div>
-        <NextLink to={knowledgePath} disabled={!picked.length} onClick={() => saveScenarios(picked)}>
+        <ContinueButton variant="default" to={knowledgePath} disabled={!picked.length} onClick={() => saveScenarios(picked)}>
           Continue to knowledge
-        </NextLink>
+        </ContinueButton>
       </div>
-    </StepCard>
+    </SetupCard>
   );
 }
 
@@ -253,28 +216,26 @@ function KnowledgeStep({ filled }: { filled: boolean }) {
   const [answers, setAnswers] = useFilledState(filled, () => suggestedAnswers);
   const answered = policies.some((p) => answers[p.key].trim() !== "");
   return (
-    <StepCard
-      width="w-[668px]"
+    <SetupCard
       title="Knowledge"
       subtitle="Answer the policies your scenarios need. Short answers are fine; the agent fills in the wording."
-      onOpenAutoFocus={focusCard}
     >
       <div className="px-6 py-5">
-        {filled ? (
-          <KnowledgeForm answers={answers} onChange={(key, value) => setAnswers((a) => ({ ...a, [key]: value }))} />
-        ) : (
-          <KnowledgeForm answers={noAnswers} onFocus={() => navigate(knowledgeFilledPath)} />
-        )}
+        <KnowledgeForm
+          answers={filled ? answers : noAnswers}
+          onChange={(key, value) => filled && setAnswers((a) => ({ ...a, [key]: value }))}
+          onFocus={filled ? undefined : () => navigate(knowledgeFilledPath)}
+        />
       </div>
       <div className={footer}>
         <div className="flex items-center gap-4">
-          <BackLink to="/ai/setup/scenarios" />
+          <BackLink to={scenariosPath} />
           <LaterButton />
         </div>
-        <NextLink to="/ai/setup/test" disabled={!filled || !answered} onClick={() => saveKnowledge(answers)}>
+        <ContinueButton variant="default" to="/ai/setup/test" disabled={!filled || !answered} onClick={() => saveKnowledge(answers)}>
           Continue to test
-        </NextLink>
+        </ContinueButton>
       </div>
-    </StepCard>
+    </SetupCard>
   );
 }
