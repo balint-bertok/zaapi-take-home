@@ -1,19 +1,29 @@
-// Stub from the guided-setup scaffold; the persona page agent replaces it.
+import { useNavigate } from "react-router";
+import { PersonaForm, type Persona } from "./PersonaForm";
 import { BackLink, ContinueButton, SetupPage } from "./SetupPage";
 
+const filled = "/ai/setup/persona/filled";
+const empty: Persona = { name: "", style: "", guidelines: "", language: null };
+
+/** Step 1, nothing entered yet. */
 export default function PersonaPage() {
+  const navigate = useNavigate();
+  // The demo fills the form in for the viewer rather than making them type: touching any field
+  // or language card moves to the filled page.
+  const fill = () => navigate(filled);
   return (
     <SetupPage
       step={1}
       title="Persona"
+      description="Name your agent and decide how it sounds. Language defaults to what your customers write in."
       footer={
         <>
           <BackLink to="/ai/setup" />
-          <ContinueButton to="/ai/setup/scenarios" />
+          <ContinueButton to={filled} disabled />
         </>
       }
     >
-      <p className="text-sm text-gray-500">Coming in this PR.</p>
+      <PersonaForm value={empty} onChange={fill} onFocus={fill} />
     </SetupPage>
   );
 }
