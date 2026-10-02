@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/cn";
 import { useDemo } from "@/store/store";
 import { CenteredAuthPage } from "./AuthChrome";
+import { demoCredentials } from "./demoCredentials";
 import { FieldError, Label, PasswordInput, PhoneInput } from "./fields";
 
 type Method = "email" | "phone";
@@ -82,7 +83,7 @@ export default function LoginPage() {
               type="email"
               id="loginEmail"
               autoComplete="email"
-              defaultValue={registeredEmail}
+              defaultValue={registeredEmail || demoCredentials.email}
               aria-invalid={!!errors.id || undefined}
               className="mt-2"
             />
@@ -99,6 +100,7 @@ export default function LoginPage() {
             <PasswordInput
               id="password"
               autoComplete="current-password"
+              defaultValue={demoCredentials.password}
               aria-invalid={!!errors.password || undefined}
             />
             {errors.password && <FieldError>{errors.password}</FieldError>}
