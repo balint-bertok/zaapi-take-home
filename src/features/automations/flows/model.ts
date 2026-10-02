@@ -43,13 +43,19 @@ const nameTime = (d: Date) => `${nameDate(d)}, ${nameClock(d)}`;
 /** "01 Oct 2026 12:37", as in the version history and the list's last-updated column. */
 export const versionTime = (iso: string) => `${versionDate(new Date(iso))} ${versionClock(new Date(iso))}`;
 
+// A new flow is named after its template, as on app.zaapi.com; a custom flow after the builder.
+const prefix: Record<BuilderTemplate, string> = {
+  custom: "Flow Builder",
+  "ai-handles-all-new-tickets": "AI handles all new tickets",
+};
+
 /** Adds a draft flow from a template to the store and returns its id. */
 export function createFlow(template: BuilderTemplate, user: string): string {
   const now = new Date();
   const at = now.toISOString();
   const flow: Flow = {
     id: `flow-${crypto.randomUUID()}`,
-    name: `Flow Builder - ${nameTime(now)} - ${user}`,
+    name: `${prefix[template]} - ${nameTime(now)} - ${user}`,
     status: "draft",
     enabled: false,
     createdBy: user,

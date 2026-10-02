@@ -32,7 +32,8 @@ export default function LoginPage() {
     const next: Errors = {};
     if (!filled(method === "email" ? "#loginEmail" : "#loginPhone"))
       next.id = method === "email" ? "Please enter your email" : "Please enter your phone number";
-    if (!filled("#password")) next.password = "Please enter your password";
+    // The phone tab sends a one-time code instead of asking for a password.
+    if (method === "email" && !filled("#password")) next.password = "Please enter your password";
     setErrors(next);
     if (!next.id && !next.password) navigate("/tickets");
   }
@@ -68,8 +69,12 @@ export default function LoginPage() {
           </button>
         ))}
       </div>
-      <form noValidate onSubmit={submit} className="flex flex-col space-y-4 text-start">
-        <div>
+      <form
+        noValidate
+        onSubmit={submit}
+        className={cn("flex flex-col text-start", method === "email" ? "space-y-4" : "space-y-8")}
+      >
+        <div className={cn(method === "phone" && "mt-2")}>
           {/* Both stay mounted, the other one hidden, so switching tabs keeps what was typed. */}
           <div hidden={method !== "email"}>
             <Label htmlFor="loginEmail">Email</Label>
@@ -88,7 +93,7 @@ export default function LoginPage() {
           </div>
           {errors.id && <FieldError>{errors.id}</FieldError>}
         </div>
-        <div>
+        <div hidden={method !== "email"}>
           <div>
             <Label htmlFor="password">Password</Label>
             <PasswordInput
@@ -102,9 +107,16 @@ export default function LoginPage() {
             Forgot your password? <Inert className="text-electric-green-600 hover:underline">Reset password</Inert>
           </p>
         </div>
-        <Button type="submit" className="w-full mt-6!">
-          Log in
-        </Button>
+        {method === "email" ? (
+          <Button type="submit" className="w-full mt-6!">
+            Log in
+          </Button>
+        ) : (
+          // The code-entry step was not captured; like "Log in", a filled form signs in.
+          <Button type="submit" className="w-full">
+            Send OTP via message
+          </Button>
+        )}
       </form>
     </CenteredAuthPage>
   );

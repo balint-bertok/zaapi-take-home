@@ -71,11 +71,14 @@ function NodeShell({ accent, tile, title, description, start, children }: ShellP
       {children}
       <div className="cursor-default absolute flex justify-center items-center -top-12 pb-4 w-full opacity-0 pointer-events-none group-hover/node:opacity-100 group-hover/node:pointer-events-auto transition-opacity duration-150">
         <div className="w-fit border bg-white p-1 border-gray-200 rounded-lg flex justify-center items-center">
-          <Inert aria-label="Duplicate" className={cn(buttonClass("ghost"), "size-8 rounded-sm text-gray-600")}>
-            <Icon name="clone" className="size-4" />
+          <Inert aria-label="Duplicate" className={cn(buttonClass("ghost", "icon"), "size-8 hover:opacity-100 rounded-sm text-gray-600")}>
+            <Icon name="clone" variant="far" className="size-4" />
           </Inert>
-          <Inert aria-label="Delete" className={cn(buttonClass("ghost"), "size-8 rounded-sm text-gray-600 hover:text-error-600")}>
-            <Icon name="trash" className="size-4" />
+          <Inert
+            aria-label="Delete"
+            className={cn(buttonClass("ghost", "icon"), "group/delete size-8 hover:bg-error-100 hover:opacity-100 rounded-sm text-gray-600")}
+          >
+            <Icon name="trash" variant="far" className="size-4 group-hover/delete:text-error-600" />
           </Inert>
         </div>
       </div>
@@ -130,7 +133,9 @@ export function MessageReceivedNode({ id, data }: NodeProps<CanvasNode>) {
           <PopoverTrigger className="w-full p-2 rounded-lg border border-gray-200 bg-gray-50 flex items-center gap-4 nodrag nopan cursor-pointer">
             <div className="flex">
               <div className="rounded-full border border-white -mr-2">
-                <img alt="widget icon" src={asset("images/channels/chat-widget.svg")} className="size-5" />
+                <div className="relative size-[20px]">
+                  <img alt="widget icon" src={asset("images/channels/chat-widget.svg")} className="size-[20px]" />
+                </div>
               </div>
             </div>
             <span className="text-gray-400">

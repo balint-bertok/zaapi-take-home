@@ -1,7 +1,7 @@
 import { cn } from "@/lib/cn";
 
-/** The pill from the saved builder header ("Draft"); the green variant is the app's success pill. */
-export function StatusBadge({ status }: { status: "draft" | "published" }) {
+/** The pill from the saved builder header ("Draft"); the green variant is the app's success pill. The list labels it "Active". */
+export function StatusBadge({ status, label }: { status: "draft" | "published"; label?: string }) {
   return (
     <div
       className={cn(
@@ -9,7 +9,7 @@ export function StatusBadge({ status }: { status: "draft" | "published" }) {
         status === "published" ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-500",
       )}
     >
-      {status === "published" ? "Published" : "Draft"}
+      {label ?? (status === "published" ? "Published" : "Draft")}
     </div>
   );
 }

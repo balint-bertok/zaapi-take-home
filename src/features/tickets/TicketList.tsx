@@ -6,7 +6,7 @@ import { cn } from "@/lib/cn";
 import { useDemo } from "@/store/store";
 import { closeTickets } from "./actions";
 import { AssignDialog } from "./AssignDialog";
-import { ContactAvatar, UserAvatar } from "./avatars";
+import { ContactAvatar, UnassignedAvatar, UserAvatar } from "./avatars";
 import { Checkbox } from "./Checkbox";
 import type { Ticket } from "./fixtures";
 import type { Inbox } from "./inbox";
@@ -48,54 +48,59 @@ export function TicketList({
               <span className="text-base font-semibold truncate p-1 py-0.5">
                 {inbox === "closed" ? "Closed" : "All tickets"}
               </span>
-              <div className="pl-1">
-                <Inert className={cn(iconButton, "size-7")}>
-                  <Icon name="ellipsis-vertical" className="h-4 w-4" />
-                </Inert>
-              </div>
+              {/* The Closed view has no list menu and no bulk actions. */}
+              {inbox !== "closed" && (
+                <div className="pl-1">
+                  <Inert className={cn(iconButton, "size-7")}>
+                    <Icon name="ellipsis-vertical" className="h-4 w-4" />
+                  </Inert>
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-x-1 ml-auto">
-              <Inert className={iconButton} aria-label="Sort from newest to oldest">
+              <Inert className={cn(iconButton, "size-9")} aria-label="Sort from newest to oldest">
                 <Icon name="arrow-up-arrow-down" className="size-4! text-gray-600" />
               </Inert>
-              <Inert className={iconButton} aria-label="Filters">
+              <Inert className={cn(iconButton, "size-9")} aria-label="Filters">
                 <Icon name="bars-filter" className="size-4!" />
               </Inert>
             </div>
           </div>
         </div>
         <div className="flex items-center justify-between pr-4 pl-4.5 gap-1 pt-1 pb-1.5">
-          <div className="flex gap-2 items-center">
-            <Checkbox
-              aria-label="Select All"
-              checked={allChecked}
-              onCheckedChange={() => setChecked(allChecked ? [] : shown.map((t) => t.id))}
-              className="size-4.5 mr-1"
-            />
-            <button
-              type="button"
-              aria-label="Assign ticket"
-              className={cn(iconButton, "size-7")}
-              disabled={live.length === 0}
-              onClick={() => setAssigning(live)}
-            >
-              <Icon name="user-plus" className="size-4" />
-            </button>
-            <div className="-ml-0.5">
+          {inbox !== "closed" && (
+            <div className="flex gap-2 items-center">
+              <Checkbox
+                aria-label="Select All"
+                checked={allChecked}
+                onCheckedChange={() => setChecked(allChecked ? [] : shown.map((t) => t.id))}
+                className="size-4.5 mr-1"
+              />
               <button
                 type="button"
-                aria-label="Close tickets"
+                aria-label="Assign ticket"
                 className={cn(iconButton, "size-7")}
-                disabled={live.length === 0 || inbox === "closed"}
-                onClick={() => {
-                  closeTickets(live, "Tickets closed");
-                  setChecked([]);
-                }}
+                disabled={live.length === 0}
+                onClick={() => setAssigning(live)}
               >
-                <Icon name="check" className="size-4" />
+                <Icon name="user-plus" className="size-4" />
               </button>
+              <div className="-ml-0.5">
+                <button
+                  type="button"
+                  aria-label="Close tickets"
+                  className={cn(iconButton, "size-7")}
+                  disabled={live.length === 0}
+                  onClick={() => {
+                    closeTickets(live, "Tickets closed");
+                    setChecked([]);
+                  }}
+                >
+                  <Icon name="check" className="size-4" />
+                </button>
+              </div>
             </div>
-          </div>
+          )}
           <div className="flex items-center gap-2 ml-auto">
             <label htmlFor="follow-up-filter" className="text-[11px] font-medium text-gray-400">
               Follow Up
@@ -113,7 +118,18 @@ export function TicketList({
 
       <section aria-label="Tickets" className="bg-white overflow-y-auto h-full p-1.5">
         {shown.length === 0 ? (
-          <p className="px-4 py-10 text-center text-sm text-gray-400">{emptyText(inbox, followOnly)}</p>
+          <div className="h-full">
+            <div className="flex h-full items-center justify-center">
+              <div className="flex h-full flex-col items-center justify-center gap-2">
+                <Icon
+                  name={inbox === "closed" && !followOnly ? "circle-check" : "face-party"}
+                  variant="far"
+                  className="size-9! text-gray-200"
+                />
+                <div className="text-center text-gray-300 mt-4 text-sm ml-2">{emptyText(inbox, followOnly)}</div>
+              </div>
+            </div>
+          </div>
         ) : (
           shown.map((t) => (
             <TicketCard
@@ -201,13 +217,7 @@ function TicketCard({
           }}
           className="flex items-center bg-white rounded-full px-2 h-7 max-w-36 border border-gray-200 hover:bg-gray-50"
         >
-          {assignee ? (
-            <UserAvatar name={assignee.name} />
-          ) : (
-            <span className="relative flex items-center justify-center rounded-full border border-gray-300 bg-gray-100 shrink-0 size-4">
-              <Icon name="user" variant="fas" className="text-gray-400 size-2.5!" />
-            </span>
-          )}
+          {assignee ? <UserAvatar name={assignee.name} /> : <UnassignedAvatar />}
           <span className="ml-2 text-sm text-gray-600 truncate">{assignee ? assignee.name : "Unassigned"}</span>
         </button>
       </div>

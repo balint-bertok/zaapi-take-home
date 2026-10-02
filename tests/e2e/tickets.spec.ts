@@ -11,7 +11,7 @@ test("tickets inbox: reply, assign, close and reopen", async ({ page }) => {
   await page.getByText("2-10").click();
   await page.getByRole("button", { name: "Continue" }).click();
   await page.getByRole("button", { name: "Do it later and explore the inbox" }).click();
-  await expect(page.getByText("Ready to get started?")).toBeVisible();
+  await expect(page.getByText("Select a customer to open the ticket")).toBeVisible();
   const list = page.getByRole("region", { name: "Tickets" });
   await list.getByText("Visitor 01 Oct 2026, 11:18").click();
   await expect(page).toHaveURL(/inbox=all&ticketId=ticket-1/);

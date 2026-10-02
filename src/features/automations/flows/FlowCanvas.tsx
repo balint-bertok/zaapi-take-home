@@ -31,8 +31,9 @@ const nodeTypes = {
   chat_assign: AssignToNode,
 };
 
-// The saved builder page's viewport at 1440 wide: the "94%" in the zoom control.
-const initialViewport = { x: 143, y: 144.144, zoom: 0.935099 };
+// The live builder fits the graph on open with this padding (it reproduces the saved page's
+// "94%" at 1440 wide and the live "87%" at a smaller window); one node is not blown up past 100%.
+const fitViewOptions = { padding: 0.25, maxZoom: 1 };
 const marker = { type: MarkerType.Arrow, width: 24, height: 24 };
 const proOptions = { hideAttribution: true };
 
@@ -99,7 +100,8 @@ export function FlowCanvas({ flow }: { flow: Flow }) {
         dragStart.current = null;
         persist(Object.fromEntries(dragged.map((n) => [n.id, n.position])));
       }}
-      defaultViewport={initialViewport}
+      fitView
+      fitViewOptions={fitViewOptions}
       deleteKeyCode={null}
       proOptions={proOptions}
     >
@@ -117,7 +119,7 @@ export function FlowCanvas({ flow }: { flow: Flow }) {
   );
 }
 
-const toolButton = cn(buttonClass("ghost"), "size-8 hover:opacity-100 hover:bg-gray-100");
+const toolButton = cn(buttonClass("ghost", "icon"), "size-8 hover:opacity-100 hover:bg-gray-100");
 
 function ToolButton({ icon, label, onClick, disabled }: { icon: IconName; label: string; onClick?: () => void; disabled?: boolean }) {
   const glyph = <Icon name={icon} variant="fal" className="size-4 text-gray-600" />;
@@ -133,14 +135,14 @@ function ToolButton({ icon, label, onClick, disabled }: { icon: IconName; label:
 }
 
 function Toolbar(props: { canUndo: boolean; canRedo: boolean; onUndo: () => void; onRedo: () => void }) {
-  const { zoomIn, zoomOut, setViewport } = useReactFlow();
+  const { zoomIn, zoomOut, fitView } = useReactFlow();
   const zoom = useStore((s) => s.transform[2]);
   return (
     <Panel position="bottom-center" className="bg-white p-2 rounded-xl border border-gray-200 shadow-xs flex gap-2">
       <ToolButton icon="arrow-turn-left" label="Undo" onClick={props.onUndo} disabled={!props.canUndo} />
       <ToolButton icon="arrow-turn-right" label="Redo" onClick={props.onRedo} disabled={!props.canRedo} />
       <div className="border-l border-gray-200" />
-      <ToolButton icon="flag-swallowtail" label="Go to start" onClick={() => setViewport(initialViewport, { duration: 300 })} />
+      <ToolButton icon="flag-swallowtail" label="Go to start" onClick={() => void fitView({ ...fitViewOptions, duration: 300 })} />
       <ToolButton icon="square-dashed" label="Select" />
       <ToolButton icon="magnifying-glass" label="Search" />
       <div className="flex">

@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Inert } from "@/components/Inert";
 import { ShellPage } from "@/shell/ShellPage";
+import { Pagination } from "@/components/Pagination";
 import { useDemo } from "@/store/store";
 import { AddScenarioSheet } from "./AddScenarioSheet";
 import type { Scenario } from "./fixtures";
 import { byName, handlingLabel, integrationsLabel } from "./format";
-import { AddSheetButton, DataTable, FilterChip, ListHeader, Pagination, PersonCell, SearchBox, type Column } from "./parts";
+import { AddSheetButton, DataTable, FilterChip, ListHeader, PersonCell, RowSearchBox, type Column } from "./parts";
 import { statusColumn } from "./statusColumn";
 
 const columns: Column<Scenario>[] = [
@@ -35,15 +36,15 @@ export default function ScenarioHandlingPage() {
           </p>
         </ListHeader>
         <div className="flex gap-2 overflow-auto pt-2">
-          <SearchBox value={query} onChange={setQuery} placeholder="Search scenario name" className="h-10 w-[320px] min-w-[320px]" />
+          <RowSearchBox value={query} onChange={setQuery} placeholder="Search scenario name" />
           <FilterChip icon="rotate-exclamation" label="How to handle" />
-          <FilterChip icon="link" label="Integrations" iconClassName="size-5" />
+          <FilterChip icon="link" label="Integrations" iconClassName="size-5" integrations />
           <FilterChip icon="user" label="Created by" />
         </div>
         <div>
           {/* Newest first, as the "Last updated" sort arrow says: rows are stored in creation order. */}
           <DataTable columns={columns} rows={byName(scenarios, query).reverse()} sticky />
-          <Pagination className="mt-5" />
+          <Pagination count={scenarios.length} className="mt-5" />
         </div>
       </section>
     </ShellPage>

@@ -14,6 +14,7 @@ A take-home assignment. Front-end only: no backend, no database, no cloud or VPS
 | How does the system work, what must always hold, what was rejected? | `docs/architecture.md` |
 | Which test suite guards which invariant? | `docs/testing.md` |
 | What was measured, when, by what? | `docs/measurements.md` |
+| Where does the demo differ from the live app, and why? | `docs/fidelity.md` |
 | Why was X decided? | `docs/decisions/` (index in `docs/decisions/README.md`) |
 | Which external services and safe identifiers? | `docs/third-parties.md` |
 | How to operate, rotate secrets, recover? | `RUNBOOK.md` only if something ever needs operating; none expected (user decision, 2026-10-01) |

@@ -2,6 +2,8 @@
 // the saved Knowledge Source, Scenario Handling and Personality pages.
 import { Fragment, useState, type ReactNode } from "react";
 import { Inert } from "@/components/Inert";
+import { Person } from "@/components/Person";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Button, buttonClass } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/menu";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
@@ -46,10 +48,40 @@ export function SearchBox({
   );
 }
 
-/** Dashed filter chip. Its dropdown was never captured, so it renders inert. */
-export function FilterChip({ icon, label, iconClassName = "size-4" }: { icon: IconName; label: string; iconClassName?: string }) {
+/** Scenario Handling's search: a bordered row holding the icon and a bare input (live markup). */
+export function RowSearchBox({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
   return (
-    <Inert className={cn(buttonClass("outline"), "border-dashed rounded-md relative")}>
+    <div className="min-w-[320px] w-[320px] flex items-center gap-2 px-4 h-10 rounded-md border bg-white">
+      <Icon name="magnifying-glass" variant="far" className="size-4 shrink-0 text-gray-500" />
+      <input
+        aria-label={placeholder}
+        placeholder={placeholder}
+        className="text-sm w-full outline-hidden"
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </div>
+  );
+}
+
+/**
+ * Dashed filter chip. Its dropdown was never captured, so it renders inert. The integrations
+ * filter is a different component in the app, with the smaller radius.
+ */
+export function FilterChip({
+  icon,
+  label,
+  iconClassName = "size-4",
+  integrations = false,
+}: {
+  icon: IconName;
+  label: string;
+  iconClassName?: string;
+  integrations?: boolean;
+}) {
+  return (
+    <Inert className={cn(buttonClass("outline"), "border-dashed relative", integrations ? "rounded-md" : "rounded-lg")}>
       <Icon name={icon} className={cn(iconClassName, "text-gray-800")} />
       <div className="font-medium">{label}</div>
     </Inert>
@@ -122,29 +154,12 @@ export function DataTable<T extends { id: string }>({ columns, rows, sticky = fa
   );
 }
 
-/** Pager under every list. The demo never has a second page, so it always reads "No data". */
-export function Pagination({ className = "mt-4" }: { className?: string }) {
-  return (
-    <div className={cn("flex items-center justify-end", className)}>
-      <div className="text-sm text-gray-800 mr-4">
-        <span className="font-medium">No data</span>
-      </div>
-      <Button variant="outline" size="sm" className="mr-2" aria-label="Previous page" disabled>
-        <Icon name="chevron-left" className="size-3 text-gray-500" />
-      </Button>
-      <Button variant="outline" size="sm" className="mr-2" aria-label="Next page" disabled>
-        <Icon name="chevron-right" className="size-3 text-gray-500" />
-      </Button>
-    </div>
-  );
-}
-
-/** Avatar plus name: the Zaapi lightning mark for system rows, the placeholder photo for people. */
+/** Avatar plus name: the Zaapi lightning mark for system rows, the initial on gray for people. */
 export function PersonCell({ name }: { name: string }) {
-  const system = name === "Zaapi System";
+  if (name !== "Zaapi System") return <Person name={name} />;
   return (
     <span className="flex gap-x-2.5 items-center">
-      <img alt={name} width={24} height={24} className="rounded-full size-6" src={asset(system ? "images/favicon.png" : "images/avatar_placeholder.jpeg")} />
+      <img alt={name} width={24} height={24} className="rounded-full size-[24px]" src={asset("images/favicon.png")} />
       <span className="text-sm text-gray-800">{name}</span>
     </span>
   );
@@ -236,6 +251,7 @@ export function RadioDot({ checked }: { checked: boolean }) {
 }
 
 const channelIcon = (channel: string) => asset(`images/channels/${channel}.svg`);
+const channelLabel: Record<string, string> = { "chat-widget": "Chat Widget" };
 
 /** "Select integrations" button with the workspace's channel icons; opens a checklist of integrations. */
 export function IntegrationPicker({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
@@ -247,32 +263,74 @@ export function IntegrationPicker({ value, onChange }: { value: string[]; onChan
         <div className="flex">
           {integrations.map((i) => (
             <div key={i.id} className="rounded-full border border-white -mr-2">
-              <img alt="widget icon" className="size-5" src={channelIcon(i.channel)} />
+              <div className="relative">
+                <img alt="widget icon" className="size-[20px]" src={channelIcon(i.channel)} />
+              </div>
             </div>
           ))}
         </div>
         <span className="ml-2">{value.length ? value.join(", ") : "Select integrations"}</span>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-64 p-1">
-        {integrations.map((i) => {
-          const on = value.includes(i.name);
-          return (
-            <button
-              key={i.id}
-              type="button"
-              role="checkbox"
-              aria-checked={on}
-              onClick={() => toggle(i.name)}
-              className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-gray-100"
-            >
-              <span className={cn("size-4 rounded-[4px] border flex items-center justify-center", on ? "bg-electric-green-500 border-electric-green-500" : "border-gray-300")}>
-                {on && <Icon name="check" className="size-3 text-white" />}
-              </span>
-              <img alt="" className="size-5" src={channelIcon(i.channel)} />
-              <span>{i.name}</span>
-            </button>
-          );
-        })}
+      <PopoverContent align="start" className="w-96 p-4 shadow-md">
+        <div className="bg-white text-sm">
+          <div className="flex flex-col px-4">
+            <h3 className="font-semibold">Integrations</h3>
+            <div className="flex justify-between items-center">
+              <p>{value.length} Integrations Selected</p>
+              <Checkbox className="size-6"
+                label="All integrations"
+                checked={value.length === integrations.length && integrations.length > 0}
+                onCheckedChange={() => onChange(value.length === integrations.length ? [] : integrations.map((i) => i.name))}
+              />
+            </div>
+            <div className="border-b mt-3" />
+          </div>
+          <div className="divide-y *:py-3 *:last:pb-0 max-h-[400px] px-4 overflow-auto">
+            {[...new Set(integrations.map((i) => i.channel))].map((channel) => {
+              const accounts = integrations.filter((i) => i.channel === channel);
+              const all = accounts.every((i) => value.includes(i.name));
+              return (
+                <div key={channel} className="flex flex-col">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex justify-center transition-transform duration-200">
+                        <Icon name="chevron-down" className="w-4 h-4" />
+                      </div>
+                      <div className="relative shrink-0">
+                        <img alt="" className="select-none object-cover size-[20px]" src={channelIcon(channel)} />
+                      </div>
+                      <span className="select-none">{channelLabel[channel] ?? channel}</span>
+                    </div>
+                    <Checkbox className="size-6"
+                      label={channelLabel[channel] ?? channel}
+                      checked={all}
+                      onCheckedChange={() =>
+                        onChange(all ? value.filter((n) => !accounts.some((i) => i.name === n)) : [...new Set([...value, ...accounts.map((i) => i.name)])])
+                      }
+                    />
+                  </div>
+                  <div className="transition-all duration-300 pl-[24px] flex flex-col space-y-3 *:first:mt-3">
+                    {accounts.map((i) => (
+                      <div key={i.id}>
+                        <div className="flex justify-between items-center gap-2">
+                          <div className="flex min-w-0 items-center grow gap-3">
+                            <div className="relative shrink-0">
+                              <img alt="" className="rounded-full object-cover select-none size-[20px]" src={asset("images/default-chat-account.png")} />
+                            </div>
+                            <span className="truncate text-gray-800 min-w-0">{i.name}</span>
+                          </div>
+                          <div className="shrink-0">
+                            <Checkbox className="size-6" label={i.name} checked={value.includes(i.name)} onCheckedChange={() => toggle(i.name)} />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </PopoverContent>
     </Popover>
   );
@@ -288,6 +346,69 @@ export function SheetFooter({ onCancel, submitLabel, disabled, large }: { onCanc
       <Button type="submit" variant="ai" size={large ? "lg" : "default"} disabled={disabled}>
         {submitLabel}
       </Button>
+    </div>
+  );
+}
+
+const toolbar: { icon: IconName; label: string; menu?: boolean }[][] = [
+  [
+    { icon: "rotate-left", label: "Undo" },
+    { icon: "rotate-right", label: "Redo" },
+  ],
+  [
+    { icon: "heading", label: "Heading", menu: true },
+    { icon: "list-ul", label: "List", menu: true },
+    { icon: "block-quote", label: "Blockquote" },
+    { icon: "square-code", label: "Code Block" },
+    { icon: "table", label: "Table", menu: true },
+  ],
+  [
+    { icon: "bold", label: "Bold" },
+    { icon: "italic", label: "Italic" },
+    { icon: "strikethrough", label: "Strikethrough" },
+    { icon: "code", label: "Code" },
+    { icon: "underline", label: "Underline" },
+    { icon: "link", label: "Link" },
+  ],
+];
+
+const editor =
+  "min-h-[200px] w-full px-4 py-3 text-sm text-gray-800 focus:outline-none [&_h2]:my-2 [&_h2]:text-lg [&_h2]:font-bold [&_p]:my-2 [&>*:first-child]:mt-0! [&>*:last-child]:mb-0!";
+
+/**
+ * The app's rich-text editor (tiptap) as captured: toolbar plus a 200px editing area. The demo's
+ * editing area is plain contenteditable; `onText` reports its text.
+ */
+export function RichTextEditor({ label, children, onText }: { label: string; children?: ReactNode; onText?: (text: string) => void }) {
+  return (
+    <div className="flex flex-col rounded-md border border-gray-200 bg-white">
+      {/* Formatting controls render as captured; the demo editor is plain contenteditable. */}
+      <div className="flex shrink-0 items-center gap-0.5 border-b border-gray-200 px-2 py-1">
+        {toolbar.map((group, g) => (
+          <div key={g} className="contents">
+            {g > 0 && <div className="mx-1 h-5 w-px bg-gray-200" />}
+            {group.map((b) => (
+              <Inert key={b.label} aria-label={b.label} className={cn(buttonClass("ghost", "icon"), "text-gray-700", b.menu && "gap-x-0.5 pl-2 pr-1")}>
+                <Icon name={b.icon} variant="fal" className="size-3.5" />
+                {b.menu && <Icon name="caret-down" className="size-2! text-gray-600" />}
+              </Inert>
+            ))}
+          </div>
+        ))}
+      </div>
+      <div className="min-h-0 flex-auto scroll-fade-b overflow-y-auto">
+        <div
+          role="textbox"
+          aria-multiline="true"
+          aria-label={label}
+          contentEditable
+          suppressContentEditableWarning
+          onInput={(e) => onText?.(e.currentTarget.textContent ?? "")}
+          className={editor}
+        >
+          {children ?? <p />}
+        </div>
+      </div>
     </div>
   );
 }

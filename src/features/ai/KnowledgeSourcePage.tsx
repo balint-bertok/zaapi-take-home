@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Inert } from "@/components/Inert";
 import { ShellPage } from "@/shell/ShellPage";
+import { Pagination } from "@/components/Pagination";
 import { useDemo } from "@/store/store";
 import { AddKnowledgeSourceSheet } from "./AddKnowledgeSourceSheet";
 import type { KnowledgeSource, KnowledgeSourceType } from "./fixtures";
 import { byName, integrationsLabel } from "./format";
-import { AddSheetButton, DataTable, FilterChip, ListHeader, Pagination, PersonCell, SearchBox, type Column } from "./parts";
+import { AddSheetButton, DataTable, FilterChip, ListHeader, PersonCell, SearchBox, type Column } from "./parts";
 import { statusColumn } from "./statusColumn";
 
 const STORAGE_LIMIT = 7_500_000;
@@ -76,12 +77,12 @@ export default function KnowledgeSourcePage() {
         <div className="flex gap-2 items-center">
           <SearchBox value={query} onChange={setQuery} />
           <FilterChip icon="file" label="Source type" />
-          <FilterChip icon="link" label="Integrations" iconClassName="size-5" />
+          <FilterChip icon="link" label="Integrations" iconClassName="size-5" integrations />
           <FilterChip icon="user" label="Created by" />
         </div>
         <div>
           <DataTable columns={columns} rows={byName(sources, query)} sticky />
-          <Pagination className="mt-8" />
+          <Pagination count={sources.filter((k) => k.type !== "quickReplies").length} className="mt-8" />
         </div>
       </section>
     </ShellPage>

@@ -62,7 +62,7 @@ export default function BillingPage() {
           <div>
             <h4 className={h4}>Seats</h4>
             <p className={muted}>
-              Number of active users: <span className={strong}>{activeUsers}</span>
+              Seats currently in use: <span className={strong}>{activeUsers}</span>
             </p>
           </div>
           {/* Disabled on a free trial in the real app too. */}

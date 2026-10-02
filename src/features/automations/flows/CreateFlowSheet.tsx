@@ -2,6 +2,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { useState, type ReactNode } from "react";
 import { useNavigate } from "react-router";
 import { Inert } from "@/components/Inert";
+import { SheetFrame } from "@/components/ui/sheet";
 import { Icon } from "@/icons/Icon";
 import { asset } from "@/lib/asset";
 import { cn } from "@/lib/cn";
@@ -19,8 +20,6 @@ const tileBackground = (rgb: string, stop: string) =>
 
 /**
  * The right-hand "Create new flow" sheet. Two templates open the builder; the rest are inert.
- * Built from the Radix parts rather than the shared SheetContent because the saved page's overlay
- * here is `bg-black/50`, not the shared sheet's blurred gray; the content classes are the saved ones.
  */
 export function CreateFlowSheet({ trigger }: { trigger: ReactNode }) {
   const [category, setCategory] = useState<CategoryKey | "all">("all");
@@ -33,9 +32,7 @@ export function CreateFlowSheet({ trigger }: { trigger: ReactNode }) {
   return (
     <DialogPrimitive.Root onOpenChange={() => setCategory("all")}>
       <DialogPrimitive.Trigger asChild>{trigger}</DialogPrimitive.Trigger>
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <DialogPrimitive.Content className="fixed z-50 rounded-lg overflow-hidden shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500 top-3 bottom-3 right-3 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right bg-gray-50 flex flex-col gap-0 p-0 max-w-[990px] w-3/4">
+      <SheetFrame className="max-w-[990px] w-3/4">
           <div className="flex flex-col text-center sm:text-left px-7 py-4 border-b space-y-1">
             <DialogPrimitive.Title className="font-semibold text-gray-800 text-lg">Create new flow</DialogPrimitive.Title>
             <DialogPrimitive.Description className="text-gray-500 text-sm">
@@ -106,8 +103,7 @@ export function CreateFlowSheet({ trigger }: { trigger: ReactNode }) {
             <Icon name="x" className="size-4! m-auto" />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
-        </DialogPrimitive.Content>
-      </DialogPrimitive.Portal>
+      </SheetFrame>
     </DialogPrimitive.Root>
   );
 }

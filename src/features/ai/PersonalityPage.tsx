@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { ShellPage } from "@/shell/ShellPage";
+import { Pagination } from "@/components/Pagination";
 import { useDemo } from "@/store/store";
 import { AddPersonalitySheet } from "./AddPersonalitySheet";
 import type { Personality } from "./fixtures";
 import { byName } from "./format";
-import { AddSheetButton, DataTable, FilterChip, ListHeader, Pagination, PersonCell, SearchBox, type Column } from "./parts";
+import { AddSheetButton, DataTable, FilterChip, ListHeader, PersonCell, SearchBox, type Column } from "./parts";
 import { statusColumn } from "./statusColumn";
 
 const columns: Column<Personality>[] = [
@@ -36,12 +37,12 @@ export default function PersonalityPage() {
         </ListHeader>
         <div className="flex gap-2 items-center">
           <SearchBox value={query} onChange={setQuery} />
-          <FilterChip icon="link" label="Integrations" iconClassName="size-5" />
+          <FilterChip icon="link" label="Integrations" iconClassName="size-5" integrations />
           <FilterChip icon="user" label="Created by" />
         </div>
         <div>
           <DataTable columns={columns} rows={byName(personalities, query)} />
-          <Pagination className="mt-8" />
+          <Pagination count={personalities.length} className="mt-8" />
         </div>
       </section>
     </ShellPage>

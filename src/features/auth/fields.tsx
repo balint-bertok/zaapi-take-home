@@ -2,8 +2,8 @@ import { useState, type ComponentProps } from "react";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/menu";
 import { Icon } from "@/icons/Icon";
-import { asset } from "@/lib/asset";
 import { cn } from "@/lib/cn";
+import { Flag } from "./flags";
 
 // Form pieces shared by the register and login pages, class lists from the saved pages.
 
@@ -46,18 +46,18 @@ export function PasswordInput({ className, ...props }: ComponentProps<"input">) 
   );
 }
 
-// The first entries of the saved page's country list, which the real picker pins to the top.
+// The countries the real picker pins to the top of its (scrolling) list, in its order.
 const countries = [
-  ["Thailand", "+66"],
-  ["Singapore", "+65"],
-  ["Philippines", "+63"],
-  ["Malaysia", "+60"],
-  ["United States", "+1"],
-  ["Taiwan", "+886"],
-  ["China", "+86"],
-  ["Hong Kong", "+852"],
-  ["Indonesia", "+62"],
-  ["India", "+91"],
+  ["Thailand", "TH", "+66"],
+  ["Singapore", "SG", "+65"],
+  ["Philippines", "PH", "+63"],
+  ["Malaysia", "MY", "+60"],
+  ["United States", "US", "+1"],
+  ["Taiwan", "TW", "+886"],
+  ["China", "CN", "+86"],
+  ["Hong Kong", "HK", "+852"],
+  ["Indonesia", "ID", "+62"],
+  ["India", "IN", "+91"],
 ] as const;
 
 /** Country code picker plus number. Thailand is fixed; the list opens but choosing is inert. */
@@ -70,16 +70,24 @@ export function PhoneInput(props: ComponentProps<"input">) {
           className="flex h-10 items-center justify-between rounded-md border px-3 py-2 text-sm data-[state=open]:border-gray-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-300 w-[140px] bg-white rounded-l-lg rounded-r-none border-r-0"
         >
           <span className="flex items-center w-full space-x-1 text-gray-800 text-sm py-1">
-            <img alt="Thailand" className="h-4 w-4 rounded-full" width="20" src={asset("images/TH.svg")} />
+            <Flag code="TH" name="Thailand" />
             <span className="!ml-2">+66</span>
           </span>
           <Icon name="chevron-down" className="h-4 w-4 text-gray-800! ml-1" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-[220px] p-1">
-          {countries.map(([name, code]) => (
-            <DropdownMenuItem key={name} className="justify-between">
-              <span>{name}</span>
-              <span className="text-gray-500">{code}</span>
+        {/* The live picker is a Radix select: code and flag per row, min-w-32, scrolling list. */}
+        <DropdownMenuContent align="start" sideOffset={0} className="min-w-32 max-h-96 p-0 overflow-y-auto rounded-md">
+          {countries.map(([name, code, dial]) => (
+            <DropdownMenuItem
+              key={code}
+              className="rounded-xs py-1.5 pr-2 pl-3 hover:bg-gray-100 hover:text-gray-800 focus:bg-gray-100"
+            >
+              <span>
+                <div className="flex items-center w-full space-x-1 text-gray-800 text-sm py-1">
+                  <Flag code={code} name={name} />
+                  <div className="!ml-2">{dial}</div>
+                </div>
+              </span>
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>

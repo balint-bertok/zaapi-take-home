@@ -1,6 +1,6 @@
 /**
  * Flow Builder click path: the template gallery creates a draft flow and opens the canvas with the
- * captured four-node graph; publishing it flips the badge and lists it with its switch on, with no
+ * captured four-node graph; publishing it flips the badge and lists it as Active, with no
  * console error on the way (the route walk only sees the builder's no-id redirect).
  */
 import { expect, test } from "@playwright/test";
@@ -32,9 +32,9 @@ test("create a flow from a template, publish it, see it listed", async ({ page }
 
   await page.getByRole("button", { name: "Back" }).click();
   await expect(page).toHaveURL(/\/automations\/flows$/);
-  const row = page.getByRole("row", { name: /Flow Builder - .* - Balint/ });
+  const row = page.getByRole("row", { name: /AI handles all new tickets - .* - Balint/ });
   await expect(row).toBeVisible();
-  await expect(row.getByRole("switch")).toHaveAttribute("aria-checked", "true");
+  await expect(row.getByRole("cell").first()).toHaveText("Active");
   expect(errors).toEqual([]);
 });
 

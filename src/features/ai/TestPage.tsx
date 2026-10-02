@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link } from "react-router";
 import { Inert } from "@/components/Inert";
 import { Button, buttonClass } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/menu";
 import { Textarea } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip } from "@/components/ui/tooltip";
@@ -159,6 +160,7 @@ function Composer({ onSend }: { onSend: (text: string) => void }) {
 export default function TestPage() {
   const [messages, setMessages] = useState<Message[]>(seed);
   const [autoResponse, setAutoResponse] = useState(true);
+  const [picking, setPicking] = useState(false);
   // One timer per customer message awaiting its reply; the AI is "typing" while any is pending.
   const [pending, setPending] = useState(0);
   const typing = pending > 0;
@@ -215,16 +217,14 @@ export default function TestPage() {
 
   return (
     <ShellPage breadcrumb={[{ label: "AI Agent" }, { label: "Test" }]} className="pb-7">
-      {/* Stands in for the app's /images/ai-gradient-bg.png, which was not saved with the page. The app
-          paints it on the scroll container; here it is absolute against the shell's content card (the
-          nearest positioned ancestor), so it stays put while the page scrolls, as the original does. */}
+      {/* The app paints /images/ai-gradient-bg.png (cover, top left) on the scroll container. That
+          file was not saved; this one is a low-resolution resampling of the live image, scaled up
+          the same way. It is absolute against the shell's content card (the nearest positioned
+          ancestor), so it stays put while the page scrolls, as the original does. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(45% 80% at 100% 100%, rgba(30, 209, 187, 0.45) 0%, rgba(60, 180, 220, 0.22) 40%, transparent 100%), radial-gradient(35% 45% at 100% 55%, rgba(94, 64, 225, 0.07) 0%, transparent 100%), radial-gradient(35% 40% at 40% 65%, rgba(30, 209, 187, 0.06) 0%, transparent 100%)",
-        }}
+        className="pointer-events-none absolute inset-0 bg-no-repeat bg-cover bg-left-top"
+        style={{ backgroundImage: `url(${asset("images/ai-gradient-bg.png")})` }}
       />
       {/* Positioned so the page paints above the gradient layer. */}
       <div className="relative space-y-8">
@@ -256,19 +256,41 @@ export default function TestPage() {
         <div className="relative bg-white/70 backdrop-blur-md flex flex-col mx-auto max-w-[990px] h-[720px] rounded-lg border border-gray-100">
           <div className="flex flex-col flex-1 overflow-auto">
             <div className="p-4 flex justify-between">
-              {/* Account picker: one integration exists and its list was never captured. */}
-              <Inert className={cn(buttonClass("outline"), "w-[320px] justify-start")}>
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center">
-                    <div className="relative size-5">
-                      <img alt="Test (Demo)" className="rounded-full object-cover size-5" src={asset("images/default-chat-account.png")} />
-                      <img alt="widget icon" className="absolute -right-1 -bottom-1 size-3" src={asset("images/channels/chat-widget.svg")} />
-                    </div>
-                    <div className="ml-3 font-medium">Test (Demo)</div>
+              {/* Account picker: the workspace's one chat account, already selected. */}
+              <Popover open={picking} onOpenChange={setPicking}>
+                <PopoverTrigger className={cn(buttonClass("outline"), "w-[320px] h-[36px] justify-start")}>
+                  <div className="flex items-center justify-between w-full">
+                    <AccountLabel />
+                    <Icon name="angles-up-down" className="h-4 w-4" />
                   </div>
-                  <Icon name="angles-up-down" className="h-4 w-4" />
-                </div>
-              </Inert>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="rounded-md border bg-white text-gray-800 shadow-md w-[320px] p-0">
+                  <div className="flex h-full w-full flex-col overflow-hidden rounded-md">
+                    <div className="flex items-center border-b px-3">
+                      <Icon name="magnifying-glass" variant="fal" className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                      <input
+                        aria-label="Search"
+                        placeholder="Search"
+                        className="flex w-full rounded-md bg-transparent py-3 text-sm outline-hidden placeholder:text-gray-800 h-[36px]"
+                      />
+                    </div>
+                    <div className="max-h-[300px] overflow-y-auto overflow-x-hidden">
+                      <div className="overflow-hidden p-1 text-gray-800">
+                        <button
+                          type="button"
+                          onClick={() => setPicking(false)}
+                          className="relative w-full cursor-default select-none rounded-md px-2 py-1.5 text-sm outline-hidden hover:bg-gray-100 flex items-center h-[36px]"
+                        >
+                          <div className="flex items-center justify-between w-full">
+                            <AccountLabel bold={false} />
+                            <Icon name="check" className="ml-auto h-4 w-4" />
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
               <div className="flex items-center gap-4">
                 <Tooltip content="If enabled, the AI agent will automatically generate a response when a customer message is sent.">
                   <div className="flex items-center gap-1.5">
@@ -300,5 +322,20 @@ export default function TestPage() {
         </div>
       </div>
     </ShellPage>
+  );
+}
+
+/** The selected chat account: its avatar with the channel badge, and its name. */
+function AccountLabel({ bold = true }: { bold?: boolean }) {
+  return (
+    <div className="flex items-center">
+      <div className="relative">
+        <img alt="Test (Demo)" className="rounded-full object-cover size-[20px]" src={asset("images/default-chat-account.png")} />
+        <div className="absolute -right-1 -bottom-1">
+          <img alt="widget icon" className="size-[12px]" src={asset("images/channels/chat-widget.svg")} />
+        </div>
+      </div>
+      <div className={cn("ml-3", bold && "font-medium")}>Test (Demo)</div>
+    </div>
   );
 }

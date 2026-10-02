@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn";
 import { sections } from "@/shell/sections";
 import { useDemo } from "@/store/store";
 import { UserAvatar } from "./avatars";
+import type { Ticket } from "./fixtures";
 import { inboxFrom, type Inbox } from "./inbox";
 
 // Same frame and item classes as the shell's SectionSidebar (saved markup), plus what only the
@@ -17,10 +18,9 @@ const caret = <Icon name="caret-down" variant="fas" className="text-gray-400 siz
 
 type Decoration = { icon: ReactNode; count?: number; caret?: boolean; action?: boolean };
 
-export function TicketsSidebar({ inbox }: { inbox: Inbox }) {
+export function TicketsSidebar({ inbox, tickets }: { inbox: Inbox; tickets: Ticket[] }) {
   const { title, groups } = sections.tickets;
   const user = useDemo((s) => s.user);
-  const tickets = useDemo((s) => s.tickets);
   const open = tickets.filter((t) => t.status === "open");
 
   // Keyed by the catalog label in sections.ts, which stays the one home for labels and links.
@@ -42,11 +42,11 @@ export function TicketsSidebar({ inbox }: { inbox: Inbox }) {
     >
       <div className="flex gap-2 p-2 pt-5 px-3 pb-2 flex-row items-center justify-between">
         <h2 className="pl-2 font-semibold text-base text-gray-900">{title}</h2>
-        <Inert className="flex items-center justify-center size-7 rounded-lg bg-gray-800 text-white opacity-50">
+        <Inert className="flex items-center justify-center size-7 rounded-lg bg-gray-800 text-white text-sm opacity-50">
           <Icon name="plus" variant="far" className="size-4 text-white" />
         </Inert>
       </div>
-      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto px-3 pt-1 pb-24 relative">
+      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto px-3 pb-24 relative">
         <div className="flex w-full min-w-0 flex-col gap-7">
           {groups.map((group) => (
             <div key={group.label} className="relative flex w-full min-w-0 flex-col p-0">
