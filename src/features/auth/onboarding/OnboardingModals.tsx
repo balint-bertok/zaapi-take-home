@@ -1,5 +1,5 @@
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { Inert } from "@/components/Inert";
 import { Button } from "@/components/ui/button";
 import { DialogOverlay } from "@/components/ui/dialog";
@@ -8,6 +8,7 @@ import { Icon } from "@/icons/Icon";
 import { asset } from "@/lib/asset";
 import { cn } from "@/lib/cn";
 import { updateDemo, useDemo } from "@/store/store";
+import { demoCredentials } from "../demoCredentials";
 import { qrPath, qrSize } from "./qr";
 
 // Strings from the catalog's chats.onboardingModal; markup and classes from the saved tickets pages.
@@ -60,16 +61,19 @@ function Step({
   width,
   title,
   subtitle,
+  onOpenAutoFocus,
   children,
 }: {
   width: string;
   title: string;
   subtitle: string;
+  onOpenAutoFocus?: (e: Event) => void;
   children: ReactNode;
 }) {
   return (
     <DialogPrimitive.Content
       aria-describedby={undefined}
+      onOpenAutoFocus={onOpenAutoFocus}
       onEscapeKeyDown={(e) => e.preventDefault()}
       onInteractOutside={(e) => e.preventDefault()}
       className={cn("rounded-lg border bg-white shadow-lg overflow-hidden", width)}
@@ -86,10 +90,25 @@ function Step({
 const fieldLabel = "text-gray-800 font-medium text-sm mb-2 inline-block";
 
 function DetailsStep({ onContinue }: { onContinue: () => void }) {
-  const [name, setName] = useState("");
-  const [staff, setStaff] = useState<string | null>(null);
+  // Opens prefilled with the demo user and a staff count, so Continue is enabled on arrival.
+  const userName = useDemo((s) => s.user.name);
+  const [name, setName] = useState(userName);
+  const [staff, setStaff] = useState<string>(demoCredentials.staffCount);
+  const nameRef = useRef<HTMLInputElement>(null);
+  // Radix focuses the first field with its text selected; keep the focus but put the caret at
+  // the end, so the prefilled name does not open highlighted.
+  const focusName = (e: Event) => {
+    e.preventDefault();
+    nameRef.current?.focus();
+    nameRef.current?.setSelectionRange(name.length, name.length);
+  };
   return (
-    <Step width="w-[410px]" title="Tell us a bit about yourself" subtitle="This helps customize your experience">
+    <Step
+      width="w-[410px]"
+      title="Tell us a bit about yourself"
+      subtitle="This helps customize your experience"
+      onOpenAutoFocus={focusName}
+    >
       <div className="p-5 space-y-4">
         <div>
           <label className={fieldLabel} htmlFor="onboarding-name">
@@ -97,6 +116,7 @@ function DetailsStep({ onContinue }: { onContinue: () => void }) {
           </label>
           <Input
             id="onboarding-name"
+            ref={nameRef}
             placeholder="Enter your name"
             maxLength={100}
             value={name}
@@ -132,7 +152,7 @@ function DetailsStep({ onContinue }: { onContinue: () => void }) {
         </div>
       </div>
       <div className="border-t bg-gray-50 px-6 py-3 flex justify-end">
-        <Button disabled={!name.trim() || !staff} onClick={onContinue}>
+        <Button disabled={!name.trim()} onClick={onContinue}>
           Continue
         </Button>
       </div>

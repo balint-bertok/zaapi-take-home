@@ -19,8 +19,6 @@ for (const route of routes) {
     // A first visit to the inbox opens the onboarding modals; walk them so step 2's images load.
     const onboarding = page.getByRole("dialog", { name: "Tell us a bit about yourself" });
     if (await onboarding.isVisible()) {
-      await onboarding.getByLabel("What's your name?").fill("Brand One");
-      await onboarding.getByText("2-10").click();
       await onboarding.getByRole("button", { name: "Continue" }).click();
       await page.getByRole("button", { name: "Do it later and explore the inbox" }).click();
     }

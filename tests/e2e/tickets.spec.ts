@@ -7,8 +7,6 @@ import { expect, test } from "@playwright/test";
 test("tickets inbox: reply, assign, close and reopen", async ({ page }) => {
   await page.goto("tickets");
   // Get past the first-visit modals (auth-onboarding.spec covers them in detail).
-  await page.getByLabel("What's your name?").fill("Brand One");
-  await page.getByText("2-10").click();
   await page.getByRole("button", { name: "Continue" }).click();
   await page.getByRole("button", { name: "Do it later and explore the inbox" }).click();
   await expect(page.getByText("Select a customer to open the ticket")).toBeVisible();
