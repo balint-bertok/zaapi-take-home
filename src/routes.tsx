@@ -4,6 +4,7 @@ import { aiRoutes } from "./features/ai/routes";
 import { authRoutes } from "./features/auth/routes";
 import { automationRoutes } from "./features/automations/routes";
 import { settingsRoutes } from "./features/settings/routes";
+import { setupRoutes } from "./features/setup/routes";
 import { ticketRoutes } from "./features/tickets/routes";
 import type { AppRoute } from "./lib/route";
 
@@ -11,6 +12,7 @@ export const routes: AppRoute[] = [
   ...authRoutes,
   ...ticketRoutes,
   ...aiRoutes,
+  ...setupRoutes,
   ...automationRoutes,
   ...settingsRoutes,
 ];

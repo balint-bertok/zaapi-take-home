@@ -13,11 +13,12 @@ export const titles = {
 
 /**
  * One page of the demo. `layout` picks the chrome around it: `auth` stands alone, `canvas` sits
- * under the trial banner only (Flow Builder), a section key adds that section's rail and sidebar.
+ * under the trial banner only (Flow Builder), `setup` adds the rail and the guided setup's step
+ * sidebar, a section key adds that section's rail and sidebar.
  */
 export type AppRoute = {
   path: string;
   title: (typeof titles)[keyof typeof titles];
-  layout: "auth" | "canvas" | SectionKey;
+  layout: "auth" | "canvas" | "setup" | SectionKey;
   Page: ComponentType;
 };

@@ -90,3 +90,4 @@ Answers: where does the demo differ from the live app, and what was done about i
 | flow builder | publish dialog | not opened on live | - | compared with the Step 13 screenshot: same | compared to screenshot |
 | tickets | own sidebar frame | identical to live | identical | left as is | ok |
 | ai lists | empty-table header | Step 11 screenshot | same | - | ok |
+| ai setup | all pages | no live counterpart (the memo's proposal; the live Enable page was never captured) | drawn in the app's style from its own cards, radios, sheet, test chat and callout | none | waived (ADR 0002) |
