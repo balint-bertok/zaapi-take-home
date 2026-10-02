@@ -8,6 +8,7 @@ import { personaSuggestion, policies, skipConsequence, type Language } from "./c
 import { ChannelRow, StepsAhead } from "./Intro";
 import { KnowledgeForm, type Answers } from "./KnowledgeForm";
 import { PersonaForm, type Persona } from "./PersonaForm";
+import type { SetupStep } from "./fixtures";
 import { saveKnowledge, savePersona, saveScenarios, skipScenarios } from "./save";
 import { BackLink, ContinueButton } from "./SetupPage";
 import { SetupProgress } from "./SetupProgress";
@@ -21,14 +22,16 @@ const scenariosPath = "/ai/setup/scenarios";
 const knowledgePath = "/ai/setup/knowledge";
 const knowledgeFilledPath = "/ai/setup/knowledge/filled";
 
-/** Each modal URL's screen, and its step number, current in the step bar (none on the welcome). */
-const screens: Record<string, { step?: number; body: () => ReactNode }> = {
-  "/ai/setup": { body: () => <WelcomeStep /> },
-  [personaPath]: { step: 1, body: () => <PersonaStep filled={false} /> },
-  [filledPath]: { step: 1, body: () => <PersonaStep filled /> },
-  [scenariosPath]: { step: 2, body: () => <ScenariosStep /> },
-  [knowledgePath]: { step: 3, body: () => <KnowledgeStep filled={false} /> },
-  [knowledgeFilledPath]: { step: 3, body: () => <KnowledgeStep filled /> },
+const welcomePath = "/ai/setup";
+
+/** Each modal URL's screen. */
+const screens: Record<string, () => ReactNode> = {
+  [welcomePath]: () => <WelcomeStep />,
+  [personaPath]: () => <PersonaStep filled={false} />,
+  [filledPath]: () => <PersonaStep filled />,
+  [scenariosPath]: () => <ScenariosStep />,
+  [knowledgePath]: () => <KnowledgeStep filled={false} />,
+  [knowledgeFilledPath]: () => <KnowledgeStep filled />,
 };
 
 // The screens' body height, so the card is one size and its footer sits at the same place on every
@@ -47,12 +50,12 @@ const focusCard = (e: Event) => {
 
 /**
  * The modal's card: one size for every screen, so the footer does not move between steps; the
- * step bar on top, the screen's body, the gray footer row. Opened with the card focused.
+ * step bar on top (`step` current, none on the welcome), the screen's body, the gray footer row.
+ * Opened with the card focused.
  */
-function SetupCard({ title, subtitle, footer, children }: { title: string; subtitle: string; footer: ReactNode; children: ReactNode }) {
-  const step = screens[useLocation().pathname]?.step;
+function SetupCard({ step, title, subtitle, footer, children }: { step?: SetupStep; title: string; subtitle: string; footer: ReactNode; children: ReactNode }) {
   return (
-    <StepCard width="w-[668px]" top={<SetupProgress step={step} />} title={title} subtitle={subtitle} onOpenAutoFocus={focusCard}>
+    <StepCard width="w-[668px]" top={<SetupProgress current={step} />} title={title} subtitle={subtitle} onOpenAutoFocus={focusCard}>
       <div className={bodyHeight}>{children}</div>
       <div className={footerClass}>{footer}</div>
     </StepCard>
@@ -67,8 +70,8 @@ export default function SetupModal() {
   const { pathname } = useLocation();
   const dismissed = useDemo((s) => s.setupModalDismissed);
   const screen = screens[pathname];
-  if (!screen || (!screen.step && dismissed)) return null;
-  return <ModalTour>{screen.body()}</ModalTour>;
+  if (!screen || (pathname === welcomePath && dismissed)) return null;
+  return <ModalTour>{screen()}</ModalTour>;
 }
 
 /**
@@ -91,7 +94,7 @@ function LaterButton() {
   const navigate = useNavigate();
   const later = () => {
     updateDemo((s) => ({ ...s, setupModalDismissed: true }));
-    navigate("/ai/setup");
+    navigate(welcomePath);
   };
   return (
     <button type="button" onClick={later} className="text-sm font-medium text-gray-800 hover:text-gray-600 transition-colors">
@@ -144,13 +147,14 @@ function PersonaStep({ filled }: { filled: boolean }) {
   const name = persona.name.trim();
   return (
     <SetupCard
+      step="persona"
       title="Persona"
       subtitle="Name your agent and decide how it sounds. Language defaults to what your customers write in."
       footer={
         <>
           <div className="flex items-center gap-4">
             {/* After "Finish later" the welcome stays closed, so Back lands on the page Start came from. */}
-            <BackLink to="/ai/setup" />
+            <BackLink to={welcomePath} />
             <LaterButton />
           </div>
           <ContinueButton variant="default" to={filled ? scenariosPath : filledPath} disabled={filled && !name} onClick={filled ? () => savePersona(persona) : undefined}>
@@ -187,6 +191,7 @@ function ScenariosStep() {
   };
   return (
     <SetupCard
+      step="scenarios"
       title="Scenarios"
       subtitle="Pick what your agent should handle. Each one comes with ready-made steps you can edit later."
       footer={
@@ -239,6 +244,7 @@ function KnowledgeStep({ filled }: { filled: boolean }) {
   const answered = policies.some((p) => answers[p.key].trim() !== "");
   return (
     <SetupCard
+      step="knowledge"
       title="Knowledge"
       subtitle="Answer the policies your scenarios need. Short answers are fine; the agent fills in the wording."
       footer={
