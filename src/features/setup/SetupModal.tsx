@@ -33,7 +33,7 @@ const screens: Record<string, { step?: number; body: () => ReactNode }> = {
 
 // The screens' body height, so the card is one size and its footer sits at the same place on every
 // screen: the tallest body, the persona form's with the step bar above it, measured in Chrome at
-// 1440×900 and rounded up to 4px. Shorter bodies leave space under their content.
+// 1440×900 and rounded up to 4px (docs/measurements.md). Shorter bodies leave space under their content.
 const bodyHeight = "min-h-[492px]";
 const footerClass = "border-t bg-gray-50 px-6 py-3 flex justify-between items-center gap-4";
 const sectionTitle = "text-base font-medium text-gray-800";
