@@ -51,8 +51,11 @@ test("the guided setup runs from sign-up to a live agent, then opens the dashboa
   await page.getByRole("link", { name: "Start" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/persona$/);
   await expect(page.getByRole("button", { name: "Continue" })).toBeDisabled();
-  await page.getByRole("radio", { name: "Thai" }).click();
+  await page.getByRole("radio", { name: "English" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/persona\/filled$/);
+  // The picked language carries over; the suggestion's Thai is one click away.
+  await expect(page.getByRole("radio", { name: "English" })).toHaveAttribute("aria-checked", "true");
+  await page.getByRole("radio", { name: "Thai" }).click();
   await expect(page.getByLabel("Name", { exact: true })).toHaveValue("Brand One assistant");
   await expect(page.getByRole("radio", { name: "Thai" })).toHaveAttribute("aria-checked", "true");
   await page.getByRole("link", { name: "Continue" }).click();

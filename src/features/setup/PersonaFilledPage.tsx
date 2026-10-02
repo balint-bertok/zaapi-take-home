@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "react-router";
 import { updateDemo } from "@/store/store";
 import { stamp } from "../ai/format";
 import { channelLanguage, personaSuggestion } from "./content";
@@ -8,7 +9,9 @@ import { BackLink, ContinueButton, SetupPage } from "./SetupPage";
 
 /** Step 1 with the suggested answers in place; still editable. */
 export default function PersonaFilledPage() {
-  const [persona, setPersona] = useState<Persona>(personaSuggestion);
+  // A language picked on the empty page arrives as navigation state and wins over the suggestion.
+  const picked = (useLocation().state as Pick<Persona, "language"> | null)?.language;
+  const [persona, setPersona] = useState<Persona>(() => ({ ...personaSuggestion, language: picked ?? personaSuggestion.language }));
   const name = persona.name.trim();
 
   // One write: the personality row (once per name, so Back then Continue does not duplicate it),
