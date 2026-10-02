@@ -3,8 +3,9 @@
  * agent. Before go-live the rail sends AI Agent into the path and leaves every other section but
  * Tickets inert; the step list links only to done steps and the current one, and the "skip the
  * setup" exit is inert. The welcome, persona, scenarios and knowledge steps run in the inbox
- * onboarding's modal frame over the setup page; test and go live are pages with no dialog. Each
- * empty form moves to its filled twin on first touch. Continue appends to the Personality,
+ * onboarding's modal frame over the setup page; test and go live are pages with no dialog. The
+ * modal's step bar marks the current step and the done ones. Each empty form moves to its filled
+ * twin on first touch, Continue included. Continue appends to the Personality,
  * Scenario Handling and Knowledge Source lists, once: a second Continue adds no duplicate. The
  * readiness summary on the Test step reads the store. "Go live" opens the dashboard; `?reset=1`
  * restores the path. "Finish later" closes the modal onto the page, whose button reopens it.
@@ -46,10 +47,15 @@ test("the guided setup runs from sign-up to a live agent, then opens the dashboa
   await expect(welcome.getByRole("button", { name: "Finish later" })).toBeVisible();
   await welcome.getByRole("link", { name: "Start" }).click();
 
-  // Persona: touching the form moves to its filled twin.
+  // Persona: the step bar marks it current; Continue on the empty form fills it, as touching it does.
   await expect(page).toHaveURL(/\/ai\/setup\/persona$/);
   const persona = page.getByRole("dialog", { name: "Persona" });
-  await expect(persona.getByRole("button", { name: "Continue" })).toBeDisabled();
+  const progress = (dialog: typeof persona) => dialog.getByRole("list", { name: "Setup progress" }).getByRole("listitem");
+  await expect(progress(persona).filter({ hasText: "Persona" })).toHaveAttribute("aria-current", "step");
+  await persona.getByRole("link", { name: "Continue" }).click();
+  await expect(page).toHaveURL(/\/ai\/setup\/persona\/filled$/);
+  await page.goBack();
+  await expect(page).toHaveURL(/\/ai\/setup\/persona$/);
   await persona.getByRole("radio", { name: "English" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/persona\/filled$/);
   // The picked language carries over; the suggestion's Thai is one click away.
@@ -68,10 +74,14 @@ test("the guided setup runs from sign-up to a live agent, then opens the dashboa
   await scenarios.getByRole("link", { name: "Continue to knowledge" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/knowledge$/);
 
-  // Knowledge: each policy names the picked scenario that needs it.
+  // Knowledge: the steps before it read as done; each policy names the picked scenario that needs it.
   const knowledge = page.getByRole("dialog", { name: "Knowledge" });
+  for (const name of ["Persona", "Scenarios"]) await expect(progress(knowledge).filter({ hasText: name })).toContainText("done");
+  await expect(progress(knowledge).filter({ hasText: "Knowledge" })).toHaveAttribute("aria-current", "step");
   await expect(knowledge.getByText("Needed by Check order status")).toBeVisible();
-  await expect(knowledge.getByRole("button", { name: "Continue to test" })).toBeDisabled();
+  await knowledge.getByRole("link", { name: "Continue to test" }).click();
+  await expect(page).toHaveURL(/\/ai\/setup\/knowledge\/filled$/);
+  await page.goBack();
   await knowledge.getByRole("textbox", { name: "Shipping times and areas" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/knowledge\/filled$/);
   await expect(knowledge.getByRole("textbox", { name: "Shipping times and areas" })).toHaveValue(/Bangkok/);
