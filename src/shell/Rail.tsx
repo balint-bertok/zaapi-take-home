@@ -39,7 +39,7 @@ function RailButton({ item, current }: { item: RailItem; current?: SectionKey })
   );
   const className = cn(button, active ? "bg-sidebar-accent text-sidebar-accent-foreground" : "bg-transparent");
   return (
-    <Tooltip content={item.label} side="right">
+    <Tooltip content={item.label} side="right" plain>
       {item.section ? (
         <Link to={sectionHome(item.section)} aria-label={item.label} className={className}>
           {icon}
@@ -61,7 +61,7 @@ export function Rail({ section }: { section: SectionKey }) {
       aria-label="Main"
       className="fixed inset-y-0 left-0 z-30 flex flex-col items-center bg-sidebar border-gray-200 py-3 gap-2 h-(--height-page-content-with-banner) top-(--banner-height) border-r w-[56px]"
     >
-      <Tooltip content={workspace} side="right">
+      <Tooltip content={workspace} side="right" plain>
         <Inert
           aria-label={`Store: ${workspace}`}
           className="flex items-center justify-center size-9 rounded-lg hover:bg-gray-200 shrink-0 mb-1"

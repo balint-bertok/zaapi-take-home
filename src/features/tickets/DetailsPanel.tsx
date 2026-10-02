@@ -26,7 +26,7 @@ const contactFields: { key: ContactFieldKey; label: string; multiline?: boolean 
   { key: "note", label: "Note", multiline: true },
 ];
 
-const valueClass = "min-w-0 rounded-lg border-transparent px-2 text-[12px] text-gray-800 hover:border-gray-200";
+const valueClass = "min-w-0 rounded-lg border-transparent px-2 text-[12px] hover:border-gray-200";
 
 /** The 320px right-hand panel: contact, linked conversations, labels, ticket history, location, activity. */
 export function DetailsPanel({ ticket }: { ticket: Ticket }) {
@@ -72,7 +72,7 @@ export function DetailsPanel({ ticket }: { ticket: Ticket }) {
           title="Linked Conversations"
           info="These conversations belong to the same contact."
           action={
-            <Inert aria-label="Add conversation" className={cn(buttonClass("ghost"), "size-7 p-0")}>
+            <Inert aria-label="Add conversation" className={cn(buttonClass("ghost"), "size-8 p-0")}>
               <Icon name="plus" variant="fal" className="size-4! text-gray-500" />
             </Inert>
           }
@@ -203,7 +203,7 @@ function ContactField({ ticket, field }: { ticket: Ticket; field: (typeof contac
             rows={1}
             defaultValue={value}
             onBlur={(e) => commit(e.target.value)}
-            className={cn(valueClass, "min-h-7 resize-none py-1 leading-normal overflow-hidden")}
+            className={cn(valueClass, "text-gray-800 rounded-md min-h-7 resize-none py-1 leading-normal overflow-hidden")}
           />
         ) : (
           <Input
@@ -212,7 +212,7 @@ function ContactField({ ticket, field }: { ticket: Ticket; field: (typeof contac
             type="text"
             defaultValue={value}
             onBlur={(e) => commit(e.target.value)}
-            className={cn(valueClass, "h-7 truncate")}
+            className={cn(valueClass, "text-gray-700 h-7 truncate")}
           />
         )}
         {value && (

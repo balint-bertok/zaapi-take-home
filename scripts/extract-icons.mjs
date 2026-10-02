@@ -37,11 +37,41 @@ for (const file of htmlFiles.sort().map((f) => join(source, f))) {
   }
 }
 
+// Glyphs the saved pages never rendered inline but the live app shows (found in the PR 7 fidelity
+// pass). They come from the Font Awesome packs bundled in the saved pages' own JS files, as
+// `{prefix:"far",iconName:"face-party",icon:[w,h,aliases,unicode,path]}`.
+const FROM_BUNDLES = [
+  ["arrow-down", "fal"],
+  ["arrow-turn-down-left", "fal"],
+  ["arrow-up", "fal"],
+  ["bookmark", "fas"],
+  ["comments", "fal"],
+  ["comments", "far"],
+  ["ellipsis-vertical", "fas"],
+  ["face-party", "far"],
+  ["users", "far"],
+];
+const htmlNames = Object.keys(registry).length;
+const bundleFiles = readdirSync(source, { recursive: true, encoding: "utf8" }).filter((f) => /\.js$/i.test(f));
+const bundles = bundleFiles.map((f) => readFileSync(join(source, f), "utf8"));
+for (const [name, prefix] of FROM_BUNDLES) {
+  if (registry[name]?.[prefix]) continue;
+  const re = new RegExp(`\\{prefix:"${prefix}",iconName:"${name}",icon:\\[(\\d+),(\\d+),\\[[^\\]]*\\],"[^"]*",("(?:[^"\\\\]|\\\\.)*"|\\[[^\\]]*\\])\\]\\}`);
+  const m = bundles.map((js) => js.match(re)).find(Boolean);
+  if (!m) {
+    console.error(`extract-icons: ${prefix} ${name} not found in the saved bundles; refusing to write.`);
+    process.exit(1);
+  }
+  const d = JSON.parse(m[3]);
+  registry[name] ??= {};
+  registry[name][prefix] = { viewBox: `0 0 ${m[1]} ${m[2]}`, paths: (Array.isArray(d) ? d : [d]).map((x) => ({ d: x })) };
+}
+
 const names = Object.keys(registry).sort();
 const glyphs = names.reduce((n, k) => n + Object.keys(registry[k]).length, 0);
 console.log(`extract-icons: ${names.length} icon names, ${glyphs} glyphs (name x style) from ${source}`);
-if (names.length !== EXPECTED) {
-  console.error(`extract-icons: expected ${EXPECTED} icon names, found ${names.length}; refusing to write.`);
+if (htmlNames !== EXPECTED) {
+  console.error(`extract-icons: expected ${EXPECTED} icon names in the saved pages, found ${htmlNames}; refusing to write.`);
   process.exit(1);
 }
 

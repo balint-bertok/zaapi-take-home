@@ -2,12 +2,12 @@ import { useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { Inert } from "@/components/Inert";
 import { Button } from "@/components/ui/button";
-import { Input, Textarea } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { SheetContent } from "@/components/ui/sheet";
 import { updateDemo, useDemo } from "@/store/store";
 import type { KnowledgeSourceType } from "./fixtures";
 import { stamp } from "./format";
-import { Counter, FormCard, IntegrationPicker, Rich, RadioCard, SheetFooter } from "./parts";
+import { Counter, FormCard, IntegrationPicker, Rich, RadioCard, RichTextEditor, SheetFooter } from "./parts";
 
 type Kind = Exclude<KnowledgeSourceType, "quickReplies">;
 
@@ -22,7 +22,7 @@ const webDisclaimer =
 const manualInputDescription =
   "Write anything you want the AI to learn about your business to improve its response accuracy.\n\n<b>Tip</b>: For best results, organize the text using proper headings (like H1, H2) and paragraphs.";
 
-const link = "text-electric-green-600 font-medium hover:opacity-80";
+const link = "text-electric-green-600 font-medium hover:text-electric-green-700";
 // The file input's `accept` list as a test on dropped names, which `accept` does not cover.
 const accepted = /\.(txt|csv|docx|xlsx)$/i;
 
@@ -43,12 +43,12 @@ function KnowledgeSourceForm({ onDone }: { onDone: () => void }) {
   const [kind, setKind] = useState<Kind>("file");
   const [file, setFile] = useState<File | null>(null);
   const [url, setUrl] = useState("");
-  const [text, setText] = useState("");
   const fileInput = useRef<HTMLInputElement>(null);
 
   const site = url.trim();
   // https://, then dot-separated non-empty host labels, then an optional path; no spaces anywhere.
   const urlInvalid = site !== "" && !/^https:\/\/[^\s/.]+(\.[^\s/.]+)+(\/\S*)?$/.test(site);
+  const [text, setText] = useState("");
   const content = { file: file?.name ?? "", website: urlInvalid ? "" : site, manual_input: text.trim() }[kind];
   const ready = name.trim() !== "" && content !== "";
 
@@ -104,7 +104,7 @@ function KnowledgeSourceForm({ onDone }: { onDone: () => void }) {
 
           <FormCard>
             <h3 className="text-base font-medium text-gray-800">Select source type</h3>
-            <div role="radiogroup" aria-label="Select source type" className="grid grid-cols-3 gap-4 mt-3">
+            <div role="radiogroup" aria-label="Select source type" className="flex gap-4 mt-2 mb-7">
               {options.map((o) => (
                 <RadioCard key={o.kind} checked={kind === o.kind} onSelect={() => setKind(o.kind)} className="hover:bg-white hover:border-gray-300 aria-checked:hover:border-electric-green-500">
                   {o.label}
@@ -112,71 +112,77 @@ function KnowledgeSourceForm({ onDone }: { onDone: () => void }) {
               ))}
             </div>
 
-            <div className="mt-6 space-y-4">
+            <div className="space-y-4">
+              {/* Hidden rather than unmounted, so the editor keeps the text that `text` still holds when
+                  switching type and back. First, so a hidden last child adds no gap under the others. */}
+              <div hidden={kind !== "manual_input"} className="space-y-4">
+                <p className="text-gray-500 whitespace-pre-line">
+                  <Rich text={manualInputDescription} />
+                </p>
+                <RichTextEditor label="Knowledge source text" onText={setText} />
+              </div>
               {kind === "file" && (
                 <>
-                  <p className="text-gray-600">
+                  <p className="text-gray-500 whitespace-pre-line">
                     To help AI find information better, keep your files well-organized. For Excel files, use the first row for headers and start your data from the second row.
                   </p>
                   {/* Template downloads point at files that were never captured. */}
-                  <div className="flex items-center gap-3">
+                  <div className="flex gap-2">
                     <Inert className={link}>Download General Q&amp;A Template</Inert>
-                    <div className="h-4 w-px bg-gray-200" />
+                    <div className="shrink-0 bg-gray-200 w-px h-4" />
                     <Inert className={link}>Download Product Details Template</Inert>
                   </div>
-                  <div
-                    className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-gray-200 py-7"
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      // One file of an accepted type, as the sheet states; any other drop is ignored.
-                      const dropped = e.dataTransfer.files;
-                      if (dropped.length === 1 && accepted.test(dropped[0].name)) setFile(dropped[0]);
-                    }}
-                  >
-                    <span className="text-gray-800">{file ? file.name : "Drop file"}</span>
-                    <span className="text-gray-400">or</span>
-                    <Button variant="outline" onClick={() => fileInput.current?.click()}>
-                      Choose file
-                    </Button>
-                    <input
-                      ref={fileInput}
-                      type="file"
-                      hidden
-                      accept=".txt,.csv,.docx,.xlsx"
-                      onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                    />
+                  <div className="space-y-4">
+                    <div
+                      className="border border-dashed border-gray-200 hover:bg-gray-50 rounded-xl h-36 flex flex-col gap-2 justify-center items-center text-sm p-4"
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        // One file of an accepted type, as the sheet states; any other drop is ignored.
+                        const dropped = e.dataTransfer.files;
+                        if (dropped.length === 1 && accepted.test(dropped[0].name)) setFile(dropped[0]);
+                      }}
+                    >
+                      <div className="text-gray-800">{file ? file.name : "Drop file"}</div>
+                      <div className="text-gray-400">or</div>
+                      <div>
+                        <Button variant="outline" onClick={() => fileInput.current?.click()}>
+                          Choose file
+                        </Button>
+                      </div>
+                      <input
+                        ref={fileInput}
+                        type="file"
+                        hidden
+                        accept=".txt,.csv,.docx,.xlsx"
+                        onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                      />
+                    </div>
                   </div>
-                  <p className="text-gray-600">You can only upload 1 file at a time, and we accept the following formats: .txt, .csv, .docx, and .xlsx.</p>
+                  <p className="text-gray-500 whitespace-pre-line">You can only upload 1 file at a time, and we accept the following formats: .txt, .csv, .docx, and .xlsx.</p>
                 </>
               )}
               {kind === "website" && (
                 <>
                   <div className="space-y-2">
-                    <label htmlFor="source-url" className="font-medium text-gray-800">
-                      Website URL
-                    </label>
+                    <div className="flex gap-2 items-center">
+                      <label htmlFor="source-url" className="font-medium text-gray-800">
+                        Website URL
+                      </label>
+                    </div>
                     <Input
                       id="source-url"
                       className="rounded-md"
-                      placeholder="https://"
+                      placeholder="https://zaapi.com/features"
                       value={url}
                       aria-invalid={urlInvalid}
                       onChange={(e) => setUrl(e.target.value)}
                     />
                     {urlInvalid && <p className="text-error-500">Invalid website URL. Please ensure it starts with 'https://'.</p>}
                   </div>
-                  <p className="text-gray-600 whitespace-pre-line">
+                  <p className="text-gray-400 whitespace-pre-line">
                     <Rich text={webDisclaimer} />
                   </p>
-                </>
-              )}
-              {kind === "manual_input" && (
-                <>
-                  <p className="text-gray-600 whitespace-pre-line">
-                    <Rich text={manualInputDescription} />
-                  </p>
-                  <Textarea aria-label="Knowledge source text" className="min-h-[200px]" value={text} onChange={(e) => setText(e.target.value)} />
                 </>
               )}
             </div>

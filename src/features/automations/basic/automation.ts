@@ -22,9 +22,8 @@ export function automationSettings(a: Automation | undefined) {
 export const updateAutomations = (update: (current: Automation[]) => Automation[]) =>
   updateDemo((s) => ({ ...s, automations: update(s.automations) }));
 
-/** Today as an ISO date in the viewer's time zone, the shape `updatedAt` stores. */
-export function today() {
-  const d = new Date();
+/** A day (today by default) as an ISO date in the viewer's time zone, the shape `updatedAt` stores. */
+export function today(d = new Date()) {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }

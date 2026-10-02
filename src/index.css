@@ -267,6 +267,12 @@
   [role="button"]:not(:disabled) {
     cursor: pointer;
   }
+  /* Transparent outline at rest, so `outline-[0.5px]` inputs show no dark ring (live base rule). */
+  input:not(:active),
+  input:not(:focus),
+  input:not(:disabled) {
+    outline: 0 #0000;
+  }
   input:focus,
   textarea:focus,
   a:focus,
@@ -282,7 +288,9 @@
     font-size: 14px;
     line-height: 1.5;
   }
-  body {
+  /* Inter sits on the app's root wrapper (next/font's class on <main>), not on <body>: portalled
+     dialogs, sheets, menus and tooltips render in the system stack, as on app.zaapi.com. */
+  #root {
     font-family: Inter, var(--font-sans);
   }
   input[type="number"] {

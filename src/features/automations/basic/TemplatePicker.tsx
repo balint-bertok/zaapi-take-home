@@ -1,7 +1,8 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router";
 import { Inert } from "@/components/Inert";
-import { DialogClose, DialogDescription, DialogTitle, SheetContent } from "@/components/ui/dialog";
+import { DialogClose, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { SheetFrame } from "@/components/ui/sheet";
 import { Icon, type IconName } from "@/icons/Icon";
 import { asset } from "@/lib/asset";
 import { cn } from "@/lib/cn";
@@ -122,13 +123,13 @@ function TemplateCard({ t }: { t: Template }) {
 /** The "Create new automation" sheet: category chips on the left filter the template sections. */
 export function TemplatePicker() {
   return (
-    <SheetContent className="gap-4 p-0! max-w-[990px]! w-3/4">
+    <SheetFrame className="gap-4 max-w-[990px] w-3/4">
       <PickerBody />
-    </SheetContent>
+    </SheetFrame>
   );
 }
 
-// Inside SheetContent, which unmounts on close, so every reopen starts at "All templates".
+// Inside SheetFrame, which unmounts on close, so every reopen starts at "All templates".
 function PickerBody() {
   const [category, setCategory] = useState(ALL);
   const shown = category === ALL ? categories : categories.filter((c) => c.title === category);

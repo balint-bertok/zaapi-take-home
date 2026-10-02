@@ -1,19 +1,21 @@
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Inert } from "@/components/Inert";
+import { Pagination } from "@/components/Pagination";
+import { Person } from "@/components/Person";
 import { Button, buttonClass } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/menu";
-import { Switch } from "@/components/ui/switch";
+import { tableRow } from "@/components/ui/table";
 import { Icon } from "@/icons/Icon";
 import { cn } from "@/lib/cn";
 import { ShellPage } from "@/shell/ShellPage";
 import { useDemo } from "@/store/store";
 import type { Flow } from "./fixtures";
 import { CheckItem } from "./flows/Checkbox";
-import { smallSwitch, toggleIn } from "./flows/shared";
+import { toggleIn } from "./flows/shared";
 import { CreateFlowSheet } from "./flows/CreateFlowSheet";
-import { updateFlow, versionTime } from "./flows/model";
 import { StatusBadge } from "./flows/StatusBadge";
+import { formatDate, today } from "./basic/automation";
 
 type StatusFilter = "active" | "paused" | "draft";
 const statusLabels: Record<StatusFilter, string> = { active: "Active", paused: "Paused", draft: "Draft" };
@@ -135,37 +137,33 @@ export default function FlowsPage() {
                     <tr
                       key={f.id}
                       onClick={() => navigate(`/automations/flow-builder?id=${f.id}`)}
-                      className="border-b border-gray-200 transition-colors hover:bg-gray-50 cursor-pointer"
+                      className={tableRow}
                     >
-                      <Cell>
-                        <Switch
-                          aria-label={f.name}
-                          checked={f.enabled}
-                          disabled={f.status === "draft"}
-                          onClick={(e) => e.stopPropagation()}
-                          onCheckedChange={(enabled) => updateFlow(f.id, () => ({ enabled }))}
-                          {...smallSwitch}
-                        />
-                      </Cell>
-                      <Cell>
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="font-medium truncate">{f.name}</span>
-                          {f.status === "draft" && <StatusBadge status="draft" />}
+                      <td className={td}>
+                        <StatusBadge status={f.status} label={statusLabels[statusOf(f)]} />
+                      </td>
+                      <td className={td}>
+                        <div className="space-y-1.5">
+                          <h3 className="font-medium text-gray-800 truncate">{f.name}</h3>
+                          <p className="text-gray-500 truncate" />
                         </div>
-                        <div className="text-gray-500 truncate">Message received</div>
-                      </Cell>
-                      <Cell>{f.createdBy}</Cell>
-                      <Cell>{f.updatedBy}</Cell>
-                      <Cell>{versionTime(f.updatedAt)}</Cell>
-                      <Cell>
-                        <Inert
-                          aria-label="More"
-                          onClick={(e) => e.stopPropagation()}
-                          className="size-8 flex items-center justify-center rounded-md hover:bg-gray-100"
-                        >
-                          <Icon name="ellipsis-vertical" className="size-4 text-gray-500" />
-                        </Inert>
-                      </Cell>
+                      </td>
+                      <td className={td}>
+                        <Person name={f.createdBy} />
+                      </td>
+                      <td className={td}>{f.status === "draft" ? "-" : <Person name={f.updatedBy} />}</td>
+                      <td className={td}>{formatDate(today(new Date(f.updatedAt)))}</td>
+                      <td className={td}>
+                        <div className="text-end">
+                          <Inert
+                            aria-label="More"
+                            onClick={(e) => e.stopPropagation()}
+                            className={cn(buttonClass("ghost"), "hover:opacity-100 size-7 p-0")}
+                          >
+                            <Icon name="ellipsis-vertical" variant="fas" className="size-4" />
+                          </Inert>
+                        </div>
+                      </td>
                     </tr>
                   ))
                 )}
@@ -173,32 +171,15 @@ export default function FlowsPage() {
             </table>
           </div>
 
-          <div className="flex justify-end items-center mt-6">
-            <div className="text-sm text-gray-800 mr-4">
-              {rows.length === 0 ? (
-                <span className="font-medium">No data</span>
-              ) : (
-                <>
-                  Showing <span className="font-medium">1-{rows.length}</span> of {rows.length}
-                </>
-              )}
-            </div>
-            <Button variant="outline" size="sm" disabled aria-label="Previous page" className="mr-2">
-              <Icon name="chevron-left" className="size-3 text-gray-500" />
-            </Button>
-            <Button variant="outline" size="sm" disabled aria-label="Next page">
-              <Icon name="chevron-right" className="size-3 text-gray-500" />
-            </Button>
-          </div>
+          <Pagination count={rows.length} className="mt-6" />
         </div>
       </div>
     </ShellPage>
   );
 }
 
-function Cell({ children }: { children: ReactNode }) {
-  return <td className="px-4.5 py-3 align-middle h-16 text-gray-800">{children}</td>;
-}
+// Cell classes from the live list (the saved page had no rows).
+const td = "p-4 border-t align-top truncate py-4 h-[80px] bg-white";
 
 function SortButton({ label, dir, onClick }: { label: string; dir: Sort["dir"] | null; onClick: () => void }) {
   return (

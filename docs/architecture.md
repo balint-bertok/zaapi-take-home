@@ -31,7 +31,7 @@ From the validated plan (`Original files/extracted/PLAN.md`), one PR each:
 - PR 4, automations: basic automations list, template picker, assign-to-agents form. Built.
 - PR 5, flow builder: flow list, template gallery, React Flow canvas (`@xyflow/react`, its stock stylesheet plus the app's one override), publish dialog; flows live in the `flows` slice. Built.
 - PR 6, settings: settings sidebar, billing page. Built.
-- PR 7, fidelity pass against the live app.
+- PR 7, fidelity pass against the live app. Built; differences and waivers in `docs/fidelity.md`.
 
 PRs 1 to 6 run in parallel after PR 0 merges; each touches only its own feature folder.
 

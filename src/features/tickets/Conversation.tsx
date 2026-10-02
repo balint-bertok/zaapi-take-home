@@ -9,6 +9,7 @@ import { Icon, type IconName } from "@/icons/Icon";
 import { cn } from "@/lib/cn";
 import { useDemo } from "@/store/store";
 import { closeTickets, postMessage, reopenTicket, setConversionValue, toggleFollowUp } from "./actions";
+import { AiLoopIcon } from "./AiLoopIcon";
 import { AssignDialog } from "./AssignDialog";
 import { ContactAvatar, UserAvatar } from "./avatars";
 import type { Message, Ticket } from "./fixtures";
@@ -24,7 +25,8 @@ export function Conversation({ ticket }: { ticket: Ticket }) {
       <TicketFields ticket={ticket} />
       <Thread messages={ticket.messages} />
       <div className="h-px bg-gray-200 shrink-0" />
-      <div className="relative flex flex-col flex-[36.913_1_0px] min-h-0">
+      {/* The app's composer panel never goes below 220px; at 900px high that is its default too. */}
+      <div className="relative flex flex-col flex-[36.913_1_0px] min-h-[220px]">
         {/* Under the closed overlay the composer is out of reach for keyboard too, not just covered. */}
         <div inert={ticket.status === "closed"} className="flex flex-col flex-1 min-h-0">
           <Composer key={ticket.id} ticketId={ticket.id} />
@@ -56,7 +58,7 @@ function Header({ ticket, account }: { ticket: Ticket; account: string }) {
         <Tooltip content={assignee ? `Assigned to ${assignee.name}` : "Assign ticket"}>
           <button type="button" aria-label="Assign ticket" className={iconButton} onClick={() => setAssigning(true)}>
             {assignee ? (
-              <UserAvatar name={assignee.name} size={22} />
+              <UserAvatar name={assignee.name} size={20} />
             ) : (
               <div className="size-[22px] rounded-full flex items-center justify-center">
                 <Icon name="user-plus" className="size-4.5! text-gray-500" />
@@ -72,7 +74,12 @@ function Header({ ticket, account }: { ticket: Ticket; account: string }) {
             className={iconButton}
             onClick={() => toggleFollowUp(ticket.id)}
           >
-            <Icon name="bookmark" variant="fal" className={cn("size-4!", ticket.followUp ? "text-warning-500" : "text-gray-600")} />
+            {/* Followed: the solid glyph (from the app's own icon bundle) in warning orange. */}
+            <Icon
+              name="bookmark"
+              variant={ticket.followUp ? "fas" : "fal"}
+              className={cn("size-4!", ticket.followUp ? "text-warning-500" : "text-gray-600")}
+            />
           </button>
         </Tooltip>
         <Inert className={iconButton}>
@@ -95,7 +102,7 @@ function TicketFields({ ticket }: { ticket: Ticket }) {
   const closed = ticket.status === "closed";
   const lockedHint = "Sales fields cannot be updated after a ticket is closed";
   return (
-    <Collapsible.Root defaultOpen className="flex flex-col shrink-0 border-b border-gray-200">
+    <Collapsible.Root defaultOpen className="flex flex-col shrink-0 border-b border-[#d1dbe3]">
       <Collapsible.Trigger className="group text-sm flex w-full gap-2 items-center justify-between px-4 h-[32px] shrink-0 hover:bg-gray-100 focus-visible:outline-1 focus-visible:outline-gray-300">
         <div className="flex items-center gap-2">
           <Icon name="ticket" variant="fal" className="size-4.5! text-gray-400" />
@@ -207,7 +214,19 @@ function Bubble({ message, showTime }: { message: Message; showTime: boolean }) 
               incoming ? "ml-[.4rem] text-left" : "mr-[.4rem] text-right",
             )}
           >
-            {showTime && <p className="select-none hover:text-gray-600 mb-0.5">{message.time}</p>}
+            {/* Time and the hover "Reply" (quote) action, which was not captured, so it is inert. */}
+            <div className={cn("flex items-end gap-1", incoming ? "flex-row" : "flex-row-reverse")}>
+              {showTime && <p className="select-none hover:text-gray-600 mb-0.5">{message.time}</p>}
+              <Inert
+                aria-label="Reply"
+                className={cn(
+                  buttonClass("ghost"),
+                  "h-8 w-8 p-0 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 delay-100 group-hover:delay-100 ease-in-out",
+                )}
+              >
+                <Icon name="reply" variant="far" className="size-4!" />
+              </Inert>
+            </div>
           </div>
         </div>
       </section>
@@ -218,7 +237,7 @@ function Bubble({ message, showTime }: { message: Message; showTime: boolean }) 
 type Mode = "reply" | "comment";
 const modes: Record<Mode, { label: string; icon: IconName; key: string }> = {
   reply: { label: "Reply", icon: "message-dots", key: "R" },
-  comment: { label: "Comment", icon: "message", key: "C" },
+  comment: { label: "Comment", icon: "comments", key: "C" },
 };
 
 /** Reply / Comment composer (chats.composer.*). Enter sends, Shift+Enter breaks the line. */
@@ -231,19 +250,15 @@ function Composer({ ticketId }: { ticketId: string }) {
     postMessage(ticketId, text.trim(), mode);
     setText("");
   };
-  const tool = (icon: IconName, label: string, variant: "fal" | "fak" = "fal") => (
+  const tool = (icon: IconName, label: string) => (
     <Inert aria-label={label} className={cn(iconButton, "size-9")}>
-      <Icon
-        name={icon}
-        variant={variant}
-        className={variant === "fak" ? "size-4.5! ai-gradient-icon" : "size-4! text-gray-600 group-hover:text-gray-800"}
-      />
+      <Icon name={icon} variant="fal" className="size-4! text-gray-600 group-hover:text-gray-800" />
     </Inert>
   );
 
   return (
-    <div className="flex flex-col flex-1 min-h-0">
-      <div className={cn("px-4 pt-3", comment && "px-3")}>
+    <div className={cn("flex flex-col flex-1 min-h-0", comment && "bg-yellow-50")}>
+      <div className="px-4 pt-3">
         <DropdownMenu>
           <DropdownMenuTrigger
             className={cn(
@@ -254,18 +269,20 @@ function Composer({ ticketId }: { ticketId: string }) {
             <Icon name={modes[mode].icon} variant="fal" className="size-3.5!" />
             <span>{modes[mode].label}</span>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="min-w-48 p-1" onCloseAutoFocus={(e) => e.preventDefault()}>
+          <DropdownMenuContent align="start" className="min-w-48" onCloseAutoFocus={(e) => e.preventDefault()}>
             {(Object.keys(modes) as Mode[]).map((m) => (
               <DropdownMenuItem key={m} onSelect={() => setMode(m)}>
-                <Icon name={modes[m].icon} className="size-4! text-gray-700" />
+                <Icon name={modes[m].icon} variant="far" className="size-4! text-gray-700" />
                 <span>{modes[m].label}</span>
-                <Kbd className="ml-auto">{modes[m].key}</Kbd>
+                <span className="text-gray-800 ml-auto text-xs tracking-widest">
+                  <Kbd>{modes[m].key}</Kbd>
+                </span>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className={cn("flex-1 w-full relative flex flex-col min-h-0 gap-2", comment ? "pt-0 px-3" : "pt-4")}>
+      <div className={cn("flex-1 w-full relative flex flex-col min-h-0 gap-2", comment ? "overflow-y-auto px-3 pt-3" : "pt-4")}>
         <textarea
           aria-label={modes[mode].label}
           value={text}
@@ -278,8 +295,8 @@ function Composer({ ticketId }: { ticketId: string }) {
           }}
           placeholder={comment ? "Leave an internal comment..." : "Type a message or press ⌘K for shortcuts"}
           className={cn(
-            "w-full flex-1 min-h-0 resize-none text-[13px] outline-hidden placeholder:text-gray-400 bg-white",
-            comment ? "min-h-[72px] p-2 text-yellow-600" : "px-4",
+            "w-full resize-none text-[13px] outline-hidden placeholder:text-gray-400",
+            comment ? "min-h-[72px] rounded-md p-2 text-yellow-600 bg-transparent" : "flex-1 min-h-0 px-4 bg-white",
           )}
         />
       </div>
@@ -289,7 +306,9 @@ function Composer({ ticketId }: { ticketId: string }) {
             <>
               {tool("bolt", "Actions")}
               <div className="mx-1 h-5 w-px bg-gray-200" />
-              {tool("ai-symbol", "AI Agent", "fak")}
+              <Inert aria-label="AI Chatbots" className={cn(iconButton, "size-9")}>
+                <AiLoopIcon />
+              </Inert>
             </>
           )}
           {tool("paperclip", "Attach a file")}

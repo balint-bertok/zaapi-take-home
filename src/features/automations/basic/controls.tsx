@@ -1,32 +1,7 @@
-import { Icon } from "@/icons/Icon";
 import { cn } from "@/lib/cn";
 
-// Checkbox and radio cards of the Assign-to-agents form, class lists from the saved create page
+// Radio cards of the Assign-to-agents form, class lists from the saved create page
 // (Radix checkbox and radio-group markup, rebuilt without the extra packages).
-
-export function Checkbox({
-  checked,
-  onCheckedChange,
-  label,
-}: {
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="checkbox"
-      aria-checked={checked}
-      aria-label={label}
-      data-state={checked ? "checked" : "unchecked"}
-      onClick={() => onCheckedChange(!checked)}
-      className="peer flex items-center justify-center shrink-0 rounded-md border-2 border-gray-200 focus-visible:opacity-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 hover:border-electric-green-500 focus-visible:ring-electric-green-500 data-[state=checked]:bg-electric-green-500 data-[state=checked]:border-electric-green-500 size-5"
-    >
-      {checked && <Icon name="check" variant="fas" className="size-3! text-white" />}
-    </button>
-  );
-}
 
 export type RadioOption<T extends string> = { value: T; title: string; description?: string; disabled?: boolean };
 
@@ -93,15 +68,6 @@ export function RadioCards<T extends string>({
           );
         })}
       </div>
-    </div>
-  );
-}
-
-/** Initial on the gray circle the app draws for a user without a photo (saved create page). */
-export function Avatar({ name }: { name: string }) {
-  return (
-    <div className="relative flex items-center justify-center rounded-full select-none shrink-0 size-[24px] bg-gray-500">
-      <span className="text-[12px] text-white">{name[0]}</span>
     </div>
   );
 }

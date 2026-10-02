@@ -1,6 +1,6 @@
 /**
  * The sign-up click path end to end: register, verify (timed redirect), login with its
- * required-field check, then the two onboarding modals over the inbox. Finishing them sets
+ * required-field check, then the two onboarding modals over the (still empty) inbox. Finishing them sets
  * `onboardingDone`, so a reload shows the inbox without them; `?reset=1` brings them back.
  * The typed password must never reach storage.
  */
@@ -39,6 +39,9 @@ test("register, verify, log in and finish onboarding", async ({ page }) => {
   await expect(page).toHaveURL(/\/tickets$/);
 
   const step1 = page.getByRole("dialog", { name: "Tell us a bit about yourself" });
+  // Behind the modals the workspace is still empty: the get-started card, no ticket yet.
+  await expect(page.getByText("Ready to get started?")).toBeVisible();
+  await expect(page.getByRole("link", { name: "All (0)", includeHidden: true })).toBeVisible();
   const next = step1.getByRole("button", { name: "Continue" });
   await expect(next).toBeDisabled();
   await page.keyboard.press("Escape");
@@ -51,7 +54,7 @@ test("register, verify, log in and finish onboarding", async ({ page }) => {
   await expect(page.getByText("Step 2 of 2")).toBeVisible();
   await step2.getByRole("button", { name: "Do it later and explore the inbox" }).click();
   await expect(step2).toBeHidden();
-  await expect(page.getByText("Ready to get started?")).toBeVisible();
+  await expect(page.getByText("Select a customer to open the ticket")).toBeVisible();
 
   const stored = await page.evaluate(() =>
     [localStorage, sessionStorage].flatMap((s) => Object.keys(s).map((k) => `${k}=${s.getItem(k)}`)).join("\n"),
@@ -61,7 +64,7 @@ test("register, verify, log in and finish onboarding", async ({ page }) => {
   expect(page.url()).not.toContain("not-stored-anywhere");
 
   await page.reload();
-  await expect(page.getByText("Ready to get started?")).toBeVisible();
+  await expect(page.getByText("Select a customer to open the ticket")).toBeVisible();
   await expect(page.getByRole("dialog")).toHaveCount(0);
 
   await page.goto("tickets?reset=1");

@@ -60,6 +60,8 @@ export const sections = {
         items: [{ label: "Labels" }, { label: "Quick Replies" }, { label: "Ticket Fields" }, { label: "Contact Fields" }],
       },
       { label: "System", items: [{ label: "Integrations" }, { label: "Workflows" }, { label: "Data Exports" }] },
+      // On app.zaapi.com since the capture (common.navigation.settings.*); not built, so inert.
+      { label: "Developers", items: [{ label: "API keys" }, { label: "Webhooks" }] },
     ],
   },
 } satisfies Record<string, Section>;

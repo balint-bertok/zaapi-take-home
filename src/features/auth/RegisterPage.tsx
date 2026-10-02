@@ -43,24 +43,27 @@ const stats = [
  */
 function TurnstileSuccess() {
   return (
-    <div className="mb-4 flex h-[65px] w-full items-center justify-between border border-[#3a3a3a] bg-[#232323] px-3 text-white">
-      <div className="flex items-center gap-2.5">
-        <svg viewBox="0 0 30 30" className="size-[30px]" aria-hidden="true">
-          <circle cx="15" cy="15" r="15" fill="#2fb34a" />
-          <path
-            d="M9 15.5l4 4 8-8.5"
-            fill="none"
-            stroke="#fff"
-            strokeWidth="2.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <span className="text-base">Success!</span>
+    // The real iframe sits inline, so its line box adds a few pixels under it.
+    <div className="mb-4 pb-[5.5px]">
+      <div className="flex h-[65px] w-full items-center justify-between border border-[#3a3a3a] bg-[#232323] px-3 text-white">
+        <div className="flex items-center gap-2.5">
+          <svg viewBox="0 0 30 30" className="size-[30px]" aria-hidden="true">
+            <circle cx="15" cy="15" r="15" fill="#2fb34a" />
+            <path
+              d="M9 15.5l4 4 8-8.5"
+              fill="none"
+              stroke="#fff"
+              strokeWidth="2.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <span className="text-base">Success!</span>
+        </div>
+        <span className="self-end pb-2 text-[8px] text-[#d9d9d9]">
+          <span className="underline">Privacy</span> · <span className="underline">Help</span>
+        </span>
       </div>
-      <span className="self-end pb-2 text-[8px] text-[#d9d9d9]">
-        <span className="underline">Privacy</span> · <span className="underline">Help</span>
-      </span>
     </div>
   );
 }
@@ -122,12 +125,11 @@ export default function RegisterPage() {
                       <Icon name="angle-right" className="text-[10px] transition-transform duration-200" />
                     </Collapsible.Trigger>
                     <Collapsible.Content className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-                      <Input
-                        className="mt-1.5"
-                        name="referralCode"
-                        aria-label="Referral code"
-                        placeholder="Enter your code"
-                      />
+                      <div className="pt-3">
+                        <div>
+                          <Input name="referralCode" aria-label="Referral code" placeholder="Enter your code" />
+                        </div>
+                      </div>
                     </Collapsible.Content>
                   </Collapsible.Root>
                 </div>

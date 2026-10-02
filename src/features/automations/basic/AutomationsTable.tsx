@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
+import { Person } from "@/components/Person";
+import { buttonClass } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/menu";
 import { Switch } from "@/components/ui/switch";
+import { tableRow } from "@/components/ui/table";
 import { Icon } from "@/icons/Icon";
 import { asset } from "@/lib/asset";
 import { cn } from "@/lib/cn";
@@ -11,7 +14,6 @@ import type { Integration } from "@/store/fixtures";
 import type { Automation } from "../fixtures";
 import { editPath, formatDate, updateAutomations } from "./automation";
 import { ConfirmDialog } from "./ConfirmDialog";
-import { Avatar } from "./controls";
 
 type SortKey = "name" | "type" | "createdBy" | "updatedBy" | "updatedAt";
 type Column = { label: string; width: number; sort?: SortKey };
@@ -29,10 +31,8 @@ const columns: Column[] = [
 const typeLabel: Record<Automation["type"], string> = { "assign-to-agents": "Assign to agents" };
 
 const th = "text-left align-middle font-medium p-1.5 bg-white h-[48px] text-gray-800";
-// Cells sit at the top of the row (the name cell's empty description line sets its height); each
-// single-line cell centres its content on one 24px line, which matches the screenshot.
-const td = "px-4.5 py-5 align-top";
-const line = "flex items-center gap-x-2 min-h-7";
+// Cell classes from the live list: padded cells at the top of the row.
+const td = "border-b p-1.5 align-top bg-white";
 const sticky = {
   right: 0,
   position: "sticky",
@@ -77,86 +77,86 @@ function Row({ a, integrations, onDelete }: { a: Automation; integrations: Integ
     updateAutomations((list) => list.map((x) => (x.id === a.id ? { ...x, enabled } : x)));
 
   return (
-    <tr className="border-b transition-colors">
+    <tr className={tableRow}>
       <td className={td}>
-        <div className={line}>
-          <Switch checked={a.enabled} onCheckedChange={setEnabled} aria-label={a.name} />
+        <div className="px-3 py-4">
+          <Switch checked={a.enabled} onCheckedChange={setEnabled} aria-label={a.name} className="h-7 w-12" />
         </div>
       </td>
       <td className={td}>
-        <div className="flex gap-x-2">
-          <Icon name="user-group" className="size-4 mt-0.5 text-gray-500 shrink-0" />
-          <div className="min-w-0">
-            <div className="font-medium truncate">{a.name}</div>
-            <div className="text-gray-500 truncate min-h-5 mt-1">{a.description}</div>
+        <div className="px-3 py-4">
+          <div className="flex gap-x-2">
+            <Icon name="users" variant="far" className="h-4 min-w-4 text-gray-500" />
+            <p className="font-medium leading-4 text-gray-800 text-sm truncate">{a.name}</p>
           </div>
+          <p className="leading-4 mt-2 text-gray-500 text-sm truncate">{a.description}</p>
         </div>
       </td>
       <td className={td}>
-        <div className={line}>
-          <div className="flex items-center justify-center rounded-md size-[24px] bg-pink-50 shrink-0">
-            <Icon name="rotate" variant="fas" className="size-3.5! text-pink-500" />
+        <div className="flex items-center gap-2 px-3 py-4 text-gray-800 text-sm">
+          <div className="shrink-0 size-7 rounded-lg flex items-center justify-center bg-pink-50">
+            <Icon name="rotate" variant="fas" className="size-4 text-pink-500" />
           </div>
-          <span>{typeLabel[a.type]}</span>
+          <div>{typeLabel[a.type]}</div>
         </div>
       </td>
       <td className={td}>
-        {accounts.length > 0 && (
-          <>
-            <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className={line}>
-              <Icon
-                name="chevron-right"
-                className={cn("size-3 text-gray-400 transition-transform duration-200", open && "rotate-90")}
-              />
-              <img alt="widget icon" src={asset("images/channels/chat-widget.svg")} className="size-[20px]" />
-              <span className="font-medium pl-1">Chat Widget ({accounts.length})</span>
-            </button>
-            {open && (
-              <ul className="mt-2 pl-12 text-gray-500">
-                {accounts.map((i) => (
-                  <li key={i.id} className="truncate">
-                    {i.name}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </>
-        )}
-      </td>
-      <td className={td}>
-        <div className={line}>
-          <Avatar name={a.createdBy} />
-          <span className="truncate pl-0.5">{a.createdBy}</span>
-        </div>
-      </td>
-      <td className={td}>
-        <div className={line}>
-          {a.updatedBy ? (
-            <>
-              <Avatar name={a.updatedBy} />
-              <span className="truncate pl-0.5">{a.updatedBy}</span>
-            </>
-          ) : (
-            "-"
+        <div className="px-3 py-4">
+          {accounts.length > 0 && (
+            <div className="w-full">
+              <h3 className="flex">
+                <button
+                  type="button"
+                  aria-expanded={open}
+                  data-state={open ? "open" : "closed"}
+                  onClick={() => setOpen(!open)}
+                  className="flex flex-1 gap-x-2 items-center justify-start py-4 text-sm font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-90 pt-0"
+                >
+                  <Icon name="chevron-right" variant="fas" className="h-4 w-4 text-gray-400 transition-transform duration-200" />
+                  <div className="flex items-center space-x-3">
+                    <div className="flex items-center justify-center">
+                      <img alt="widget icon" src={asset("images/channels/chat-widget.svg")} className="size-[20px]" />
+                    </div>
+                    <span className="text-gray-800 text-start">Chat Widget ({accounts.length})</span>
+                  </div>
+                </button>
+              </h3>
+              {open && (
+                <ul className="pl-12 text-gray-500">
+                  {accounts.map((i) => (
+                    <li key={i.id} className="truncate">
+                      {i.name}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           )}
         </div>
       </td>
       <td className={td}>
-        <div className={line}>{formatDate(a.updatedAt)}</div>
+        <div className="px-3 py-4">
+          <Person name={a.createdBy} />
+        </div>
       </td>
-      <td className="py-5 pr-4 align-top" style={sticky}>
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            aria-label="More"
-            className="flex items-center justify-center size-7 rounded-md hover:bg-gray-100 ml-auto"
-          >
-            <Icon name="ellipsis-vertical" className="size-4! text-gray-800" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={() => navigate(editPath(a.id))}>Edit</DropdownMenuItem>
-            <DropdownMenuItem onSelect={onDelete}>Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <td className={td}>
+        <div className="px-3 py-4">{a.updatedBy ? <Person name={a.updatedBy} /> : "-"}</div>
+      </td>
+      <td className={td}>
+        <div className="leading-5 px-3 py-4 text-gray-800 text-sm">{formatDate(a.updatedAt)}</div>
+      </td>
+      <td className={td} style={sticky}>
+        <div className="pr-3 py-3 text-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger aria-label="More" className={cn(buttonClass("ghost"), "h-7 p-0 w-7")}>
+              <Icon name="ellipsis-vertical" variant="fas" className="h-4 w-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => navigate(editPath(a.id))}>Edit</DropdownMenuItem>
+              <DropdownMenuItem onSelect={onDelete}>Delete</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </td>
     </tr>
   );

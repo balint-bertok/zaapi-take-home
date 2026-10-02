@@ -1,3 +1,4 @@
+import { Icon } from "@/icons/Icon";
 import { asset } from "@/lib/asset";
 
 /**
@@ -11,7 +12,7 @@ export function ContactAvatar({ size }: { size: 36 | 48 }) {
       <img
         alt="chat account"
         src={asset("images/default-chat-account.png")}
-        className="absolute left-0 top-0 size-4 rounded-full object-cover"
+        className="absolute left-0 top-0 size-[16px] rounded-full object-cover"
       />
       <img alt="avatar" src={asset("images/avatar_placeholder.jpeg")} className="h-full w-full rounded-full object-cover" />
       <div
@@ -24,19 +25,16 @@ export function ContactAvatar({ size }: { size: 36 | 48 }) {
   );
 }
 
-/** Team member initial on gray-500, as in the sidebar's "My Inbox" entry and assignee chips. */
-export function UserAvatar({ name, size = 16 }: { name: string; size?: number }) {
+export { InitialAvatar as UserAvatar } from "@/components/Person";
+
+/** The grey "nobody" circle of the unassigned chip and the assign dialog. */
+export function UnassignedAvatar({ size = 16 }: { size?: number }) {
   return (
-    <div
-      className="relative flex items-center justify-center rounded-full select-none shrink-0 bg-gray-500"
+    <span
+      className="relative flex items-center justify-center rounded-full border border-gray-300 bg-gray-100 shrink-0"
       style={{ width: size, height: size }}
     >
-      <span
-        className="font-medium text-white leading-none"
-        style={{ fontSize: Math.round(size * 0.62) }}
-      >
-        {name.charAt(0).toUpperCase()}
-      </span>
-    </div>
+      <Icon name="user" variant="fas" className={size > 16 ? "text-gray-400 size-3.5!" : "text-gray-400 size-2.5!"} />
+    </span>
   );
 }

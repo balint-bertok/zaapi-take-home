@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { ShellPage } from "@/shell/ShellPage";
+import { Pagination } from "@/components/Pagination";
 import { useDemo } from "@/store/store";
 import { AddPersonalitySheet } from "./AddPersonalitySheet";
 import type { Personality } from "./fixtures";
 import { byName } from "./format";
-import { AddSheetButton, DataTable, FilterChip, ListHeader, Pagination, PersonCell, SearchBox, type Column } from "./parts";
+import { AddSheetButton, DataTable, FilterChip, ListHeader, PersonCell, SearchBox, type Column } from "./parts";
 import { statusColumn } from "./statusColumn";
 
 const columns: Column<Personality>[] = [
@@ -21,6 +22,7 @@ const columns: Column<Personality>[] = [
 export default function PersonalityPage() {
   const personalities = useDemo((s) => s.personalities);
   const [query, setQuery] = useState("");
+  const rows = byName(personalities, query);
 
   return (
     <ShellPage breadcrumb={[{ label: "AI Agent" }, { label: "Train" }, { label: "Personality" }]} className="space-y-7 pb-7">
@@ -36,12 +38,12 @@ export default function PersonalityPage() {
         </ListHeader>
         <div className="flex gap-2 items-center">
           <SearchBox value={query} onChange={setQuery} />
-          <FilterChip icon="link" label="Integrations" iconClassName="size-5" />
+          <FilterChip icon="link" label="Integrations" iconClassName="size-5" integrations />
           <FilterChip icon="user" label="Created by" />
         </div>
         <div>
-          <DataTable columns={columns} rows={byName(personalities, query)} />
-          <Pagination className="mt-8" />
+          <DataTable columns={columns} rows={rows} />
+          <Pagination count={rows.length} className="mt-8" />
         </div>
       </section>
     </ShellPage>

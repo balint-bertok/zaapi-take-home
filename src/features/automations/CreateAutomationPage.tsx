@@ -11,7 +11,9 @@ import { useDemo } from "@/store/store";
 import type { Automation } from "./fixtures";
 import { automationSettings, listPath, today, updateAutomations } from "./basic/automation";
 import { ConfirmDialog } from "./basic/ConfirmDialog";
-import { Avatar, Checkbox, RadioCards } from "./basic/controls";
+import { InitialAvatar } from "@/components/Person";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioCards } from "./basic/controls";
 import { toggleIn } from "./flows/shared";
 
 // Texts verbatim from the catalog (automations.*, common.general.*), markup from the saved create page.
@@ -187,7 +189,7 @@ function AutomationForm({ existing }: { existing: Automation | undefined }) {
                             className="size-[22px] max-w-none"
                           />
                         </span>
-                        <span className="text-gray-800 text-sm font-normal text-start truncate">Chat Widget</span>
+                        <span className="text-gray-800 text-sm text-start truncate">Chat Widget</span>
                       </span>
                     </button>
                     <Checkbox label="Chat Widget" checked={allWidgets} onCheckedChange={setAllWidgets} />
@@ -257,7 +259,7 @@ function AutomationForm({ existing }: { existing: Automation | undefined }) {
                   <div className="border border-gray-100 my-2" />
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex gap-x-2 items-center h-8 min-w-0">
-                      <Avatar name={user.name} />
+                      <InitialAvatar name={user.name} size={24} text="text-[12px]" />
                       <span className="text-sm leading-4 text-gray-800 truncate">{user.name}</span>
                       <Icon name="clock" variant="far" className="min-w-4 h-4 text-gray-400" />
                     </div>

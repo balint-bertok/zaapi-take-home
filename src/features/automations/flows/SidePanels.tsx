@@ -128,7 +128,7 @@ function AutomationLogs() {
           Only runs not linked to a conversation
         </label>
       </div>
-      <div className="flex justify-center text-gray-500">No data</div>
+      <p className="text-sm text-gray-500 text-center pt-4">No data</p>
     </div>
   );
 }
