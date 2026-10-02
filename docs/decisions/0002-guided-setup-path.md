@@ -23,6 +23,12 @@ The memo to leadership proposes one product change: a guided path to a merchant'
 - The e2e suites that open other sections by URL are unaffected; only rail clicks are gated.
 - A viewer who knows the product will not find these pages on app.zaapi.com; `docs/fidelity.md` carries the waiver.
 
+## Amendment, 2026-10-02: hybrid modal
+
+Status stays accepted. The intro, persona, scenarios and knowledge steps now run in the inbox onboarding's modal frame (`ModalTour` and `StepCard` in `src/components/ModalTour.tsx`) over the setup page; test and go live stay pages. Each step keeps its URL, and the empty and filled twins still move on first touch. "Do it later" closes the modal onto the setup page, and the page's button (at the first step not done) or the step list reopens it. Skipping scenarios asks inline, in the same card, because a dialog inside a modal is avoided. The file-or-website sheet is not offered inside the modal; Knowledge Source keeps it.
+
+Why: the user wanted the first AI Agent click to feel like the product's existing onboarding pop-ups; the heavier steps stay pages because a modal suits short, focused steps (user decision, 2026-10-02).
+
 ## Alternatives considered
 
 | Rejected | Why | Whose decision |
@@ -31,3 +37,4 @@ The memo to leadership proposes one product change: a guided path to a merchant'
 | Gating other features behind finishing the path, in the proposal | Adds a restriction to features that exist today; the reward for finishing is the live agent | User |
 | Making the path mandatory, in the proposal | Contradicts the campaign-season finding (merchants must be able to leave) and hides the exit rate | User |
 | Renaming the live app's "Set command" page | Out of scope; only the path uses "Scenarios" | User |
+| All five steps in the modal | The test chat and go-live do not fit a modal | User |
