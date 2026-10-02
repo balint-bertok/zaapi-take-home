@@ -24,8 +24,12 @@ for (const route of routes) {
     }
     // Hovering a rail icon opens a tooltip portal, the one lazily rendered part of the shell.
     // Every route with a section layout has the rail, so a missing one fails here, not silently.
-    if (route.layout !== "auth" && route.layout !== "canvas")
-      await page.getByRole("navigation", { name: "Main" }).getByRole("link").first().hover();
+    // Under the setup modal the rail cannot be hovered, by the viewer or here; it must still exist.
+    if (route.layout !== "auth" && route.layout !== "canvas") {
+      const railLink = page.getByRole("navigation", { name: "Main", includeHidden: true }).getByRole("link", { includeHidden: true }).first();
+      if (await page.getByRole("dialog").isVisible()) await expect(railLink).toBeAttached();
+      else await railLink.hover();
+    }
     await page.waitForLoadState("networkidle");
 
     expect(requested.length).toBeGreaterThan(0);
