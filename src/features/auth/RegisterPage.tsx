@@ -1,12 +1,11 @@
 import * as Collapsible from "@radix-ui/react-collapsible";
 import type { CSSProperties, FormEvent } from "react";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { Inert } from "@/components/Inert";
 import { Button, buttonClass } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Icon } from "@/icons/Icon";
 import { asset } from "@/lib/asset";
-import { updateDemo } from "@/store/store";
 import { LanguageButton } from "./AuthChrome";
 import { demoCredentials } from "./demoCredentials";
 import { FieldError, Label, PasswordInput, PhoneInput } from "./fields";
@@ -72,13 +71,10 @@ function TurnstileSuccess() {
 export default function RegisterPage() {
   const navigate = useNavigate();
 
-  // No app validation (the browser's own email-format check stays, as on the saved page) and no
-  // account: remember only the email, which the login and verify pages echo back.
+  // No app validation (the browser's own email-format check stays, as on the saved page), no account
+  // and nothing kept: straight to the inbox (user decision 2026-10-02).
   function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const email = String(new FormData(e.currentTarget).get("email") ?? "").trim();
-    updateDemo((s) => ({ ...s, registeredEmail: email }));
-    // Straight to the inbox; /register/verify stays routable by URL but off the click path (user decision 2026-10-02).
     navigate("/tickets");
   }
 
@@ -167,9 +163,8 @@ export default function RegisterPage() {
           <div className="flex w-full flex-col justify-between h-full px-10 py-6">
             <nav className="flex items-center justify-between">
               <LanguageButton />
-              <Link className={buttonClass("outline")} to="/login">
-                Log in
-              </Link>
+              {/* The login page is outside the demo's journey (ADR 0003). */}
+              <Inert className={buttonClass("outline")}>Log in</Inert>
             </nav>
             <div className="flex flex-col items-center gap-24 pt-16 flex-1 justify-center">
               <h2 className="text-center font-outfit text-4xl font-light text-gray-800">

@@ -5,7 +5,7 @@ import { Icon } from "@/icons/Icon";
 import { cn } from "@/lib/cn";
 import { Flag } from "./flags";
 
-// Form pieces shared by the register and login pages, class lists from the saved pages.
+// Form pieces of the register page, class lists from the saved pages.
 
 export function Label({ className, ...props }: ComponentProps<"label">) {
   return (

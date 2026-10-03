@@ -7,7 +7,8 @@
  * modal's step bar marks the current step and the done ones. Each empty form moves to its filled
  * twin on first touch, Continue included. Continue appends to the Personality and Knowledge
  * Source lists, once: a second Continue adds no duplicate; a scenario row is added on Create. The
- * readiness summary on the Test step reads the store. "Go live" opens the dashboard; `?reset=1`
+ * readiness summary on the Test step reads the store. "Go live" opens the AI Agent pages (the rest
+ * of the rail stays inert, ADR 0003); `?reset=1`
  * restores the path, and the done page's "start again" resets the demo and returns to sign-up. "Finish later" closes the modal onto the page, whose button reopens it.
  * Skipping scenarios states the consequence inline, in the same dialog, and changes what the
  * knowledge step asks. Picking a template opens its prefilled scenario form in the same card, as
@@ -127,8 +128,10 @@ test("the guided setup runs from sign-up to a live agent, then opens the dashboa
   await expect(page).toHaveURL(/\/ai\/setup\/live\/done$/);
   await expect(page.getByText(/answering half/)).toBeVisible();
 
-  // After go-live the dashboard is open and every step links.
-  for (const name of ["Automations", "Settings"]) await expect(rail.getByRole("link", { name })).toBeVisible();
+  // After go-live the AI Agent pages open and every step links; pages outside the journey stay inert (ADR 0003).
+  for (const name of ["Automations", "Settings"]) {
+    await expect(rail.locator(`button[aria-disabled="true"][aria-label="${name}"]`)).toBeVisible();
+  }
   await expect(rail.getByRole("link", { name: "AI Agent" })).toHaveAttribute("href", /\/ai\/train\/knowledge-source$/);
   for (const name of ["Persona", "Scenarios", "Knowledge", "Test", "Go live"]) await expect(sidebar.getByRole("link", { name })).toBeVisible();
 

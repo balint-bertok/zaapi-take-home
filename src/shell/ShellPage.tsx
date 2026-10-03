@@ -7,9 +7,8 @@ const container = "mx-auto min-w-(--min-width-content) max-w-(--max-width-conten
 /**
  * The standard page inside the content card: a 70px breadcrumb header (last entry is the current
  * page) over the scrolling, width-capped page container. Pages with their own header (Tickets)
- * render straight into the card instead. Without `className` the container carries the automations
- * pages' spacing (`mb-8` plus a `mt-3` wrapper); with it, the container takes exactly those classes,
- * as on the settings and AI pages (`space-y-10 pb-7` and similar).
+ * render straight into the card instead. The container takes exactly `className`, as on the AI
+ * pages (`space-y-7 pb-7` and similar).
  */
 export function ShellPage({
   breadcrumb,
@@ -17,7 +16,7 @@ export function ShellPage({
   children,
 }: {
   breadcrumb: Crumb[];
-  className?: string;
+  className: string;
   children?: ReactNode;
 }) {
   return (
@@ -28,13 +27,7 @@ export function ShellPage({
         </div>
       </header>
       <div className="bg-(--content-area-background) px-10 overflow-auto overscroll-x-none h-(--height-page-content-with-banner) pt-(--auth-header-height)">
-        {className ? (
-          <main className={cn(container, className)}>{children}</main>
-        ) : (
-          <main className={cn(container, "mb-8")}>
-            <div className="mt-3">{children}</div>
-          </main>
-        )}
+        <main className={cn(container, className)}>{children}</main>
       </div>
     </>
   );

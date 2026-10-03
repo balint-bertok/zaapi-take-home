@@ -3,7 +3,7 @@
  * For each route: HTTP 200, no console error, no uncaught page error, the catalog title
  * (seo.metaTitle), and every in-app link points at a route in the table, so a click never
  * dead-ends (uncaptured pages are <Inert>, not links; user decision 2026-10-01).
- * "/" must redirect to /login.
+ * "/" must redirect to /register.
  */
 import { expect, test, type Page } from "@playwright/test";
 import { routes } from "../../src/routes";
@@ -33,10 +33,10 @@ for (const route of routes) {
   });
 }
 
-test("/ redirects to /login", async ({ page }) => {
+test("/ redirects to /register", async ({ page }) => {
   const errors = collectErrors(page);
   await page.goto("./", { waitUntil: "networkidle" });
-  await expect(page).toHaveURL(/\/login$/);
-  await expect(page).toHaveTitle("Welcome to Zaapi!");
+  await expect(page).toHaveURL(/\/register$/);
+  await expect(page).toHaveTitle("Register - Zaapi");
   expect(errors).toEqual([]);
 });

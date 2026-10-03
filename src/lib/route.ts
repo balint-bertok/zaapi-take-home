@@ -3,18 +3,16 @@ import type { SectionKey } from "../shell/sections";
 
 /** Document titles from the catalog's seo.metaTitle, one per page family. */
 export const titles = {
-  login: "Welcome to Zaapi!",
   register: "Register - Zaapi",
   inbox: "Inbox - Zaapi",
   ai: "AI training center - Zaapi",
-  automations: "Automations - Zaapi",
-  settings: "Settings - Zaapi",
 } as const;
 
 /**
  * One page of the demo. `layout` picks the chrome around it: `auth` stands alone, `canvas` sits
- * under the trial banner only (Flow Builder), `setup` adds the rail and the guided setup's step
- * sidebar, a section key adds that section's rail and sidebar.
+ * under the trial banner only (the tickets inbox, which draws its own rail and sidebar), `setup`
+ * adds the rail and the guided setup's step sidebar, a section key adds that section's rail and
+ * sidebar.
  */
 export type AppRoute = {
   path: string;

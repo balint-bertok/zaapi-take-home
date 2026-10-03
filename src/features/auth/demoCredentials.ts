@@ -1,7 +1,6 @@
-// Fake values the auth forms and the first onboarding modal open with, so one click signs in and
+// Fake values the register form and the first onboarding modal open with, so one click signs up and
 // one click continues (user decisions 2026-10-02); the onboarding name is the store's demo user.
-// Input defaults only. The password never reaches the store, storage or the URL; the register
-// email is kept like any typed email (`registeredEmail`).
+// Input defaults only: nothing typed reaches the store, storage or the URL.
 export const demoCredentials = {
   businessName: "Brand One",
   email: "test@demo.com",

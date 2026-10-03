@@ -12,7 +12,7 @@ export const SheetTrigger = DialogPrimitive.Trigger;
 type FrameProps = ComponentProps<typeof DialogPrimitive.Content>;
 
 /**
- * Every right-hand sheet in the app (AI Agent, automations, flows): a plain black/50 backdrop with
+ * Every right-hand sheet in the demo (the AI Agent pages): a plain black/50 backdrop with
  * no blur (unlike centred dialogs) and the sliding gray-50 panel. Callers add their own header.
  */
 export function SheetFrame({ className, children, ...props }: FrameProps) {

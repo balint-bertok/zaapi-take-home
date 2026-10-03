@@ -1,4 +1,3 @@
-import { Link } from "react-router";
 import { Inert } from "@/components/Inert";
 import { Icon } from "@/icons/Icon";
 import { asset } from "@/lib/asset";
@@ -37,9 +36,8 @@ export default function TestPage() {
             <div className="flex flex-col gap-1">
               <div className="ai-gradient-text">
                 Activate AI by adding the ‘Let AI handle’ block in Flow Builder or by using one of our templates.{" "}
-                <Link className="border-b border-purple-600" to="/automations/flows">
-                  Go to Flow Builder
-                </Link>
+                {/* Flow Builder is outside the demo's journey (ADR 0003). */}
+                <Inert className="border-b border-purple-600">Go to Flow Builder</Inert>
               </div>
             </div>
           </div>
