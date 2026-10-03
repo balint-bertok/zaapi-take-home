@@ -3,13 +3,11 @@ import { Icon } from "@/icons/Icon";
 import { updateDemo, useDemo } from "@/store/store";
 import { FormCard, RadioCard } from "../ai/parts";
 import { AccountLabel } from "../ai/TestChat";
-import { shares } from "./content";
-import { BackLink, ContinueButton, SetupPage } from "./SetupPage";
+import { flowBlocks, flowName, pauseNote, shares } from "./content";
+import { IconRow } from "./IconRow";
+import { BackLink, ContinueButton, SetupPage, setupCard, setupCardTitle } from "./SetupPage";
 
-const card = "border border-gray-200";
-const cardTitle = "text-base font-medium text-gray-800";
-
-/** Step 5: pick the channel's share, then go live. Nothing is stored until "Go live". */
+/** Step 5: pick the channel's share, see the flow this publishes, then go live. Nothing is stored until "Go live". */
 export default function GoLivePage() {
   const stored = useDemo((s) => s.agentShare);
   const [share, setShare] = useState(stored);
@@ -28,8 +26,8 @@ export default function GoLivePage() {
         </>
       }
     >
-      <FormCard className={card}>
-        <h2 className={cardTitle}>Channel</h2>
+      <FormCard className={setupCard}>
+        <h2 className={setupCardTitle}>Channel</h2>
         {/* The account row of the Test chat's account picker. */}
         <div className="text-sm text-gray-800 mt-3">
           <AccountLabel />
@@ -37,8 +35,8 @@ export default function GoLivePage() {
         <p className="text-sm text-gray-500 mt-1">Chat Widget</p>
       </FormCard>
 
-      <FormCard className={card}>
-        <h2 className={cardTitle}>Share of new conversations</h2>
+      <FormCard className={setupCard}>
+        <h2 className={setupCardTitle}>Share of new conversations</h2>
         <div role="radiogroup" aria-label="Share of new conversations" className="flex gap-4 mt-3">
           {shares.map((s) => (
             <RadioCard key={s.value} checked={share === s.value} onSelect={() => setShare(s.value)}>
@@ -52,6 +50,21 @@ export default function GoLivePage() {
         </p>
       </FormCard>
 
+      <FormCard className={setupCard}>
+        <h2 className={setupCardTitle}>What this publishes</h2>
+        <p className="text-sm text-gray-500 mt-1">
+          A flow in Flow Builder, “{flowName}”. You can change it there later.
+        </p>
+        <ol aria-label="Flow blocks" className="mt-3 divide-y divide-gray-200 rounded-lg border border-gray-200">
+          {flowBlocks(share).map((b) => (
+            <IconRow key={b.label} icon={b.icon} iconClassName={b.iconClassName} className="p-3">
+              <span className="font-medium">{b.label}</span>
+              <span className="text-gray-500">: {b.detail}</span>
+            </IconRow>
+          ))}
+        </ol>
+      </FormCard>
+
       {/* The AI Agent > Test page's callout. */}
       <div className="p-3.5 rounded-md text-sm border-l-4 bg-(image:--color-ai-gradient-light) border-electric-green-500" role="alert">
         <div className="flex flex-row gap-2">
@@ -59,9 +72,7 @@ export default function GoLivePage() {
             <Icon name="ai-symbol" className="size-5! ai-gradient-icon shrink-0" />
           </div>
           <div className="flex flex-col gap-1">
-            <div className="ai-gradient-text">
-              Your team can take over any conversation at any time. Switching the agent off is one click on the AI Agent page.
-            </div>
+            <div className="ai-gradient-text">Your team can take over any conversation at any time. {pauseNote}</div>
           </div>
         </div>
       </div>

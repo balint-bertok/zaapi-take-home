@@ -36,6 +36,10 @@ export function SetupPage({
   );
 }
 
+/** The bordered card and its title on the Test and Go live pages. */
+export const setupCard = "border border-gray-200";
+export const setupCardTitle = "text-base font-medium text-gray-800";
+
 const back = (
   <>
     {/* The saved pages carry no arrow-left glyph; arrow-right mirrored is the same shape. */}
