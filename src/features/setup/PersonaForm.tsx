@@ -12,15 +12,25 @@ import { languageNote, languages, type Language } from "./content";
 
 export type Persona = { name: string; style: string; guidelines: string; language: Language | null; signature: boolean };
 
+/** A field's label with its character counter on the same row, so the form stays short. */
+function LabelRow({ htmlFor, label, value, max }: { htmlFor: string; label: string; value: string; max: number }) {
+  return (
+    <div className="flex items-baseline justify-between gap-4">
+      <label htmlFor={htmlFor} className={fieldLabel}>
+        {label}
+      </label>
+      <Counter value={value} max={max} className="" />
+    </div>
+  );
+}
+
 /** `onFocus` runs when any text field gets focus; `onChange` gets each edit as a patch. */
 export function PersonaForm({ value, onChange, onFocus }: { value: Persona; onChange: (patch: Partial<Persona>) => void; onFocus?: () => void }) {
   return (
-    <form className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm items-start" onSubmit={(e) => e.preventDefault()}>
-      <div className="space-y-4">
+    <form className="grid grid-cols-2 gap-x-6 text-sm items-start" onSubmit={(e) => e.preventDefault()}>
+      <div className="space-y-3">
       <div>
-        <label htmlFor="persona-name" className={fieldLabel}>
-          Name
-        </label>
+        <LabelRow htmlFor="persona-name" label="Name" value={value.name} max={100} />
         <Input
           id="persona-name"
           className="rounded-md"
@@ -30,13 +40,10 @@ export function PersonaForm({ value, onChange, onFocus }: { value: Persona; onCh
           onFocus={onFocus}
           onChange={(e) => onChange({ name: e.target.value })}
         />
-        <Counter value={value.name} max={100} />
       </div>
 
       <div>
-        <label htmlFor="persona-style" className={fieldLabel}>
-          Style your AI agent to match your brand personality
-        </label>
+        <LabelRow htmlFor="persona-style" label="Style your AI agent to match your brand personality" value={value.style} max={150} />
         <div className="mb-2">
           <StyleHelp />
         </div>
@@ -49,26 +56,22 @@ export function PersonaForm({ value, onChange, onFocus }: { value: Persona; onCh
           onFocus={onFocus}
           onChange={(e) => onChange({ style: e.target.value })}
         />
-        <Counter value={value.style} max={150} />
       </div>
 
       <div>
-        <label htmlFor="persona-guidelines" className={fieldLabel}>
-          Custom guidelines for response generation
-        </label>
+        <LabelRow htmlFor="persona-guidelines" label="Custom guidelines for response generation" value={value.guidelines} max={250} />
         <div className="mb-2">
           <GuidelinesHelp />
         </div>
         <Textarea
           id="persona-guidelines"
-          className="resize-none"
+          className="min-h-[64px] resize-none"
           placeholder="Write specific guidelines for the AI to follow - language, word choice, formatting rules..."
           maxLength={250}
           value={value.guidelines}
           onFocus={onFocus}
           onChange={(e) => onChange({ guidelines: e.target.value })}
         />
-        <Counter value={value.guidelines} max={250} />
       </div>
       </div>
 

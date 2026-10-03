@@ -47,10 +47,12 @@ const screens: Record<string, () => ReactNode> = {
 // The card's width and the screens' body height, so the card is one size and its footer sits at the
 // same place on every screen, and no screen scrolls to reach the next step (user decision
 // 2026-10-03): the taller screens (persona, scenario form, test, go live) lay their content out in two
-// columns instead, and every screen's content fits the body (docs/measurements.md, guarded by the
-// setup-path suite). The body still scrolls if content ever outgrows it, so nothing is unreachable.
-const cardWidth = "w-[900px]";
-const bodyHeight = 612;
+// columns instead, and every screen's content fits the body, with the whole card fitting a laptop
+// window (docs/measurements.md, guarded by the setup-path suite). The card is a column capped at the
+// window's height, so in a window shorter than the card the body alone scrolls and the title and
+// footer stay on screen; the body also scrolls if content ever outgrows it, so nothing is unreachable.
+const cardWidth = "w-[960px] flex max-h-[calc(100vh-2rem)] flex-col";
+const bodyHeight = 516;
 const footerClass = "border-t bg-gray-50 px-6 py-3 flex justify-between items-center gap-4";
 const sectionTitle = "text-base font-medium text-gray-800";
 
@@ -81,7 +83,8 @@ function SetupCard({
 }) {
   return (
     <StepCard width={cardWidth} top={<SetupProgress current={step} />} title={title} subtitle={subtitle} onOpenAutoFocus={focusCard}>
-      <div data-testid="setup-body" className="overflow-y-auto" style={{ height: bodyHeight }}>
+      {/* The design height, shrinking only when the window is shorter than the card. */}
+      <div data-testid="setup-body" className="min-h-0 overflow-y-auto" style={{ height: bodyHeight }}>
         {children}
       </div>
       <div className={footerClass}>{footer}</div>
