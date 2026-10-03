@@ -2,8 +2,8 @@
  * The guided setup click path (ADR 0002 and its hybrid-modal amendment), from sign-up to a live
  * agent. Before go-live the rail sends AI Agent into the path and leaves every other section but
  * Tickets inert; the step list links only to done steps and the current one, and the "skip the
- * setup" exit is inert. The welcome, persona, scenarios, knowledge and test steps run in the inbox
- * onboarding's modal frame over the setup page; go live is a page with no dialog. The
+ * setup" exit is inert. Every step, welcome through go live, runs in the inbox onboarding's modal
+ * frame over the setup page; only the done page has no dialog. The
  * modal's step bar marks the current step and the done ones. Each empty form moves to its filled
  * twin on first touch, Continue included. Continue appends to the Personality and Knowledge
  * Source lists, once: a second Continue adds no duplicate; a scenario row is added on Create. The
@@ -35,6 +35,9 @@ async function expectFits(dialog: Locator) {
   const [content, height] = await body.evaluate((el) => [el.scrollHeight, el.clientHeight]);
   expect(content, `content ${content}px in a ${height}px body`).toBeLessThanOrEqual(height);
 }
+
+/** The frame behind an open modal, by CSS: the open dialog hides the page from role locators. */
+const behind = (page: Page, label: string) => page.locator(`[aria-label="${label}"]`);
 
 test("the guided setup runs from sign-up to a live agent, then opens the AI Agent pages", async ({ page }) => {
   const errors = collectErrors(page);
@@ -146,7 +149,6 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
 
   // The step list links only to done steps and the current one; the skip exit is shown but inert.
   // The open modal hides the page from the accessibility tree, so the step list is located by CSS.
-  const sidebar = page.getByRole("complementary", { name: "Set up your AI Agent" });
   const stepList = page.locator('[aria-label="Set up your AI Agent"]');
   for (const name of ["Persona", "Scenarios", "Knowledge", "Test"]) await expect(stepList.locator("a", { hasText: name })).toBeVisible();
   await expect(stepList.locator('button[aria-disabled="true"]', { hasText: "Go live" })).toBeVisible();
@@ -155,28 +157,34 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
 
   await test.getByRole("link", { name: "Continue", exact: true }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/live$/);
-  await expect(page.getByRole("dialog")).toHaveCount(0);
 
-  // Go live: a small share by default. The page shows the flow it publishes, and the "Let AI handle"
-  // block follows the picked share; the done page names the flow and says pausing it pauses the agent.
-  await expect(page.getByRole("radio", { name: "1 in 5" })).toHaveAttribute("aria-checked", "true");
-  const blocks = page.getByRole("list", { name: "Flow blocks" });
+  // Go live, a modal screen too: a small share by default. It shows the flow it publishes, and the
+  // "Let AI handle" block follows the picked share; the done page names the flow and says pausing it
+  // pauses the agent.
+  const live = page.getByRole("dialog", { name: "Go live" });
+  await expect(progress(live).filter({ hasText: "Go live" })).toHaveAttribute("aria-current", "step");
+  await expectFits(live);
+  await expect(live.getByRole("radio", { name: "1 in 5" })).toHaveAttribute("aria-checked", "true");
+  const blocks = live.getByRole("list", { name: "Flow blocks" });
   await expect(blocks.getByRole("listitem")).toHaveText([/^Trigger/, /^Let AI handle: 1 in 5/, /^Assign to/]);
-  await page.getByRole("radio", { name: "Half" }).click();
+  await live.getByRole("radio", { name: "Half" }).click();
   await expect(blocks.getByRole("listitem").nth(1)).toHaveText(/^Let AI handle: half/);
-  await page.getByRole("main").getByRole("link", { name: "Go live" }).click();
+  await live.getByRole("link", { name: "Go live" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/live\/done$/);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Your agent is live. That's the end of the demo." })).toBeVisible();
   await expect(page.getByText(/answers half .* through the flow “AI handles new conversations on Test \(Demo\)”\. Pausing the agent/)).toBeVisible();
 
   // After go-live the AI Agent pages open and every step links; pages outside the journey stay inert
-  // (ADR 0003). The done page stands alone, so this is checked from the go-live page, which has no modal.
+  // (ADR 0003). The done page stands alone and every setup URL opens the modal, so the frame behind it
+  // is located by CSS, as above.
   await page.goto("ai/setup/live");
+  await expect(live).toBeVisible();
   for (const name of ["Automations", "Settings"]) {
-    await expect(rail.locator(`button[aria-disabled="true"][aria-label="${name}"]`)).toBeVisible();
+    await expect(behind(page, "Main").locator(`button[aria-disabled="true"][aria-label="${name}"]`)).toBeVisible();
   }
-  await expect(rail.getByRole("link", { name: "AI Agent" })).toHaveAttribute("href", /\/ai\/train\/knowledge-source$/);
-  for (const name of ["Persona", "Scenarios", "Knowledge", "Test", "Go live"]) await expect(sidebar.getByRole("link", { name })).toBeVisible();
+  await expect(behind(page, "Main").locator('a[aria-label="AI Agent"]')).toHaveAttribute("href", /\/ai\/train\/knowledge-source$/);
+  for (const name of ["Persona", "Scenarios", "Knowledge", "Test", "Go live"]) await expect(stepList.locator("a", { hasText: name })).toBeVisible();
 
   // The lists show what the path created, once each.
   await page.goto("ai/train/personality");
@@ -217,10 +225,9 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   await page.goto("ai/setup?reset=1");
   await expect(welcome).toBeVisible();
   // The open modal hides the page from the accessibility tree, so the frame is located by CSS here.
-  const behind = (label: string) => page.locator(`[aria-label="${label}"]`);
-  await expect(behind("Set up your AI Agent").locator('button[aria-disabled="true"]', { hasText: "Scenarios" })).toBeVisible();
-  await expect(behind("Main").locator('button[aria-disabled="true"][aria-label="Automations"]')).toBeVisible();
-  await expect(behind("Main").locator('a[aria-label="AI Agent"]')).toHaveAttribute("href", /\/ai\/setup$/);
+  await expect(behind(page, "Set up your AI Agent").locator('button[aria-disabled="true"]', { hasText: "Scenarios" })).toBeVisible();
+  await expect(behind(page, "Main").locator('button[aria-disabled="true"][aria-label="Automations"]')).toBeVisible();
+  await expect(behind(page, "Main").locator('a[aria-label="AI Agent"]')).toHaveAttribute("href", /\/ai\/setup$/);
 
   expect(errors).toEqual([]);
 });

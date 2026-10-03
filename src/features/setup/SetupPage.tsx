@@ -4,20 +4,17 @@ import { Button, buttonClass } from "@/components/ui/button";
 import { Icon } from "@/icons/Icon";
 import { cn } from "@/lib/cn";
 import { ShellPage } from "@/shell/ShellPage";
-import { stepCounter } from "./content";
 
 /**
- * The frame every guided-setup page shares: breadcrumb, "Step N of M" (none on the setup home),
- * the title and description, the page's own content, and an optional footer row (Back, Continue).
+ * The frame of the setup page behind the modal: breadcrumb, the title and description, the page's
+ * own content, and an optional footer row (Back, Continue).
  */
 export function SetupPage({
-  step,
   title,
   description,
   children,
   footer,
 }: {
-  step?: 5;
   title: string;
   description?: ReactNode;
   children?: ReactNode;
@@ -26,7 +23,6 @@ export function SetupPage({
   return (
     <ShellPage breadcrumb={[{ label: "AI Agent" }, { label: "Set up" }, { label: title }]} className="space-y-8 pb-7">
       <section>
-        {step && <div className="text-xs font-medium text-gray-400">{stepCounter(step)}</div>}
         <h1 className="text-2xl font-medium">{title}</h1>
         {description && <div className="text-sm text-gray-500 mt-2">{description}</div>}
       </section>
@@ -36,7 +32,7 @@ export function SetupPage({
   );
 }
 
-/** The bordered card and its title on the test screen's readiness card and the Go live page. */
+/** The bordered card and its title on the test and go-live screens' cards. */
 export const setupCard = "border border-gray-200";
 export const setupCardTitle = "text-base font-medium text-gray-800";
 
