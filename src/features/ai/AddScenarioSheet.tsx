@@ -95,7 +95,8 @@ function Steps({ markdown }: { markdown: string }) {
 /**
  * The scenario form, prefilled from `start`: submitting appends the row, toasts, then `onDone`.
  * The guided setup's modal reuses it: `compact` leaves out the integration card (the setup has one
- * channel), and `frame` places the form and its own submit button, tied to the form by `submit.form`.
+ * channel), `frame` places the form and its own submit button, tied to the form by `submit.form`, and
+ * `onTouch` runs when any field gets focus (the setup fills an empty form in on first touch).
  * Without `frame` it is the sheet's section with the sheet's footer.
  */
 export function ScenarioForm({
@@ -103,11 +104,13 @@ export function ScenarioForm({
   onDone,
   compact,
   frame,
+  onTouch,
 }: {
   start: Template["form"];
   onDone: () => void;
   compact?: boolean;
   frame?: (form: ReactNode, submit: { form: string; disabled: boolean }) => ReactNode;
+  onTouch?: () => void;
 }) {
   const id = useId();
   const user = useDemo((s) => s.user);
@@ -115,6 +118,15 @@ export function ScenarioForm({
   const [trigger, setTrigger] = useState(start.trigger);
   const [integrations, setIntegrations] = useState<string[]>([]);
   const [handling, setHandling] = useState<ScenarioHandling>(start.handling);
+  // A new `start` (the setup filling the empty form in) resets the fields during render, so the
+  // field that was touched keeps its focus; the editor below is keyed on it for the same reason.
+  const [shown, setShown] = useState(start);
+  if (shown !== start) {
+    setShown(start);
+    setName(start.name);
+    setTrigger(start.trigger);
+    setHandling(start.handling);
+  }
   const ready = name.trim() !== "" && trigger.trim() !== "";
 
   function submit(e: FormEvent) {
@@ -203,7 +215,7 @@ export function ScenarioForm({
             </p>
           </div>
           <div className="mt-4">
-            <RichTextEditor label="Reply steps">{start.instruction ? <Steps markdown={start.instruction} /> : undefined}</RichTextEditor>
+            <RichTextEditor key={start.instruction ?? ""} label="Reply steps">{start.instruction ? <Steps markdown={start.instruction} /> : undefined}</RichTextEditor>
           </div>
         </div>
         {handling === "escalate_to_human_agent" && (
@@ -215,7 +227,7 @@ export function ScenarioForm({
 
   if (frame)
     return frame(
-      <form id={id} className="bg-gray-50 p-6 text-sm" onSubmit={submit}>
+      <form id={id} className="bg-gray-50 p-6 text-sm" onSubmit={submit} onFocus={onTouch}>
         {fields}
       </form>,
       { form: id, disabled: !ready },

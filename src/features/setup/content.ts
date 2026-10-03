@@ -99,5 +99,14 @@ export const neededPolicies = (scenarioNames: string[]) =>
 /** Where the inline reference goes: a URL is a website source, anything else a file. */
 export const referenceType = (reference: string): "website" | "file" => (/^(https?:\/\/|www\.)/i.test(reference.trim()) ? "website" : "file");
 
+/** What the "Manual entry" scenario form holds once "filled": a scenario the merchant might write. */
+export const writtenScenario: Template["form"] = {
+  name: "Opening hours",
+  trigger: "When a customer asks when the shop or the support team is available, or whether someone is there right now.",
+  handling: "follow_instruction",
+  instruction:
+    "## 1. Give the hours\n\nMonday to Saturday, 9:00 to 18:00 Bangkok time. Closed on Sundays and public holidays.\n\n## 2. Outside those hours\n\nSay when the team is back and offer to pass the question on so someone replies first thing.",
+};
+
 /** The consequence of skipping scenarios, stated when the merchant tries to. */
 export const skipConsequence = "Without a scenario, refunds and complaints go to your team.";

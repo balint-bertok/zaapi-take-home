@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState, type MouseEvent, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { Inert } from "@/components/Inert";
 import { ModalTour, StepCard } from "@/components/ModalTour";
@@ -7,7 +7,7 @@ import { useDemo } from "@/store/store";
 import { ChoiceCard, ScenarioForm } from "../ai/AddScenarioSheet";
 import { TestChat } from "../ai/TestChat";
 import { isTemplateName, manualEntry, scratch, templates, type Template } from "../ai/scenarioTemplates";
-import { neededPolicies, personaSuggestion, policies, skipConsequence, type Policy } from "./content";
+import { neededPolicies, personaSuggestion, policies, skipConsequence, writtenScenario, type Policy } from "./content";
 import { ChannelRow, StepsAhead } from "./Intro";
 import { KnowledgeForm, type Knowledge } from "./KnowledgeForm";
 import { PersonaForm, type Persona } from "./PersonaForm";
@@ -199,7 +199,8 @@ function PersonaStep({ filled }: { filled: boolean }) {
  * scenario" sheet does; creating it adds the row and returns to the cards with that one checked (unless
  * renamed: the card stands for the template's name). Unchecking a card only drops the pick: Continue
  * removes its row. "Manual entry" opens the empty form, as the sheet's does (user decision 2026-10-03);
- * each scenario it creates stays, and counts on its card.
+ * like the other empty forms it fills itself in on first touch, or on Create, with a scenario the
+ * merchant might write; each scenario it creates stays, and counts on its card.
  */
 function ScenariosStep() {
   const scenarios = useDemo((s) => s.scenarios);
@@ -225,18 +226,22 @@ function ScenariosStep() {
     skipScenarios();
     navigate(knowledgePath);
   };
-  if (editing)
+  if (editing) {
+    const empty = editing.form === scratch;
+    const written = editing.title === manualEntry.title;
+    const fill = () => setEditing({ ...editing, form: writtenScenario });
     return (
       <ScenarioForm
         start={editing.form}
         compact
+        onTouch={empty ? fill : undefined}
         // A template's new row checks its card; a written one counts on Manual entry.
         onDone={() => setEditing(null)}
         frame={(form, submit) => (
           <SetupCard
             step="scenarios"
             title={editing.title}
-            subtitle={editing.form === scratch ? "Describe when it should trigger and how the agent handles it. You can edit it later." : "Review the ready-made steps, then create the scenario. You can edit it later."}
+            subtitle={written ? "Describe when it should trigger and how the agent handles it. You can edit it later." : "Review the ready-made steps, then create the scenario. You can edit it later."}
             scroll
             footer={
               <>
@@ -244,7 +249,20 @@ function ScenariosStep() {
                   <BackButton onClick={() => setEditing(null)} />
                   <LaterButton />
                 </div>
-                <Button type="submit" {...submit}>
+                {/* On the empty form Create fills it in instead of submitting, like Continue on the persona. The
+                    default is prevented because the fill re-renders this button as the submit before the click's
+                    default action runs. */}
+                <Button
+                  {...(empty
+                    ? {
+                        type: "button" as const,
+                        onClick: (e: MouseEvent<HTMLButtonElement>) => {
+                          e.preventDefault();
+                          fill();
+                        },
+                      }
+                    : { type: "submit" as const, ...submit })}
+                >
                   Create scenario
                 </Button>
               </>
@@ -255,6 +273,7 @@ function ScenariosStep() {
         )}
       />
     );
+  }
   return (
     <SetupCard
       step="scenarios"
