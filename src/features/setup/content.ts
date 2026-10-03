@@ -1,5 +1,6 @@
 // Copy and fixture values the guided setup shows. None of it comes from the catalog: the setup is
 // this demo's proposal, not a captured page. Business values follow the fixture convention.
+import type { IconName } from "@/icons/Icon";
 import type { Template } from "../ai/scenarioTemplates";
 import type { SetupStep } from "./fixtures";
 
@@ -48,10 +49,10 @@ export const shareLabel = (value: number) => (shares.find((s) => s.value === val
  * blocks in order; the trigger is the catalog's own condition for AI handling unassigned chats.
  */
 export const flowName = "AI handles new conversations on Test (Demo)";
-export const flowBlocks = (share: number): { icon: "bolt" | "ai-symbol" | "user-group"; label: string; detail: string }[] => [
-  { icon: "bolt", label: "Trigger", detail: "Customer sends a new message and the ticket is unassigned" },
-  { icon: "ai-symbol", label: "Let AI handle", detail: `${shareLabel(share)} of those conversations` },
-  { icon: "user-group", label: "Assign to", detail: "your team: the rest, and any conversation the agent hands over" },
+export const flowBlocks = (share: number): { icon: IconName; iconClassName: string; label: string; detail: string }[] => [
+  { icon: "bolt", iconClassName: "text-gray-500", label: "Trigger", detail: "Customer sends a new message and the ticket is unassigned" },
+  { icon: "ai-symbol", iconClassName: "ai-gradient-icon", label: "Let AI handle", detail: `${shareLabel(share)} of those conversations` },
+  { icon: "user-group", iconClassName: "text-gray-500", label: "Assign to", detail: "your team: the rest, and any conversation the agent hands over" },
 ];
 
 /** How the agent is switched off: by pausing its flow, as in the live app. */

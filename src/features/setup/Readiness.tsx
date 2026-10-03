@@ -1,9 +1,8 @@
-import { Icon } from "@/icons/Icon";
-import { cn } from "@/lib/cn";
 import { useDemo } from "@/store/store";
 import { templates } from "../ai/scenarioTemplates";
 import { FormCard } from "../ai/parts";
 import { channelLanguage, policies, type Language } from "./content";
+import { IconRow } from "./IconRow";
 
 type Row = { ok: boolean; text: string };
 
@@ -39,15 +38,9 @@ export function Readiness() {
       <h2 className="text-base font-medium text-gray-800">Ready to go live?</h2>
       <ul className="space-y-3 mt-3">
         {rows.map((r) => (
-          <li key={r.text} className="flex items-start gap-3 text-sm">
-            <span className="flex items-center justify-center size-5 shrink-0">
-              <Icon
-                name={r.ok ? "circle-check" : "circle-exclamation"}
-                className={cn("size-4!", r.ok ? "text-electric-green-600" : "text-warning-500")}
-              />
-            </span>
-            <span className="text-gray-800">{r.text}</span>
-          </li>
+          <IconRow key={r.text} icon={r.ok ? "circle-check" : "circle-exclamation"} iconClassName={r.ok ? "text-electric-green-600" : "text-warning-500"}>
+            {r.text}
+          </IconRow>
         ))}
       </ul>
       {rows.some((r) => !r.ok) && (

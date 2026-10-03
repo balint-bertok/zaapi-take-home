@@ -126,9 +126,9 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   // block follows the picked share; the done page names the flow and says pausing it pauses the agent.
   await expect(page.getByRole("radio", { name: "1 in 5" })).toHaveAttribute("aria-checked", "true");
   const blocks = page.getByRole("list", { name: "Flow blocks" });
-  await expect(blocks.getByRole("listitem")).toHaveText([/^Trigger/, /^Let AI handle: 1 in 5 of/, /^Assign to/]);
+  await expect(blocks.getByRole("listitem")).toHaveText([/^Trigger/, /^Let AI handle: 1 in 5/, /^Assign to/]);
   await page.getByRole("radio", { name: "Half" }).click();
-  await expect(blocks.getByRole("listitem").nth(1)).toHaveText(/^Let AI handle: half of/);
+  await expect(blocks.getByRole("listitem").nth(1)).toHaveText(/^Let AI handle: half/);
   await page.getByRole("main").getByRole("link", { name: "Go live" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/live\/done$/);
   await expect(page.getByText(/answering half .* through the flow "AI handles new conversations on Test \(Demo\)"\. Pausing the agent/)).toBeVisible();

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Icon } from "@/icons/Icon";
-import { cn } from "@/lib/cn";
 import { updateDemo, useDemo } from "@/store/store";
 import { FormCard, RadioCard } from "../ai/parts";
 import { AccountLabel } from "../ai/TestChat";
 import { flowBlocks, flowName, pauseNote, shares } from "./content";
+import { IconRow } from "./IconRow";
 import { BackLink, ContinueButton, SetupPage } from "./SetupPage";
 
 const card = "border border-gray-200";
@@ -60,15 +60,10 @@ export default function GoLivePage() {
         </p>
         <ol aria-label="Flow blocks" className="mt-3 divide-y divide-gray-200 rounded-lg border border-gray-200">
           {flowBlocks(share).map((b) => (
-            <li key={b.label} className="flex items-start gap-3 p-3 text-sm">
-              <span className="flex items-center justify-center size-5 shrink-0">
-                <Icon name={b.icon} className={cn("size-4!", b.icon === "ai-symbol" ? "ai-gradient-icon" : "text-gray-500")} />
-              </span>
-              <span className="text-gray-800">
-                <span className="font-medium">{b.label}</span>
-                <span className="text-gray-500">: {b.detail}</span>
-              </span>
-            </li>
+            <IconRow key={b.label} icon={b.icon} iconClassName={b.iconClassName} className="p-3">
+              <span className="font-medium">{b.label}</span>
+              <span className="text-gray-500">: {b.detail}</span>
+            </IconRow>
           ))}
         </ol>
       </FormCard>
