@@ -51,7 +51,9 @@ const screens: Record<string, () => ReactNode> = {
 // window (docs/measurements.md, guarded by the setup-path suite). The card is a column capped at the
 // window's height, so in a window shorter than the card the body alone scrolls and the title and
 // footer stay on screen; the body also scrolls if content ever outgrows it, so nothing is unreachable.
-const cardWidth = "w-[960px] flex max-h-[calc(100vh-2rem)] flex-col";
+// Wide enough for the test chat's header beside the readiness card without a sideways scroll
+// (user report 2026-10-03).
+const cardWidth = "w-[1040px] flex max-h-[calc(100vh-2rem)] flex-col";
 const bodyHeight = 516;
 const footerClass = "border-t bg-gray-50 px-6 py-3 flex justify-between items-center gap-4";
 const sectionTitle = "text-base font-medium text-gray-800";
@@ -404,7 +406,7 @@ function TestStep() {
       }
     >
       {/* One definite row, so the chat's full height resolves against it; the readiness card keeps its own. */}
-      <div className="h-full px-6 py-5 grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] grid-rows-[minmax(0,1fr)] gap-5">
+      <div className="h-full px-6 py-5 grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] grid-rows-[minmax(0,1fr)] gap-5">
         <div className="self-start">
           <Readiness />
         </div>

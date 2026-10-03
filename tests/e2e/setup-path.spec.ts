@@ -28,12 +28,13 @@ function collectErrors(page: Page) {
   return errors;
 }
 
-/** The modal body never needs scrolling: every screen's content fits the card's fixed body (user decision 2026-10-03). */
+/** The modal body never needs scrolling, down or sideways: every screen's content fits the card's fixed body (user decisions 2026-10-03). */
 async function expectFits(dialog: Locator) {
   const body = dialog.getByTestId("setup-body");
   await expect(body).toBeVisible();
-  const [content, height] = await body.evaluate((el) => [el.scrollHeight, el.clientHeight]);
+  const [content, height, wide, width] = await body.evaluate((el) => [el.scrollHeight, el.clientHeight, el.scrollWidth, el.clientWidth]);
   expect(content, `content ${content}px in a ${height}px body`).toBeLessThanOrEqual(height);
+  expect(wide, `content ${wide}px wide in a ${width}px body`).toBeLessThanOrEqual(width);
 }
 
 /** The frame behind an open modal, by CSS: the open dialog hides the page from role locators. */
