@@ -13,9 +13,6 @@ export const setupSteps: { label: string; to: string; step?: SetupStep; text: st
   { label: "Go live", to: "/ai/setup/live", text: "Start on a small share of conversations, widen when you're ready." },
 ];
 
-/** "Step N of M", over a setup page's title. */
-export const stepCounter = (step: number) => `Step ${step} of ${setupSteps.length}`;
-
 export type Language = "Thai" | "English";
 export const languages: Language[] = ["Thai", "English"];
 

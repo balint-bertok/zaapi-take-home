@@ -3,21 +3,23 @@ import { useLocation, useNavigate } from "react-router";
 import { Inert } from "@/components/Inert";
 import { ModalTour, StepCard } from "@/components/ModalTour";
 import { Button } from "@/components/ui/button";
-import { useDemo } from "@/store/store";
+import { Icon } from "@/icons/Icon";
+import { updateDemo, useDemo } from "@/store/store";
 import { ChoiceCard, ScenarioForm } from "../ai/AddScenarioSheet";
-import { TestChat } from "../ai/TestChat";
+import { FormCard, RadioCard } from "../ai/parts";
+import { AccountLabel, TestChat } from "../ai/TestChat";
 import { isTemplateName, manualEntry, scratch, templates, type Template } from "../ai/scenarioTemplates";
-import { neededPolicies, personaSuggestion, policies, skipConsequence, writtenScenario, type Policy } from "./content";
+import { flowBlocks, flowName, neededPolicies, pauseNote, personaSuggestion, policies, shares, skipConsequence, writtenScenario, type Policy } from "./content";
+import { IconRow } from "./IconRow";
 import { ChannelRow, StepsAhead } from "./Intro";
 import { KnowledgeForm, type Knowledge } from "./KnowledgeForm";
 import { PersonaForm, type Persona } from "./PersonaForm";
-import type { SetupStep } from "./fixtures";
 import { Readiness } from "./Readiness";
 import { markTested, saveKnowledge, savePersona, saveScenarios, skipScenarios } from "./save";
-import { BackButton, BackLink, ContinueButton } from "./SetupPage";
-import { SetupProgress } from "./SetupProgress";
+import { BackButton, BackLink, ContinueButton, setupCard, setupCardTitle } from "./SetupPage";
+import { SetupProgress, type ProgressStep } from "./SetupProgress";
 
-// The setup's first five screens (through test), in the inbox onboarding's modal frame, over the
+// The setup's screens, welcome through go live, in the inbox onboarding's modal frame, over the
 // setup page. Copy is not from the catalog (see content.ts).
 
 const personaPath = "/ai/setup/persona";
@@ -26,6 +28,7 @@ const scenariosPath = "/ai/setup/scenarios";
 const knowledgePath = "/ai/setup/knowledge";
 const knowledgeFilledPath = "/ai/setup/knowledge/filled";
 const testPath = "/ai/setup/test";
+const livePath = "/ai/setup/live";
 
 const welcomePath = "/ai/setup";
 
@@ -38,11 +41,12 @@ const screens: Record<string, () => ReactNode> = {
   [knowledgePath]: () => <KnowledgeStep filled={false} />,
   [knowledgeFilledPath]: () => <KnowledgeStep filled />,
   [testPath]: () => <TestStep />,
+  [livePath]: () => <GoLiveStep />,
 };
 
 // The card's width and the screens' body height, so the card is one size and its footer sits at the
 // same place on every screen, and no screen scrolls to reach the next step (user decision
-// 2026-10-03): the taller screens (persona, scenario form, test) lay their content out in two
+// 2026-10-03): the taller screens (persona, scenario form, test, go live) lay their content out in two
 // columns instead, and every screen's content fits the body (docs/measurements.md, guarded by the
 // setup-path suite). The body still scrolls if content ever outgrows it, so nothing is unreachable.
 const cardWidth = "w-[900px]";
@@ -69,7 +73,7 @@ function SetupCard({
   footer,
   children,
 }: {
-  step?: SetupStep;
+  step?: ProgressStep;
   title: string;
   subtitle: string;
   footer: ReactNode;
@@ -86,8 +90,8 @@ function SetupCard({
 }
 
 /**
- * Shown on the welcome, persona, scenarios, knowledge and test URLs. Mounted once by SetupShell, so
- * it survives moving between its screens.
+ * Shown on every setup URL but the done page. Mounted once by SetupShell, so it survives moving
+ * between its screens.
  */
 export default function SetupModal() {
   const { pathname } = useLocation();
@@ -378,7 +382,7 @@ function KnowledgeStep({ filled }: { filled: boolean }) {
 /**
  * Step 4: what the agent covers so far beside the AI Agent > Test chat to try it, in two columns so
  * nothing scrolls (user decision 2026-10-03: the test runs in the modal too). Continue marks the step
- * done and leaves the modal for the go-live page.
+ * done and moves to the go-live screen.
  */
 function TestStep() {
   return (
@@ -392,7 +396,7 @@ function TestStep() {
             <BackLink to={knowledgePath} />
             <LaterButton />
           </div>
-          <ContinueButton variant="default" to="/ai/setup/live" onClick={markTested} />
+          <ContinueButton variant="default" to={livePath} onClick={markTested} />
         </>
       }
     >
@@ -403,6 +407,85 @@ function TestStep() {
         </div>
         {/* As tall as the body allows; the thread scrolls on its own, as on the Test page. */}
         <TestChat className="h-full" />
+      </div>
+    </SetupCard>
+  );
+}
+
+/**
+ * Step 5: pick the channel's share, see the flow this publishes, then go live (user decision
+ * 2026-10-03: go live runs in the modal too). Nothing is stored until "Go live", which leaves the
+ * modal for the end-of-demo page.
+ */
+function GoLiveStep() {
+  const stored = useDemo((s) => s.agentShare);
+  const [share, setShare] = useState(stored);
+  const goLive = () => updateDemo((s) => ({ ...s, agentLive: true, agentShare: share }));
+  return (
+    <SetupCard
+      step="live"
+      title="Go live"
+      subtitle="Start small. The agent handles a share of new conversations; your team sees the rest as usual."
+      footer={
+        <>
+          <div className="flex items-center gap-4">
+            <BackLink to={testPath} />
+            <LaterButton />
+          </div>
+          <ContinueButton variant="default" to="/ai/setup/live/done" onClick={goLive}>
+            Go live
+          </ContinueButton>
+        </>
+      }
+    >
+      <div className="px-6 py-5 grid grid-cols-2 gap-5 items-start text-sm">
+        <div className="space-y-5">
+          <FormCard className={setupCard}>
+            <h2 className={setupCardTitle}>Channel</h2>
+            {/* The account row of the Test chat's account picker. */}
+            <div className="text-gray-800 mt-3">
+              <AccountLabel />
+            </div>
+            <p className="text-gray-500 mt-1">Chat Widget</p>
+          </FormCard>
+          <FormCard className={setupCard}>
+            <h2 className={setupCardTitle}>Share of new conversations</h2>
+            <div role="radiogroup" aria-label="Share of new conversations" className="flex gap-4 mt-3">
+              {shares.map((s) => (
+                <RadioCard key={s.value} checked={share === s.value} onSelect={() => setShare(s.value)}>
+                  {s.label}
+                </RadioCard>
+              ))}
+            </div>
+            <p className="text-gray-500 mt-3">
+              A wrong answer in the first week then affects one conversation in five, not every customer. We'll suggest widening after a week with
+              no handoffs.
+            </p>
+          </FormCard>
+        </div>
+        <div className="space-y-5">
+          <FormCard className={setupCard}>
+            <h2 className={setupCardTitle}>What this publishes</h2>
+            <p className="text-gray-500 mt-1">A flow in Flow Builder, “{flowName}”. You can change it there later.</p>
+            <ol aria-label="Flow blocks" className="mt-3 divide-y divide-gray-200 rounded-lg border border-gray-200">
+              {flowBlocks(share).map((b) => (
+                <IconRow key={b.label} icon={b.icon} iconClassName={b.iconClassName} className="p-3">
+                  <span className="font-medium">{b.label}</span>
+                  <span className="text-gray-500">: {b.detail}</span>
+                </IconRow>
+              ))}
+            </ol>
+          </FormCard>
+          {/* The AI Agent > Test page's callout. */}
+          <div className="p-3.5 rounded-md border-l-4 bg-(image:--color-ai-gradient-light) border-electric-green-500" role="note">
+            <div className="flex flex-row gap-2">
+              <div className="mt-[2px]">
+                <Icon name="ai-symbol" className="size-5! ai-gradient-icon shrink-0" />
+              </div>
+              <div className="ai-gradient-text">Your team can take over any conversation at any time. {pauseNote}</div>
+            </div>
+          </div>
+        </div>
       </div>
     </SetupCard>
   );
