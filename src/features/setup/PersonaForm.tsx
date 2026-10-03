@@ -1,7 +1,7 @@
 // The persona step's form in the setup modal. The Name, Style, Guidelines and Signature fields are
 // the "Add new personality" sheet's, with its help texts and examples under the inbox onboarding's
 // labels (user decision 2026-10-03); Integrations is left out (the setup has one channel). Language
-// is the setup's own field.
+// is the setup's own field. Two columns, so the step fits the card without scrolling.
 import { Input, Textarea } from "@/components/ui/input";
 import { fieldLabel } from "@/components/ModalTour";
 import { Icon } from "@/icons/Icon";
@@ -15,7 +15,8 @@ export type Persona = { name: string; style: string; guidelines: string; languag
 /** `onFocus` runs when any text field gets focus; `onChange` gets each edit as a patch. */
 export function PersonaForm({ value, onChange, onFocus }: { value: Persona; onChange: (patch: Partial<Persona>) => void; onFocus?: () => void }) {
   return (
-    <form className="space-y-4 text-sm" onSubmit={(e) => e.preventDefault()}>
+    <form className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm items-start" onSubmit={(e) => e.preventDefault()}>
+      <div className="space-y-4">
       <div>
         <label htmlFor="persona-name" className={fieldLabel}>
           Name
@@ -60,7 +61,7 @@ export function PersonaForm({ value, onChange, onFocus }: { value: Persona; onCh
         </div>
         <Textarea
           id="persona-guidelines"
-          className="min-h-[108px] resize-none"
+          className="resize-none"
           placeholder="Write specific guidelines for the AI to follow - language, word choice, formatting rules..."
           maxLength={250}
           value={value.guidelines}
@@ -69,7 +70,9 @@ export function PersonaForm({ value, onChange, onFocus }: { value: Persona; onCh
         />
         <Counter value={value.guidelines} max={250} />
       </div>
+      </div>
 
+      <div className="space-y-4">
       <div>
         <span className={fieldLabel}>Language</span>
         <div role="radiogroup" aria-label="Language" className="flex gap-4">
@@ -91,6 +94,7 @@ export function PersonaForm({ value, onChange, onFocus }: { value: Persona; onCh
           <SignatureIntro />
         </div>
         <SignatureOptions value={value.signature} onChange={(signature) => onChange({ signature })} />
+      </div>
       </div>
     </form>
   );

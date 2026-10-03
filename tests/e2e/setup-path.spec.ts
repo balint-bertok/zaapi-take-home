@@ -19,13 +19,21 @@
  * opens the empty form, which fills itself in on first touch; what it creates counts on its card and
  * enables Continue.
  */
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 function collectErrors(page: Page) {
   const errors: string[] = [];
   page.on("console", (msg) => msg.type() === "error" && errors.push(`console: ${msg.text()}`));
   page.on("pageerror", (err) => errors.push(`pageerror: ${err.message}`));
   return errors;
+}
+
+/** The modal body never needs scrolling: every screen's content fits the card's fixed body (user decision 2026-10-03). */
+async function expectFits(dialog: Locator) {
+  const body = dialog.getByTestId("setup-body");
+  await expect(body).toBeVisible();
+  const [content, height] = await body.evaluate((el) => [el.scrollHeight, el.clientHeight]);
+  expect(content, `content ${content}px in a ${height}px body`).toBeLessThanOrEqual(height);
 }
 
 test("the guided setup runs from sign-up to a live agent, then opens the AI Agent pages", async ({ page }) => {
@@ -76,6 +84,7 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   await persona.getByRole("radio", { name: "Thai" }).click();
   await expect(persona.getByLabel("Name", { exact: true })).toHaveValue("Brand One assistant");
   await expect(persona.getByRole("radio", { name: "Thai" })).toHaveAttribute("aria-checked", "true");
+  await expectFits(persona);
   // The sheet's help text and signature cards are on the step too; the suggestion signs replies.
   await expect(persona.getByText("calm and witty tech expert")).toBeVisible();
   await persona.getByRole("radio", { name: "Custom signature" }).click();
@@ -87,6 +96,7 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   // form in the same card; creating it returns to the cards with that one checked.
   const scenarios = page.getByRole("dialog", { name: "Scenarios" });
   await expect(scenarios.getByRole("button", { name: "Continue to knowledge" })).toBeDisabled();
+  await expectFits(scenarios);
   for (const [title, step] of [
     ["Check order status", "Share the status clearly"],
     ["Return or refund", "Request relevant order information"],
@@ -96,6 +106,7 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
     await expect(form.getByRole("heading", { name: title, exact: true })).toBeVisible();
     await expect(progress(form).filter({ hasText: "Scenarios" })).toHaveAttribute("aria-current", "step");
     await expect(form.getByLabel("Scenario name")).toHaveValue(title);
+    await expectFits(form);
     await expect(form.getByRole("textbox", { name: "Reply steps" })).toContainText(step);
     await expect(form.getByText("Where should this scenario run?")).toHaveCount(0);
     await form.getByRole("button", { name: "Create scenario" }).click();
@@ -119,17 +130,19 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   await knowledge.getByRole("textbox", { name: "Shipping times and areas" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/knowledge\/filled$/);
   await expect(knowledge.getByRole("textbox", { name: "Shipping times and areas" })).toHaveValue(/Bangkok/);
+  await expectFits(knowledge);
   await knowledge.getByRole("link", { name: "Continue to test" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/test$/);
 
   // Test is a modal screen too; the readiness summary reads what the earlier steps stored, and the
-  // chat sits under it inside the scrolling body.
+  // chat sits beside it.
   const test = page.getByRole("dialog", { name: "Test" });
   await expect(progress(test).filter({ hasText: "Test" })).toHaveAttribute("aria-current", "step");
   await expect(test.getByText("Scenarios: Check order status, Return or refund")).toBeVisible();
   await expect(test.getByText("Policies: shipping times and areas, returns and refunds answered")).toBeVisible();
   await expect(test.getByText("Language: Thai, matches your Test (Demo) customers")).toBeVisible();
   await expect(test.getByRole("textbox", { name: "Message" })).toBeVisible();
+  await expectFits(test);
 
   // The step list links only to done steps and the current one; the skip exit is shown but inert.
   // The open modal hides the page from the accessibility tree, so the step list is located by CSS.

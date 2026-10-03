@@ -156,7 +156,7 @@ function Composer({ onSend }: { onSend: (text: string) => void }) {
 /**
  * The scripted test chat of AI Agent > Test (Step 14): account picker, auto-response switch, Clear,
  * the thread and the composer. Shared with the guided setup's Test step. Nothing is sent anywhere.
- * `className` overrides the frame's height where it sits inside a scrolling body (the setup modal).
+ * `className` overrides the frame's height where it sits inside a fixed-height body (the setup modal).
  */
 export function TestChat({ className }: { className?: string }) {
   const [messages, setMessages] = useState<Message[]>(seed);

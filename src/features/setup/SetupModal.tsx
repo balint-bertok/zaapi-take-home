@@ -41,11 +41,12 @@ const screens: Record<string, () => ReactNode> = {
 };
 
 // The card's width and the screens' body height, so the card is one size and its footer sits at the
-// same place on every screen. Both grew a little on 2026-10-03 when the test step moved in (user
-// decision); the card still fits a 900px window (docs/measurements.md). Shorter bodies leave space
-// under their content; the persona, scenario form and test screens, taller, scroll inside it.
-const cardWidth = "w-[760px]";
-const bodyHeight = 560;
+// same place on every screen, and no screen scrolls to reach the next step (user decision
+// 2026-10-03): the taller screens (persona, scenario form, test) lay their content out in two
+// columns instead, and every screen's content fits the body (docs/measurements.md, guarded by the
+// setup-path suite). The body still scrolls if content ever outgrows it, so nothing is unreachable.
+const cardWidth = "w-[900px]";
+const bodyHeight = 612;
 const footerClass = "border-t bg-gray-50 px-6 py-3 flex justify-between items-center gap-4";
 const sectionTitle = "text-base font-medium text-gray-800";
 
@@ -58,27 +59,25 @@ const focusCard = (e: Event) => {
 
 /**
  * The modal's card: one size for every screen, so the footer does not move between steps; the
- * step bar on top (`step` current, none on the welcome), the screen's body (held at the body height
- * and scrolling, with `scroll`), the gray footer row. Opened with the card focused.
+ * step bar on top (`step` current, none on the welcome), the screen's body (held at the body
+ * height), the gray footer row. Opened with the card focused.
  */
 function SetupCard({
   step,
   title,
   subtitle,
   footer,
-  scroll,
   children,
 }: {
   step?: SetupStep;
   title: string;
   subtitle: string;
   footer: ReactNode;
-  scroll?: boolean;
   children: ReactNode;
 }) {
   return (
     <StepCard width={cardWidth} top={<SetupProgress current={step} />} title={title} subtitle={subtitle} onOpenAutoFocus={focusCard}>
-      <div className={scroll ? "overflow-y-auto" : undefined} style={{ minHeight: bodyHeight, maxHeight: scroll ? bodyHeight : undefined }}>
+      <div data-testid="setup-body" className="overflow-y-auto" style={{ height: bodyHeight }}>
         {children}
       </div>
       <div className={footerClass}>{footer}</div>
@@ -169,7 +168,6 @@ function PersonaStep({ filled }: { filled: boolean }) {
       step="persona"
       title="Persona"
       subtitle="Name your agent and decide how it sounds. Language defaults to what your customers write in."
-      scroll
       footer={
         <>
           <div className="flex items-center gap-4">
@@ -242,7 +240,6 @@ function ScenariosStep() {
             step="scenarios"
             title={editing.title}
             subtitle={written ? "Describe when it should trigger and how the agent handles it. You can edit it later." : "Review the ready-made steps, then create the scenario. You can edit it later."}
-            scroll
             footer={
               <>
                 <div className="flex items-center gap-4">
@@ -379,9 +376,9 @@ function KnowledgeStep({ filled }: { filled: boolean }) {
 }
 
 /**
- * Step 4: what the agent covers so far, then the AI Agent > Test chat to try it, scrolling inside the
- * card's body (user decision 2026-10-03: the test runs in the modal too). Continue marks the step done
- * and leaves the modal for the go-live page.
+ * Step 4: what the agent covers so far beside the AI Agent > Test chat to try it, in two columns so
+ * nothing scrolls (user decision 2026-10-03: the test runs in the modal too). Continue marks the step
+ * done and leaves the modal for the go-live page.
  */
 function TestStep() {
   return (
@@ -389,7 +386,6 @@ function TestStep() {
       step="test"
       title="Test"
       subtitle="Here's what your agent can handle so far. Try a conversation before anyone else can."
-      scroll
       footer={
         <>
           <div className="flex items-center gap-4">
@@ -400,10 +396,13 @@ function TestStep() {
         </>
       }
     >
-      <div className="px-6 py-5 space-y-5">
-        <Readiness />
-        {/* Shorter than the Test page's chat, so the thread and the composer are reachable without scrolling the body far. */}
-        <TestChat className="h-[520px]" />
+      {/* One definite row, so the chat's full height resolves against it; the readiness card keeps its own. */}
+      <div className="h-full px-6 py-5 grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] grid-rows-[minmax(0,1fr)] gap-5">
+        <div className="self-start">
+          <Readiness />
+        </div>
+        {/* As tall as the body allows; the thread scrolls on its own, as on the Test page. */}
+        <TestChat className="h-full" />
       </div>
     </SetupCard>
   );
