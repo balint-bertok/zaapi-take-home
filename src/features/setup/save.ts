@@ -23,20 +23,16 @@ export function savePersona(persona: Persona) {
   }));
 }
 
-/** One scenario row per picked template, rows of unpicked templates removed, the step marked done. */
+/**
+ * Rows of unpicked templates removed and the step marked done. Picked templates already have their
+ * rows: the scenario form adds each one when it is created.
+ */
 export function saveScenarios(pickedIds: string[]) {
-  const chosen = templates.filter((t) => pickedIds.includes(t.id));
   const dropped = new Set(templates.filter((t) => !pickedIds.includes(t.id)).map((t) => t.form.name));
-  const now = stamp();
   updateDemo((s) => ({
     ...s,
-    scenarios: [
-      // Only rows named after an unpicked template go; scenarios added elsewhere stay.
-      ...s.scenarios.filter((r) => !dropped.has(r.name)),
-      ...chosen
-        .filter((t) => !s.scenarios.some((r) => r.name === t.form.name))
-        .map((t) => ({ id: crypto.randomUUID(), name: t.form.name, enabled: true, handling: t.form.handling, integrations: [], createdBy: s.user.name, createdAt: now })),
-    ],
+    // Only rows named after an unpicked template go; scenarios added elsewhere stay.
+    scenarios: s.scenarios.filter((r) => !dropped.has(r.name)),
     setupDone: withStep(s.setupDone, "scenarios"),
   }));
 }

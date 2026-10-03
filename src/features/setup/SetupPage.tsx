@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router";
-import { buttonClass } from "@/components/ui/button";
+import { Button, buttonClass } from "@/components/ui/button";
 import { Icon } from "@/icons/Icon";
 import { cn } from "@/lib/cn";
 import { ShellPage } from "@/shell/ShellPage";
@@ -56,9 +56,9 @@ export function BackLink({ to }: { to: string }) {
 /** The same "Back" within a step: a button, since it changes the screen's own state rather than the URL. */
 export function BackButton({ onClick }: { onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className={buttonClass("outline")}>
+    <Button variant="outline" onClick={onClick}>
       {back}
-    </button>
+    </Button>
   );
 }
 

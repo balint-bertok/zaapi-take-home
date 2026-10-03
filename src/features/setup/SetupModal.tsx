@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { ModalTour, StepCard } from "@/components/ModalTour";
-import { buttonClass } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { updateDemo, useDemo } from "@/store/store";
 import { ChoiceCard, ScenarioForm } from "../ai/AddScenarioSheet";
 import { templates, type Template } from "../ai/scenarioTemplates";
@@ -195,13 +195,14 @@ function PersonaStep({ filled }: { filled: boolean }) {
 /**
  * Step 2: pick the scenario templates. Opens with what the store holds, so coming back shows the picks.
  * Picking a template opens its prefilled scenario form in the same card, as the "Add scenario" sheet
- * does; creating it returns to the cards with that one checked. Unchecking a card only drops the pick:
- * Continue removes its row.
+ * does; creating it adds the row and returns to the cards with that one checked. Unchecking a card
+ * only drops the pick: Continue removes its row.
  */
 function ScenariosStep() {
   const scenarios = useDemo((s) => s.scenarios);
   const navigate = useNavigate();
-  const [picked, setPicked] = useState(() => templates.filter((t) => scenarios.some((s) => s.name === t.form.name)).map((t) => t.id));
+  const created = (t: Template) => scenarios.some((s) => s.name === t.form.name);
+  const [picked, setPicked] = useState(() => templates.filter(created).map((t) => t.id));
   const [editing, setEditing] = useState<Template | null>(null);
   // Skipping asks inline, not in a second dialog over this one.
   const [skipping, setSkipping] = useState(false);
@@ -210,7 +211,7 @@ function ScenariosStep() {
     setSkipping(false);
     if (picked.includes(t.id)) setPicked((p) => p.filter((x) => x !== t.id));
     // Created earlier and unchecked since: its row is still there, so checking it again needs no second one.
-    else if (scenarios.some((s) => s.name === t.form.name)) check(t.id);
+    else if (created(t)) check(t.id);
     else setEditing(t);
   };
   const skip = () => {
@@ -238,9 +239,9 @@ function ScenariosStep() {
                   <BackButton onClick={() => setEditing(null)} />
                   <LaterButton />
                 </div>
-                <button type="submit" {...submit} className={buttonClass("default")}>
+                <Button type="submit" {...submit}>
                   Create scenario
-                </button>
+                </Button>
               </>
             }
           >

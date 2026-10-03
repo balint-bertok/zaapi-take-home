@@ -5,8 +5,8 @@
  * setup" exit is inert. The welcome, persona, scenarios and knowledge steps run in the inbox
  * onboarding's modal frame over the setup page; test and go live are pages with no dialog. The
  * modal's step bar marks the current step and the done ones. Each empty form moves to its filled
- * twin on first touch, Continue included. Continue appends to the Personality,
- * Scenario Handling and Knowledge Source lists, once: a second Continue adds no duplicate. The
+ * twin on first touch, Continue included. Continue appends to the Personality and Knowledge
+ * Source lists, once: a second Continue adds no duplicate; a scenario row is added on Create. The
  * readiness summary on the Test step reads the store. "Go live" opens the dashboard; `?reset=1`
  * restores the path. "Finish later" closes the modal onto the page, whose button reopens it.
  * Skipping scenarios states the consequence inline, in the same dialog, and changes what the
