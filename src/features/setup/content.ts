@@ -31,6 +31,7 @@ export const personaSuggestion = {
   style: "Friendly and concise, like a helpful shop assistant.",
   guidelines: "Keep answers short. Never promise a delivery date you don't know. Hand over to the team when a customer is upset.",
   language: channelLanguage,
+  signature: true,
 };
 
 /** Go live's share options: the percentage of new conversations the agent takes. */
