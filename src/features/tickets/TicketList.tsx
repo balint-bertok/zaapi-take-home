@@ -4,29 +4,21 @@ import { Switch } from "@/components/ui/switch";
 import { Icon } from "@/icons/Icon";
 import { cn } from "@/lib/cn";
 import { useDemo } from "@/store/store";
-import { closeTickets } from "./actions";
 import { AssignDialog } from "./AssignDialog";
 import { ContactAvatar, UnassignedAvatar, UserAvatar } from "./avatars";
 import { Checkbox } from "./Checkbox";
 import type { Ticket } from "./fixtures";
-import type { Inbox } from "./inbox";
 import { iconButton } from "./styles";
 
-const emptyText = (inbox: Inbox, followOnly: boolean) =>
-  followOnly
-    ? "You haven't marked any tickets to follow up"
-    : inbox === "closed"
-      ? "You haven't closed any tickets"
-      : "All tickets are closed";
+const emptyText = (followOnly: boolean) =>
+  followOnly ? "You haven't marked any tickets to follow up" : "All tickets are closed";
 
 /** The ticket list column: header, bulk row with the Follow Up filter, cards, bulk-select bar. */
 export function TicketList({
-  inbox,
   tickets,
   selectedId,
   onSelect,
 }: {
-  inbox: Inbox;
   tickets: Ticket[];
   selectedId: string | null;
   onSelect: (id: string) => void;
@@ -45,17 +37,12 @@ export function TicketList({
         <div className="pl-4 pr-4 flex-1 flex items-end pt-4 pb-2">
           <div className="flex flex-1 items-center gap-x-2 min-w-0 h-8">
             <div className="flex-1 flex items-center gap-0.5 min-w-0">
-              <span className="text-base font-semibold truncate p-1 py-0.5">
-                {inbox === "closed" ? "Closed" : "All tickets"}
-              </span>
-              {/* The Closed view has no list menu and no bulk actions. */}
-              {inbox !== "closed" && (
-                <div className="pl-1">
-                  <Inert className={cn(iconButton, "size-7")}>
-                    <Icon name="ellipsis-vertical" className="h-4 w-4" />
-                  </Inert>
-                </div>
-              )}
+              <span className="text-base font-semibold truncate p-1 py-0.5">All tickets</span>
+              <div className="pl-1">
+                <Inert className={cn(iconButton, "size-7")}>
+                  <Icon name="ellipsis-vertical" className="h-4 w-4" />
+                </Inert>
+              </div>
             </div>
             <div className="flex items-center gap-x-1 ml-auto">
               <Inert className={cn(iconButton, "size-9")} aria-label="Sort from newest to oldest">
@@ -68,39 +55,29 @@ export function TicketList({
           </div>
         </div>
         <div className="flex items-center justify-between pr-4 pl-4.5 gap-1 pt-1 pb-1.5">
-          {inbox !== "closed" && (
-            <div className="flex gap-2 items-center">
-              <Checkbox
-                aria-label="Select All"
-                checked={allChecked}
-                onCheckedChange={() => setChecked(allChecked ? [] : shown.map((t) => t.id))}
-                className="size-4.5 mr-1"
-              />
-              <button
-                type="button"
-                aria-label="Assign ticket"
-                className={cn(iconButton, "size-7")}
-                disabled={live.length === 0}
-                onClick={() => setAssigning(live)}
-              >
-                <Icon name="user-plus" className="size-4" />
-              </button>
-              <div className="-ml-0.5">
-                <button
-                  type="button"
-                  aria-label="Close tickets"
-                  className={cn(iconButton, "size-7")}
-                  disabled={live.length === 0}
-                  onClick={() => {
-                    closeTickets(live, "Tickets closed");
-                    setChecked([]);
-                  }}
-                >
-                  <Icon name="check" className="size-4" />
-                </button>
-              </div>
+          <div className="flex gap-2 items-center">
+            <Checkbox
+              aria-label="Select All"
+              checked={allChecked}
+              onCheckedChange={() => setChecked(allChecked ? [] : shown.map((t) => t.id))}
+              className="size-4.5 mr-1"
+            />
+            <button
+              type="button"
+              aria-label="Assign ticket"
+              className={cn(iconButton, "size-7")}
+              disabled={live.length === 0}
+              onClick={() => setAssigning(live)}
+            >
+              <Icon name="user-plus" className="size-4" />
+            </button>
+            <div className="-ml-0.5">
+              {/* Bulk close is outside the demo (user decision 2026-10-03): inert, greyed like an empty selection. */}
+              <Inert aria-label="Close tickets" className={cn(iconButton, "size-7 opacity-50")}>
+                <Icon name="check" className="size-4" />
+              </Inert>
             </div>
-          )}
+          </div>
           <div className="flex items-center gap-2 ml-auto">
             <label htmlFor="follow-up-filter" className="text-[11px] font-medium text-gray-400">
               Follow Up
@@ -121,12 +98,8 @@ export function TicketList({
           <div className="h-full">
             <div className="flex h-full items-center justify-center">
               <div className="flex h-full flex-col items-center justify-center gap-2">
-                <Icon
-                  name={inbox === "closed" && !followOnly ? "circle-check" : "face-party"}
-                  variant="far"
-                  className="size-9! text-gray-200"
-                />
-                <div className="text-center text-gray-300 mt-4 text-sm ml-2">{emptyText(inbox, followOnly)}</div>
+                <Icon name="face-party" variant="far" className="size-9! text-gray-200" />
+                <div className="text-center text-gray-300 mt-4 text-sm ml-2">{emptyText(followOnly)}</div>
               </div>
             </div>
           </div>

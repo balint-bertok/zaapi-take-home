@@ -8,7 +8,7 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { Icon, type IconName } from "@/icons/Icon";
 import { cn } from "@/lib/cn";
 import { useDemo } from "@/store/store";
-import { closeTickets, postMessage, reopenTicket, setConversionValue, toggleFollowUp } from "./actions";
+import { postMessage, setConversionValue, toggleFollowUp } from "./actions";
 import { AiLoopIcon } from "./AiLoopIcon";
 import { AssignDialog } from "./AssignDialog";
 import { ContactAvatar, UserAvatar } from "./avatars";
@@ -16,7 +16,7 @@ import type { Message, Ticket } from "./fixtures";
 import { Kbd } from "./Kbd";
 import { iconButton } from "./styles";
 
-/** Middle column: conversation header, ticket fields, thread and composer (or the closed state). */
+/** Middle column: conversation header, ticket fields, thread and composer. */
 export function Conversation({ ticket }: { ticket: Ticket }) {
   const integration = useDemo((s) => s.integrations.find((i) => i.id === ticket.integrationId));
   return (
@@ -26,12 +26,8 @@ export function Conversation({ ticket }: { ticket: Ticket }) {
       <Thread messages={ticket.messages} />
       <div className="h-px bg-gray-200 shrink-0" />
       {/* The app's composer panel never goes below 220px; at 900px high that is its default too. */}
-      <div className="relative flex flex-col flex-[36.913_1_0px] min-h-[220px]">
-        {/* Under the closed overlay the composer is out of reach for keyboard too, not just covered. */}
-        <div inert={ticket.status === "closed"} className="flex flex-col flex-1 min-h-0">
-          <Composer key={ticket.id} ticketId={ticket.id} />
-        </div>
-        {ticket.status === "closed" && <ClosedState ticketId={ticket.id} />}
+      <div className="flex flex-col flex-[36.913_1_0px] min-h-[220px]">
+        <Composer key={ticket.id} ticketId={ticket.id} />
       </div>
     </div>
   );
@@ -85,12 +81,11 @@ function Header({ ticket, account }: { ticket: Ticket; account: string }) {
         <Inert className={iconButton}>
           <Icon name="ellipsis-vertical" className="size-4!" />
         </Inert>
-        {ticket.status === "open" && (
-          <Button variant="outline" size="sm" className="font-medium text-gray-800" onClick={() => closeTickets([ticket.id])}>
-            <Icon name="check" className="size-4" />
-            Close
-          </Button>
-        )}
+        {/* Closing a ticket is outside the demo (user decision 2026-10-03), so the button is inert. */}
+        <Inert className={cn(buttonClass("outline", "sm"), "font-medium text-gray-800")}>
+          <Icon name="check" className="size-4" />
+          Close
+        </Inert>
       </div>
       <AssignDialog ticketIds={[ticket.id]} open={assigning} onOpenChange={setAssigning} />
     </div>
@@ -99,8 +94,6 @@ function Header({ ticket, account }: { ticket: Ticket; account: string }) {
 
 /** The collapsible "#number" row with the two system ticket fields (common.systemTicketFields). */
 function TicketFields({ ticket }: { ticket: Ticket }) {
-  const closed = ticket.status === "closed";
-  const lockedHint = "Sales fields cannot be updated after a ticket is closed";
   return (
     <Collapsible.Root defaultOpen className="flex flex-col shrink-0 border-b border-[#d1dbe3]">
       <Collapsible.Trigger className="group text-sm flex w-full gap-2 items-center justify-between px-4 h-[32px] shrink-0 hover:bg-gray-100 focus-visible:outline-1 focus-visible:outline-gray-300">
@@ -120,14 +113,13 @@ function TicketFields({ ticket }: { ticket: Ticket }) {
             <label htmlFor={`conversion-${ticket.id}`} className="w-[120px] shrink-0 text-gray-500 text-[12px] truncate">
               Conversion value
             </label>
-            <div className="flex-1 min-w-0" title={closed ? lockedHint : undefined}>
+            <div className="flex-1 min-w-0">
               <Input
                 id={`conversion-${ticket.id}`}
                 key={ticket.id}
                 type="text"
                 inputMode="decimal"
                 placeholder="Empty"
-                disabled={closed}
                 defaultValue={ticket.conversionValue}
                 onBlur={(e) => setConversionValue(ticket.id, e.target.value.trim())}
                 className="h-7 min-w-0 truncate border-transparent px-2 text-[12px] hover:border-gray-200"
@@ -317,23 +309,6 @@ function Composer({ ticketId }: { ticketId: string }) {
         <Button variant="ghost" disabled={!text.trim()} onClick={send} className="text-gray-800 disabled:text-gray-500">
           {comment ? "Add comment" : "Send"}
         </Button>
-      </div>
-    </div>
-  );
-}
-
-/** Overlay on the composer of a closed ticket (chats.conversation.closedTicket). */
-function ClosedState({ ticketId }: { ticketId: string }) {
-  return (
-    <div className="backdrop-blur-xs bg-white/50 absolute left-0 top-0.5 w-full h-full z-20 flex flex-col gap-4 items-center justify-center">
-      <Icon name="ticket" variant="fal" className="size-6! text-gray-400" />
-      <p className="text-gray-600 text-sm">This ticket is closed.</p>
-      <div className="flex flex-col gap-2 items-stretch">
-        <Button variant="outline" className="font-semibold" onClick={() => reopenTicket(ticketId)}>
-          Reopen ticket
-        </Button>
-        <Inert className={cn(buttonClass("default"), "font-semibold")}>Create new ticket</Inert>
-        <Inert className={cn(buttonClass("ghost"), "font-semibold")}>View conversation history</Inert>
       </div>
     </div>
   );

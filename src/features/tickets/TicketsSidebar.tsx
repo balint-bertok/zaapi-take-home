@@ -7,7 +7,6 @@ import { sections } from "@/shell/sections";
 import { useDemo } from "@/store/store";
 import { UserAvatar } from "./avatars";
 import type { Ticket } from "./fixtures";
-import { inboxFrom, type Inbox } from "./inbox";
 
 // Same frame and item classes as the shell's SectionSidebar (saved markup), plus what only the
 // inbox menu has: per-entry icons, live counts, the disabled "+" and the saved-view carets.
@@ -18,22 +17,20 @@ const caret = <Icon name="caret-down" variant="fas" className="text-gray-400 siz
 
 type Decoration = { icon: ReactNode; count?: number; caret?: boolean; action?: boolean };
 
-export function TicketsSidebar({ inbox, tickets }: { inbox: Inbox; tickets: Ticket[] }) {
+export function TicketsSidebar({ tickets }: { tickets: Ticket[] }) {
   const { title, groups } = sections.tickets;
   const user = useDemo((s) => s.user);
-  const open = tickets.filter((t) => t.status === "open");
 
   // Keyed by the catalog label in sections.ts, which stays the one home for labels and links.
   const decorations: Record<string, Decoration> = {
-    "My Inbox": { icon: <UserAvatar name={user.name} />, count: open.filter((t) => t.assigneeId === user.id).length },
-    Unassigned: { icon: <Icon name="circle-user" className="text-gray-400" />, count: open.filter((t) => !t.assigneeId).length },
-    All: { icon: <Icon name="message-dots" className="text-gray-400" />, count: open.length },
+    "My Inbox": { icon: <UserAvatar name={user.name} />, count: tickets.filter((t) => t.assigneeId === user.id).length },
+    Unassigned: { icon: <Icon name="circle-user" className="text-gray-400" />, count: tickets.filter((t) => !t.assigneeId).length },
+    All: { icon: <Icon name="message-dots" className="text-gray-400" />, count: tickets.length },
     "Pinned by me": { icon: <Icon name="thumbtack" className="size-4 text-gray-400" />, caret: true },
     "All saved views": { icon: <Icon name="folder-open" className="size-4 text-gray-400" />, caret: true, action: true },
     Closed: { icon: <Icon name="check" className="text-gray-400" /> },
     Spam: { icon: <Icon name="octagon-exclamation" className="text-gray-400" /> },
   };
-  const isActive = (to: string) => inboxFrom(new URLSearchParams(to.split("?")[1]).get("inbox")) === inbox;
 
   return (
     <aside
@@ -69,7 +66,8 @@ export function TicketsSidebar({ inbox, tickets }: { inbox: Inbox; tickets: Tick
                   return (
                     <li key={label} className="group/menu-item relative">
                       {to ? (
-                        <Link to={to} className={cn(item, isActive(to) && activeItem)}>
+                        // All is the one linked entry and the one inbox, so a link is always the current one.
+                        <Link to={to} className={cn(item, activeItem)}>
                           {body}
                         </Link>
                       ) : (

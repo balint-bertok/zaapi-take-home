@@ -25,7 +25,7 @@ Answers: where does the demo differ from the live app, and what was done about i
 | tickets | assign dialog | Unassigned + AI Agent + Balint rows, gray-50 footer px-7 py-4 with arrow kbds | only Balint, thin footer | rewritten | fixed |
 | tickets | textarea fields radius | 5.25 | 7 | rounded-md | fixed |
 | tickets | pre-onboarding | All (0) + Ready card (Step 5/6) | ticket present | hide tickets until onboarding done | fixed |
-| tickets | closed view header | no list menu, no bulk controls, circle-check empty icon | menu + bulk row, plain text | hidden in Closed | fixed |
+| tickets | closed view header | no list menu, no bulk controls, circle-check empty icon | menu + bulk row, plain text | hidden in Closed | removed 2026-10-03: tickets never close in the demo |
 | tickets | empty list | face-party size-9 gray-200 + gray-300 text | plain gray-400 text | live markup | fixed |
 | tickets | no ticket selected | grey bolt image + "Select a customer to open the ticket" | Ready card | NoTicketSelected | fixed |
 | ai-ks | filter chips radius | lg (Source type, Created by), md (Integrations) | all md | prop | fixed |
@@ -60,7 +60,7 @@ Answers: where does the demo differ from the live app, and what was done about i
 | all | loading states | grey veil and top progress bar while data loads | no loading (in-memory store) | none | waived (no network) |
 | tickets | no ticket selected image | /images/zaapi-symbol-gray.png | - | logo bolt recoloured to the sampled grey-blue ramp | approximated (asset not saved) |
 | tickets | composer | 24-hour window error banner on an old chat | none | none | waived (fixture age) |
-| tickets | closed-ticket state | not observable without closing a live ticket | - | none | not compared on live |
+| tickets | closed-ticket state | not observable without closing a live ticket | - | none | removed 2026-10-03: tickets never close in the demo |
 | ai-test | background image | live PNG | - | low-resolution resampling of the live image, scaled the same way | approximated (asset not saved) |
 | register | phone flags | flag images for every country | Thailand only | other pinned flags drawn as simplified round SVGs; the list stops at the pinned countries | approximated |
 | register | phone default country | chosen from the visitor's location | Thailand, as captured | none | waived (capture) |

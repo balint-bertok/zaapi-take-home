@@ -6,12 +6,11 @@ import { asset } from "@/lib/asset";
 import { Conversation } from "./Conversation";
 import type { Ticket } from "./fixtures";
 import { DetailsPanel } from "./DetailsPanel";
-import { inboxFrom, inInbox } from "./inbox";
 import { TicketList } from "./TicketList";
 import { TicketsSidebar } from "./TicketsSidebar";
 
 /**
- * The inbox at `/tickets?inbox=all|closed&ticketId=…`, as app.zaapi.com addresses it. It brings its
+ * The inbox at `/tickets?inbox=all&ticketId=…`, as app.zaapi.com addresses it. It brings its
  * own section menu (icons, live counts) next to the shared rail, so the route uses the banner-only
  * layout; the frame below mirrors ShellLayout.
  */
@@ -19,7 +18,6 @@ const none: Ticket[] = [];
 
 export default function TicketsPage() {
   const [params, setParams] = useSearchParams();
-  const inbox = inboxFrom(params.get("inbox"));
   // Before onboarding the workspace has no conversation yet (as in the captured first visit, where
   // the empty card sits behind the modals); the visitor's ticket is there once onboarding is done.
   const onboarded = useDemo((s) => s.onboardingDone);
@@ -32,15 +30,14 @@ export default function TicketsPage() {
       <OnboardingModals />
       <div className="shrink-0 w-[296px]" />
       <Rail section="tickets" />
-      <TicketsSidebar inbox={inbox} tickets={tickets} />
+      <TicketsSidebar tickets={tickets} />
       <section className="rounded-lg border border-gray-200 bg-(--content-area-background) shadow-medium grow relative overflow-hidden mr-(--content-area-margin) my-[calc(var(--content-area-margin)-2px)]">
         <main className="flex w-full h-(--height-page-content-with-banner)">
           <div className="flex-[30.362_1_0px] min-w-0">
             <TicketList
-              inbox={inbox}
-              tickets={tickets.filter((t) => inInbox(t, inbox))}
+              tickets={tickets}
               selectedId={selected?.id ?? null}
-              onSelect={(id) => setParams({ inbox, ticketId: id })}
+              onSelect={(id) => setParams({ inbox: "all", ticketId: id })}
             />
           </div>
           <div role="separator" className="w-px shrink-0 bg-gray-200" />

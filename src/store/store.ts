@@ -4,7 +4,7 @@ import { seed, type DemoState } from "./fixtures";
 // The whole demo state lives in this module and in one localStorage key. Nothing leaves the browser.
 // Bump the key's version when a fixture changes shape incompatibly; old saved state is then ignored.
 // Last bumped when the automations slice left with its pages (ADR 0003).
-const STORAGE_KEY = "zaapi-demo-state-v4";
+const STORAGE_KEY = "zaapi-demo-state-v5";
 
 function load(): DemoState {
   try {

@@ -2,14 +2,12 @@ import * as Collapsible from "@radix-ui/react-collapsible";
 import { useEffect, useState, type ReactNode } from "react";
 import { Inert } from "@/components/Inert";
 import { buttonClass } from "@/components/ui/button";
-import { Input, Textarea } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip } from "@/components/ui/tooltip";
 import { Icon } from "@/icons/Icon";
 import { asset } from "@/lib/asset";
 import { cn } from "@/lib/cn";
 import { useDemo } from "@/store/store";
-import { setContactField } from "./actions";
 import { ContactAvatar } from "./avatars";
 import type { ContactFieldKey, Ticket } from "./fixtures";
 import { iconButton } from "./styles";
@@ -26,7 +24,7 @@ const contactFields: { key: ContactFieldKey; label: string; multiline?: boolean 
   { key: "note", label: "Note", multiline: true },
 ];
 
-const valueClass = "min-w-0 rounded-lg border-transparent px-2 text-[12px] hover:border-gray-200";
+const valueClass = "min-w-0 rounded-lg border border-transparent px-2 text-[12px] hover:border-gray-200";
 
 /** The 320px right-hand panel: contact, linked conversations, labels, ticket history, location, activity. */
 export function DetailsPanel({ ticket }: { ticket: Ticket }) {
@@ -189,32 +187,27 @@ function Section({
   );
 }
 
+/**
+ * One contact field, read-only: editing contact information is outside the demo (user decision
+ * 2026-10-03). Same box and hover border as the app's input, with "Empty" where the app shows the
+ * placeholder; the copy button stays.
+ */
 function ContactField({ ticket, field }: { ticket: Ticket; field: (typeof contactFields)[number] }) {
   const value = ticket.contact[field.key] ?? "";
-  const commit = (v: string) => setContactField(ticket.id, field.key, v.trim());
   return (
     <div className="flex w-full min-w-0 items-start gap-2 text-sm">
       <span className="h-7 w-[40%] max-w-[180px] min-w-0 shrink-0 truncate leading-7 text-gray-500">{field.label}</span>
       <div className="group relative flex min-w-0 flex-1 items-start gap-2 break-words text-gray-700">
-        {field.multiline ? (
-          <Textarea
-            aria-label={field.label}
-            placeholder="Empty"
-            rows={1}
-            defaultValue={value}
-            onBlur={(e) => commit(e.target.value)}
-            className={cn(valueClass, "text-gray-800 rounded-md min-h-7 resize-none py-1 leading-normal overflow-hidden")}
-          />
-        ) : (
-          <Input
-            aria-label={field.label}
-            placeholder="Empty"
-            type="text"
-            defaultValue={value}
-            onBlur={(e) => commit(e.target.value)}
-            className={cn(valueClass, "text-gray-700 h-7 truncate")}
-          />
-        )}
+        <div
+          className={cn(
+            valueClass,
+            "w-full",
+            value ? (field.multiline ? "text-gray-800" : "text-gray-700") : "text-gray-400",
+            field.multiline ? "rounded-md min-h-7 py-1 leading-normal whitespace-pre-wrap" : "h-7 leading-7 truncate",
+          )}
+        >
+          {value || "Empty"}
+        </div>
         {value && (
           <span className="absolute right-1 z-10 flex items-center gap-0.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100">
             <button
@@ -232,11 +225,10 @@ function ContactField({ ticket, field }: { ticket: Ticket; field: (typeof contac
   );
 }
 
-/** One ticket in "Ticket History": number, status ring, "Current", and its running timer. */
+/** One ticket in "Ticket History": number, open-status ring, "Current", and its running timer. */
 function HistoryRow({ ticket }: { ticket: Ticket }) {
-  const open = ticket.status === "open";
-  const now = useNow(open);
-  const elapsed = Math.max(0, Math.floor(((ticket.closedAt ?? now) - ticket.openedAt) / 1000));
+  const now = useNow();
+  const elapsed = Math.max(0, Math.floor((now - ticket.openedAt) / 1000));
   const hms = [Math.floor(elapsed / 3600), Math.floor(elapsed / 60) % 60, elapsed % 60]
     .map((n) => String(n).padStart(2, "0"))
     .join(":");
@@ -245,13 +237,9 @@ function HistoryRow({ ticket }: { ticket: Ticket }) {
       <span className="flex items-center justify-between gap-2">
         <span className="flex min-w-0 flex-1 items-center gap-1.5">
           <span className="min-w-0 truncate font-medium text-gray-800">#{ticket.number}</span>
-          {open ? (
-            <span className="shrink-0 p-1 flex items-center justify-center rounded-full bg-warning-50">
-              <span className="size-3.5 border border-warning-500 border-dashed rounded-full" />
-            </span>
-          ) : (
-            <Icon name="circle-check" variant="fas" className="size-4! text-green-500" />
-          )}
+          <span className="shrink-0 p-1 flex items-center justify-center rounded-full bg-warning-50">
+            <span className="size-3.5 border border-warning-500 border-dashed rounded-full" />
+          </span>
           <span className="shrink-0 rounded bg-gray-100 px-1 py-px text-[10px] font-medium text-gray-500">Current</span>
         </span>
         <span className="inline-flex gap-1.5 shrink-0 items-center justify-center text-sm text-gray-500">
@@ -263,13 +251,12 @@ function HistoryRow({ ticket }: { ticket: Ticket }) {
   );
 }
 
-function useNow(running: boolean) {
+function useNow() {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    if (!running) return;
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
-  }, [running]);
+  }, []);
   return now;
 }
 
