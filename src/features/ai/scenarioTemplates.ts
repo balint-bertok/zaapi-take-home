@@ -56,3 +56,9 @@ export const templates: Template[] = [
 ];
 
 export const scratch: Template["form"] = { name: "", trigger: "", handling: "follow_instruction" };
+
+/** Whether a scenario row stands for a template (matched by name, as the setup's cards and the knowledge step do). */
+export const isTemplateName = (name: string) => templates.some((t) => t.form.name === name);
+
+/** The "Create from scratch" card (ai.scenarioTraining.manualEntry.*), on the sheet and the setup's Scenarios step. */
+export const manualEntry = { title: "Manual entry", description: "Manually create a unique scenario tailored to your use case." };

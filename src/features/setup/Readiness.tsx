@@ -1,5 +1,5 @@
 import { useDemo } from "@/store/store";
-import { templates } from "../ai/scenarioTemplates";
+import { isTemplateName, templates } from "../ai/scenarioTemplates";
 import { FormCard } from "../ai/parts";
 import { channelLanguage, policies, type Language } from "./content";
 import { IconRow } from "./IconRow";
@@ -8,7 +8,9 @@ import { setupCard, setupCardTitle } from "./SetupPage";
 type Row = { ok: boolean; text: string };
 
 function readiness(scenarioNames: string[], sourceNames: string[], language: Language): Row[] {
-  const covered = templates.map((t) => t.form.name).filter((n) => scenarioNames.includes(n));
+  // Template names in their catalog order, then the scenarios written by hand.
+  const fromTemplates = templates.map((t) => t.form.name).filter((n) => scenarioNames.includes(n));
+  const covered = [...fromTemplates, ...scenarioNames.filter((n) => !isTemplateName(n))];
   const answered = policies.filter((p) => sourceNames.includes(p.label)).length;
   return [
     covered.length

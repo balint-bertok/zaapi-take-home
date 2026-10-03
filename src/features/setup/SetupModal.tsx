@@ -5,7 +5,7 @@ import { ModalTour, StepCard } from "@/components/ModalTour";
 import { Button } from "@/components/ui/button";
 import { useDemo } from "@/store/store";
 import { ChoiceCard, ScenarioForm } from "../ai/AddScenarioSheet";
-import { templates, type Template } from "../ai/scenarioTemplates";
+import { isTemplateName, manualEntry, scratch, templates, type Template } from "../ai/scenarioTemplates";
 import { personaSuggestion, policies, skipConsequence } from "./content";
 import { ChannelRow, StepsAhead } from "./Intro";
 import { KnowledgeForm, type Answers } from "./KnowledgeForm";
@@ -189,10 +189,12 @@ function PersonaStep({ filled }: { filled: boolean }) {
 }
 
 /**
- * Step 2: pick the scenario templates. Opens with what the store holds, so coming back shows the picks.
- * Picking a template opens its prefilled scenario form in the same card, as the "Add scenario" sheet
- * does; creating it adds the row and returns to the cards with that one checked (unless renamed: the
- * card stands for the template's name). Unchecking a card only drops the pick: Continue removes its row.
+ * Step 2: pick the scenario templates, or write one. Opens with what the store holds, so coming back
+ * shows the picks. Picking a template opens its prefilled scenario form in the same card, as the "Add
+ * scenario" sheet does; creating it adds the row and returns to the cards with that one checked (unless
+ * renamed: the card stands for the template's name). Unchecking a card only drops the pick: Continue
+ * removes its row. "Manual entry" opens the empty form, as the sheet's does (user decision 2026-10-03);
+ * each scenario it creates stays, and counts on its card.
  */
 function ScenariosStep() {
   const scenarios = useDemo((s) => s.scenarios);
@@ -202,7 +204,9 @@ function ScenariosStep() {
   const [unchecked, setUnchecked] = useState<string[]>([]);
   const created = (t: Template) => scenarios.some((s) => s.name === t.form.name);
   const picked = templates.filter((t) => created(t) && !unchecked.includes(t.id)).map((t) => t.id);
-  const [editing, setEditing] = useState<Template | null>(null);
+  // Rows not named after a template: written by hand here (or on the Scenario Handling page).
+  const written = scenarios.filter((s) => !isTemplateName(s.name)).length;
+  const [editing, setEditing] = useState<Pick<Template, "title" | "form"> | null>(null);
   // Skipping asks inline, not in a second dialog over this one.
   const [skipping, setSkipping] = useState(false);
   const pick = (t: Template) => {
@@ -221,13 +225,13 @@ function ScenariosStep() {
       <ScenarioForm
         start={editing.form}
         compact
-        // Its new row checks the card.
+        // A template's new row checks its card; a written one counts on Manual entry.
         onDone={() => setEditing(null)}
         frame={(form, submit) => (
           <SetupCard
             step="scenarios"
             title={editing.title}
-            subtitle="Review the ready-made steps, then create the scenario. You can edit it later."
+            subtitle={editing.form === scratch ? "Describe when it should trigger and how the agent handles it. You can edit it later." : "Review the ready-made steps, then create the scenario. You can edit it later."}
             scroll
             footer={
               <>
@@ -269,17 +273,27 @@ function ScenariosStep() {
               </button>
             )}
           </div>
-          <ContinueButton variant="default" to={knowledgePath} disabled={!picked.length} onClick={() => saveScenarios(picked)}>
+          <ContinueButton variant="default" to={knowledgePath} disabled={!picked.length && !written} onClick={() => saveScenarios(picked)}>
             Continue to knowledge
           </ContinueButton>
         </>
       }
     >
       <div className="px-6 py-5 space-y-4">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           {templates.map((t) => (
             <ChoiceCard key={t.id} icon={t.icon} title={t.title} description={t.description} checked={picked.includes(t.id)} onClick={() => pick(t)} />
           ))}
+          <ChoiceCard
+            plain
+            icon="pencil"
+            title={manualEntry.title}
+            description={written ? `${written} written so far. Add another.` : manualEntry.description}
+            onClick={() => {
+              setSkipping(false);
+              setEditing({ title: manualEntry.title, form: scratch });
+            }}
+          />
         </div>
         <p className="text-sm text-gray-500">The complaint scenario hands the conversation to your team straight away.</p>
       </div>
