@@ -1,6 +1,6 @@
 /**
  * One line of a ticket thread. `contact`/`agent` are chat bubbles, `comment` an internal comment,
- * `ticket` an open/close line drawn between rules, `system` a plain centred line (assignment).
+ * `ticket` a ticket event line (opened) drawn between rules, `system` a plain centred line (assignment).
  * Lines are stored already rendered from the catalog templates: the thread is a log.
  */
 export type Message = {
@@ -26,12 +26,10 @@ export type Ticket = {
   number: string;
   contactName: string;
   integrationId: string;
-  status: "open" | "closed";
   assigneeId: string | null;
   followUp: boolean;
-  /** Epoch ms; the ticket-history timer runs from here until `closedAt`. */
+  /** Epoch ms; the ticket-history timer runs from here. Tickets never close in the demo. */
   openedAt: number;
-  closedAt: number | null;
   conversionValue: string;
   contact: Partial<Record<ContactFieldKey, string>>;
   messages: Message[];
@@ -45,11 +43,9 @@ export const ticketsSeed: { tickets: Ticket[] } = {
       number: "261001DH7ET7",
       contactName: "Visitor 01 Oct 2026, 11:18",
       integrationId: "integration-1",
-      status: "open",
       assigneeId: null,
       followUp: false,
       openedAt: Date.now() - 34_000,
-      closedAt: null,
       conversionValue: "",
       contact: { firstName: "Visitor 01 Oct 2026, 11:18" },
       messages: [

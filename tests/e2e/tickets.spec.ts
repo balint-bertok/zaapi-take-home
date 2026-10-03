@@ -1,11 +1,12 @@
 /**
  * The inbox's main click path, driven only by the in-memory store: select the visitor ticket,
- * reply, assign it to the signed-in user, close it, find it in the closed inbox (by URL: the
- * Completed / Closed entry is inert), reopen it.
+ * reply, assign it to the signed-in user. Closing a ticket (header and bulk), reopening it and
+ * editing the contact fields are outside the demo (user decision 2026-10-03): those controls
+ * render inert, and the contact fields are plain text.
  */
 import { expect, test } from "@playwright/test";
 
-test("tickets inbox: reply, assign, close and reopen", async ({ page }) => {
+test("tickets inbox: reply and assign; close, bulk close and contact fields are inert", async ({ page }) => {
   await page.goto("tickets");
   // Get past the first-visit modals (auth-onboarding.spec covers them in detail).
   await page.getByRole("button", { name: "Continue" }).click();
@@ -27,17 +28,17 @@ test("tickets inbox: reply, assign, close and reopen", async ({ page }) => {
   await expect(page.getByRole("link", { name: "My Inbox (1)" })).toHaveCount(0); // inert entry
   await expect(page.getByRole("button", { name: "My Inbox (1)" })).toBeVisible();
 
-  await page.getByRole("button", { name: "Close", exact: true }).click();
-  await expect(page.getByText("Ticket closed", { exact: true })).toBeVisible();
-  await expect(page.getByText("This ticket is closed.")).toBeVisible();
-  await expect(list.getByText("All tickets are closed")).toBeVisible();
-
-  // The Closed entry is inert; the closed inbox is still there by URL.
-  await expect(page.getByRole("link", { name: "Closed" })).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "Closed" })).toHaveAttribute("aria-disabled", "true");
-  await page.goto("tickets?inbox=closed");
-  await list.getByText("Visitor 01 Oct 2026, 11:18").click();
-  await page.getByRole("button", { name: "Reopen ticket" }).click();
+  // Close stays inert: the ticket stays open and no closed state appears.
+  const close = page.getByRole("button", { name: "Close", exact: true });
+  await expect(close).toHaveAttribute("aria-disabled", "true");
+  await close.click({ force: true }); // Playwright skips aria-disabled targets unless forced
   await expect(page.getByText("This ticket is closed.")).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "All (1)" })).toBeVisible();
+  await expect(page.getByText("Ticket closed", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Close tickets" })).toHaveAttribute("aria-disabled", "true");
+  await expect(page.getByRole("button", { name: "Closed" })).toHaveAttribute("aria-disabled", "true");
+
+  // Contact information is read-only: no field is a textbox, the values are text.
+  const contact = page.getByRole("complementary", { name: "Contact" });
+  await expect(contact.getByRole("textbox")).toHaveCount(0);
+  await expect(contact.getByText("Visitor 01 Oct 2026, 11:18").first()).toBeVisible();
 });
