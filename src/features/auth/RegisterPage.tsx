@@ -1,11 +1,12 @@
 import * as Collapsible from "@radix-ui/react-collapsible";
-import type { CSSProperties, FormEvent } from "react";
+import { useEffect, type CSSProperties, type FormEvent } from "react";
 import { useNavigate } from "react-router";
 import { Inert } from "@/components/Inert";
 import { Button, buttonClass } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Icon } from "@/icons/Icon";
 import { asset } from "@/lib/asset";
+import { resetDemo } from "@/store/store";
 import { LanguageButton } from "./AuthChrome";
 import { demoCredentials } from "./demoCredentials";
 import { FieldError, Label, PasswordInput, PhoneInput } from "./fields";
@@ -70,6 +71,9 @@ function TurnstileSuccess() {
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  // Sign-up is where a run starts: arriving here puts the demo back to its fixtures, so nothing from
+  // an earlier run (scenarios, knowledge, the live agent) is seen again (user decision 2026-10-03).
+  useEffect(() => resetDemo(), []);
 
   // No app validation (the browser's own email-format check stays, as on the saved page), no account
   // and nothing kept: straight to the inbox (user decision 2026-10-02).
