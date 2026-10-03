@@ -156,8 +156,9 @@ function Composer({ onSend }: { onSend: (text: string) => void }) {
 /**
  * The scripted test chat of AI Agent > Test (Step 14): account picker, auto-response switch, Clear,
  * the thread and the composer. Shared with the guided setup's Test step. Nothing is sent anywhere.
+ * `className` overrides the frame's height where it sits inside a scrolling body (the setup modal).
  */
-export function TestChat() {
+export function TestChat({ className }: { className?: string }) {
   const [messages, setMessages] = useState<Message[]>(seed);
   const [autoResponse, setAutoResponse] = useState(true);
   const [picking, setPicking] = useState(false);
@@ -216,7 +217,7 @@ export function TestChat() {
   for (const m of messages) questions.push(m.from === "customer" ? m.text : (questions.at(-1) ?? ""));
 
   return (
-    <div className="relative bg-white/70 backdrop-blur-md flex flex-col mx-auto max-w-[990px] h-[720px] rounded-lg border border-gray-100">
+    <div className={cn("relative bg-white/70 backdrop-blur-md flex flex-col mx-auto max-w-[990px] h-[720px] rounded-lg border border-gray-100", className)}>
       <div className="flex flex-col flex-1 overflow-auto">
         <div className="p-4 flex justify-between">
           {/* Account picker: the workspace's one chat account, already selected. */}

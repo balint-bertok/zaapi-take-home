@@ -2,8 +2,8 @@
  * The guided setup click path (ADR 0002 and its hybrid-modal amendment), from sign-up to a live
  * agent. Before go-live the rail sends AI Agent into the path and leaves every other section but
  * Tickets inert; the step list links only to done steps and the current one, and the "skip the
- * setup" exit is inert. The welcome, persona, scenarios and knowledge steps run in the inbox
- * onboarding's modal frame over the setup page; test and go live are pages with no dialog. The
+ * setup" exit is inert. The welcome, persona, scenarios, knowledge and test steps run in the inbox
+ * onboarding's modal frame over the setup page; go live is a page with no dialog. The
  * modal's step bar marks the current step and the done ones. Each empty form moves to its filled
  * twin on first touch, Continue included. Continue appends to the Personality and Knowledge
  * Source lists, once: a second Continue adds no duplicate; a scenario row is added on Create. The
@@ -121,22 +121,27 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   await knowledge.getByRole("link", { name: "Continue to test" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/test$/);
 
-  // Test is a page, not a modal screen; the readiness summary reads what the earlier steps stored.
-  await expect(page.getByRole("dialog")).toHaveCount(0);
-  await expect(page.getByText("Scenarios: Check order status, Return or refund")).toBeVisible();
-  await expect(page.getByText("Policies: shipping times and areas, returns and refunds answered")).toBeVisible();
-  await expect(page.getByText("Language: Thai, matches your Test (Demo) customers")).toBeVisible();
-  await expect(page.getByRole("textbox", { name: "Message" })).toBeVisible();
+  // Test is a modal screen too; the readiness summary reads what the earlier steps stored, and the
+  // chat sits under it inside the scrolling body.
+  const test = page.getByRole("dialog", { name: "Test" });
+  await expect(progress(test).filter({ hasText: "Test" })).toHaveAttribute("aria-current", "step");
+  await expect(test.getByText("Scenarios: Check order status, Return or refund")).toBeVisible();
+  await expect(test.getByText("Policies: shipping times and areas, returns and refunds answered")).toBeVisible();
+  await expect(test.getByText("Language: Thai, matches your Test (Demo) customers")).toBeVisible();
+  await expect(test.getByRole("textbox", { name: "Message" })).toBeVisible();
 
   // The step list links only to done steps and the current one; the skip exit is shown but inert.
+  // The open modal hides the page from the accessibility tree, so the step list is located by CSS.
   const sidebar = page.getByRole("complementary", { name: "Set up your AI Agent" });
-  for (const name of ["Persona", "Scenarios", "Knowledge", "Test"]) await expect(sidebar.getByRole("link", { name })).toBeVisible();
-  await expect(sidebar.locator('button[aria-disabled="true"]', { hasText: "Go live" })).toBeVisible();
-  await expect(sidebar.getByRole("link", { name: "Go live" })).toHaveCount(0);
-  await expect(sidebar.locator('button[aria-disabled="true"]', { hasText: "I know what I'm doing, skip the setup" })).toBeVisible();
+  const stepList = page.locator('[aria-label="Set up your AI Agent"]');
+  for (const name of ["Persona", "Scenarios", "Knowledge", "Test"]) await expect(stepList.locator("a", { hasText: name })).toBeVisible();
+  await expect(stepList.locator('button[aria-disabled="true"]', { hasText: "Go live" })).toBeVisible();
+  await expect(stepList.locator("a", { hasText: "Go live" })).toHaveCount(0);
+  await expect(stepList.locator('button[aria-disabled="true"]', { hasText: "I know what I'm doing, skip the setup" })).toBeVisible();
 
-  await page.getByRole("main").getByRole("link", { name: "Continue", exact: true }).click();
+  await test.getByRole("link", { name: "Continue", exact: true }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/live$/);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
 
   // Go live: a small share by default. The page shows the flow it publishes, and the "Let AI handle"
   // block follows the picked share; the done page names the flow and says pausing it pauses the agent.
@@ -151,8 +156,8 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   await expect(page.getByText(/answers half .* through the flow “AI handles new conversations on Test \(Demo\)”\. Pausing the agent/)).toBeVisible();
 
   // After go-live the AI Agent pages open and every step links; pages outside the journey stay inert
-  // (ADR 0003). The done page stands alone, so this is checked from an AI Agent page.
-  await page.goto("ai/setup/test");
+  // (ADR 0003). The done page stands alone, so this is checked from the go-live page, which has no modal.
+  await page.goto("ai/setup/live");
   for (const name of ["Automations", "Settings"]) {
     await expect(rail.locator(`button[aria-disabled="true"][aria-label="${name}"]`)).toBeVisible();
   }

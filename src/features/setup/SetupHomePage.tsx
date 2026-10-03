@@ -7,7 +7,7 @@ const card = "border border-gray-200 space-y-3";
 const cardTitle = "text-base font-medium text-gray-800";
 
 /**
- * The page behind the setup modal, on the welcome, persona, scenarios and knowledge URLs alike:
+ * The page behind the setup modal, on the welcome, persona, scenarios, knowledge and test URLs alike:
  * which channel the agent starts on, and the five steps ahead. The modal cannot be left ("Finish
  * later" is inert), so the page is only ever its backdrop and its Start button is never reached.
  */

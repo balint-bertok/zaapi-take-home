@@ -5,24 +5,27 @@ import { ModalTour, StepCard } from "@/components/ModalTour";
 import { Button } from "@/components/ui/button";
 import { useDemo } from "@/store/store";
 import { ChoiceCard, ScenarioForm } from "../ai/AddScenarioSheet";
+import { TestChat } from "../ai/TestChat";
 import { isTemplateName, manualEntry, scratch, templates, type Template } from "../ai/scenarioTemplates";
 import { neededPolicies, personaSuggestion, policies, skipConsequence, type Policy } from "./content";
 import { ChannelRow, StepsAhead } from "./Intro";
 import { KnowledgeForm, type Knowledge } from "./KnowledgeForm";
 import { PersonaForm, type Persona } from "./PersonaForm";
 import type { SetupStep } from "./fixtures";
-import { saveKnowledge, savePersona, saveScenarios, skipScenarios } from "./save";
+import { Readiness } from "./Readiness";
+import { markTested, saveKnowledge, savePersona, saveScenarios, skipScenarios } from "./save";
 import { BackButton, BackLink, ContinueButton } from "./SetupPage";
 import { SetupProgress } from "./SetupProgress";
 
-// The setup's first four screens, in the inbox onboarding's modal frame, over the setup page.
-// Copy is not from the catalog (see content.ts).
+// The setup's first five screens (through test), in the inbox onboarding's modal frame, over the
+// setup page. Copy is not from the catalog (see content.ts).
 
 const personaPath = "/ai/setup/persona";
 const filledPath = "/ai/setup/persona/filled";
 const scenariosPath = "/ai/setup/scenarios";
 const knowledgePath = "/ai/setup/knowledge";
 const knowledgeFilledPath = "/ai/setup/knowledge/filled";
+const testPath = "/ai/setup/test";
 
 const welcomePath = "/ai/setup";
 
@@ -34,13 +37,15 @@ const screens: Record<string, () => ReactNode> = {
   [scenariosPath]: () => <ScenariosStep />,
   [knowledgePath]: () => <KnowledgeStep filled={false} />,
   [knowledgeFilledPath]: () => <KnowledgeStep filled />,
+  [testPath]: () => <TestStep />,
 };
 
-// The screens' body height, so the card is one size and its footer sits at the same place on every
-// screen: the persona form's with the step bar above it, before its help texts and signature cards
-// were added, measured in Chrome at 1440×900 and rounded up to 4px (docs/measurements.md). Shorter
-// bodies leave space under their content; the persona and scenario forms, taller, scroll inside it.
-const bodyHeight = 492;
+// The card's width and the screens' body height, so the card is one size and its footer sits at the
+// same place on every screen. Both grew a little on 2026-10-03 when the test step moved in (user
+// decision); the card still fits a 900px window (docs/measurements.md). Shorter bodies leave space
+// under their content; the persona, scenario form and test screens, taller, scroll inside it.
+const cardWidth = "w-[760px]";
+const bodyHeight = 560;
 const footerClass = "border-t bg-gray-50 px-6 py-3 flex justify-between items-center gap-4";
 const sectionTitle = "text-base font-medium text-gray-800";
 
@@ -72,7 +77,7 @@ function SetupCard({
   children: ReactNode;
 }) {
   return (
-    <StepCard width="w-[668px]" top={<SetupProgress current={step} />} title={title} subtitle={subtitle} onOpenAutoFocus={focusCard}>
+    <StepCard width={cardWidth} top={<SetupProgress current={step} />} title={title} subtitle={subtitle} onOpenAutoFocus={focusCard}>
       <div className={scroll ? "overflow-y-auto" : undefined} style={{ minHeight: bodyHeight, maxHeight: scroll ? bodyHeight : undefined }}>
         {children}
       </div>
@@ -82,8 +87,8 @@ function SetupCard({
 }
 
 /**
- * Shown on the welcome, persona, scenarios and knowledge URLs. Mounted once by SetupShell, so it
- * survives moving between its screens.
+ * Shown on the welcome, persona, scenarios, knowledge and test URLs. Mounted once by SetupShell, so
+ * it survives moving between its screens.
  */
 export default function SetupModal() {
   const { pathname } = useLocation();
@@ -310,7 +315,7 @@ const suggestedKnowledge = (reference: string | null) => ({ answers: answersFrom
  * Step 3, on both knowledge URLs. Empty, focusing any answer, checking the reference box or Continue
  * moves to the filled URL, as on the persona; filled, Brand One's answers sit in local state,
  * editable. Continue saves each answered policy as a written knowledge source, the reference as a
- * website or file source, and leaves the modal for the test page. With nothing asked (no scenario
+ * website or file source, and moves to the test screen. With nothing asked (no scenario
  * picked) Continue is always open.
  */
 function KnowledgeStep({ filled }: { filled: boolean }) {
@@ -333,7 +338,7 @@ function KnowledgeStep({ filled }: { filled: boolean }) {
           </div>
           <ContinueButton
             variant="default"
-            to={filled ? "/ai/setup/test" : knowledgeFilledPath}
+            to={filled ? testPath : knowledgeFilledPath}
             disabled={filled && !ready}
             onClick={filled ? () => saveKnowledge(knowledge) : undefined}
           >
@@ -349,6 +354,37 @@ function KnowledgeStep({ filled }: { filled: boolean }) {
           onChange={(patch) => (filled ? setKnowledge((k) => ({ ...k, ...patch })) : navigate(knowledgeFilledPath, { state: { reference: patch.reference ?? null } }))}
           onFocus={filled ? undefined : () => navigate(knowledgeFilledPath)}
         />
+      </div>
+    </SetupCard>
+  );
+}
+
+/**
+ * Step 4: what the agent covers so far, then the AI Agent > Test chat to try it, scrolling inside the
+ * card's body (user decision 2026-10-03: the test runs in the modal too). Continue marks the step done
+ * and leaves the modal for the go-live page.
+ */
+function TestStep() {
+  return (
+    <SetupCard
+      step="test"
+      title="Test"
+      subtitle="Here's what your agent can handle so far. Try a conversation before anyone else can."
+      scroll
+      footer={
+        <>
+          <div className="flex items-center gap-4">
+            <BackLink to={knowledgePath} />
+            <LaterButton />
+          </div>
+          <ContinueButton variant="default" to="/ai/setup/live" onClick={markTested} />
+        </>
+      }
+    >
+      <div className="px-6 py-5 space-y-5">
+        <Readiness />
+        {/* Shorter than the Test page's chat, so the thread and the composer are reachable without scrolling the body far. */}
+        <TestChat className="h-[520px]" />
       </div>
     </SetupCard>
   );
