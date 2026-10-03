@@ -366,3 +366,60 @@ test("arriving on sign-up starts a fresh run", async ({ page }) => {
 
   expect(errors).toEqual([]);
 });
+
+test.describe("in a 720px-tall window, a laptop with its browser chrome", () => {
+  test.use({ viewport: { width: 1440, height: 720 } });
+
+  test("every modal screen fits the window with its footer on screen, and nothing scrolls", async ({ page }) => {
+    const errors = collectErrors(page);
+    const fitsWindow = async (name: string) => {
+      const dialog = page.getByRole("dialog", { name });
+      await expect(dialog).toBeVisible();
+      // The cap keeps the card's bottom inside the window by itself; the real guard is `expectFits`:
+      // content that outgrew the shrunken body would scroll.
+      const box = (await dialog.boundingBox())!;
+      expect(box.y + box.height, `${name}: card bottom at ${box.y + box.height}px`).toBeLessThanOrEqual(720);
+      // The footer's forward control, on screen: a link, or a disabled button where nothing is picked yet.
+      await expect(dialog.getByRole("link").or(dialog.getByRole("button")).filter({ hasText: /^(Continue|Go live|Start|Create scenario)/ }).last()).toBeInViewport();
+      await expectFits(dialog);
+    };
+    await page.goto("ai/setup?reset=1");
+    await fitsWindow("Set up your first AI Agent");
+    await page.goto("ai/setup/persona/filled");
+    await fitsWindow("Persona");
+    await page.goto("ai/setup/scenarios");
+    await fitsWindow("Scenarios");
+    await page.getByRole("checkbox", { name: /Check order status/ }).click();
+    await fitsWindow("Check order status");
+    await page.getByRole("button", { name: "Back" }).click();
+    await page.getByRole("button", { name: /Manual entry/ }).click();
+    await page.getByRole("button", { name: "Create scenario" }).click();
+    await fitsWindow("Manual entry");
+    await page.goto("ai/setup/knowledge/filled");
+    await fitsWindow("Knowledge");
+    await page.goto("ai/setup/test");
+    await fitsWindow("Test");
+    await page.goto("ai/setup/live");
+    await fitsWindow("Go live");
+
+    expect(errors).toEqual([]);
+  });
+});
+
+test.describe("in a window shorter than the card", () => {
+  test.use({ viewport: { width: 1440, height: 560 } });
+
+  test("the card caps at the window and only its middle scrolls; the title and footer stay on screen", async ({ page }) => {
+    const errors = collectErrors(page);
+    await page.goto("ai/setup/persona/filled?reset=1");
+    const persona = page.getByRole("dialog", { name: "Persona" });
+    const box = (await persona.boundingBox())!;
+    expect(box.y + box.height, `card bottom at ${box.y + box.height}px`).toBeLessThanOrEqual(560);
+    await expect(persona.getByRole("heading", { name: "Persona" })).toBeInViewport();
+    await expect(persona.getByRole("link", { name: "Continue" })).toBeInViewport();
+    const body = persona.getByTestId("setup-body");
+    const [content, height] = await body.evaluate((el) => [el.scrollHeight, el.clientHeight]);
+    expect(content).toBeGreaterThan(height);
+    expect(errors).toEqual([]);
+  });
+});
