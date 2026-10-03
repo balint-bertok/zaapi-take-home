@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { useDemo } from "@/store/store";
 import { ChoiceCard, ScenarioForm } from "../ai/AddScenarioSheet";
 import { isTemplateName, manualEntry, scratch, templates, type Template } from "../ai/scenarioTemplates";
-import { personaSuggestion, policies, skipConsequence } from "./content";
+import { neededPolicies, personaSuggestion, policies, skipConsequence, type Policy } from "./content";
 import { ChannelRow, StepsAhead } from "./Intro";
-import { KnowledgeForm, type Answers } from "./KnowledgeForm";
+import { KnowledgeForm, type Knowledge } from "./KnowledgeForm";
 import { PersonaForm, type Persona } from "./PersonaForm";
 import type { SetupStep } from "./fixtures";
 import { saveKnowledge, savePersona, saveScenarios, skipScenarios } from "./save";
@@ -301,18 +301,25 @@ function ScenariosStep() {
   );
 }
 
-const noAnswers: Answers = { shipping: "", returns: "", cancellations: "" };
-const suggestedAnswers = Object.fromEntries(policies.map((p) => [p.key, p.answer])) as Answers;
+const answersFrom = (text: (p: Policy) => string) => Object.fromEntries(policies.map((p) => [p.key, text(p)])) as Knowledge["answers"];
+const noKnowledge: Knowledge = { answers: answersFrom(() => ""), reference: null };
+// The reference box checked on the empty form arrives as navigation state and stays checked.
+const suggestedKnowledge = (reference: string | null) => ({ answers: answersFrom((p) => p.answer), reference });
 
 /**
- * Step 3, on both knowledge URLs. Empty, focusing any answer or Continue moves to the filled URL,
- * as on the persona; filled, Brand One's answers sit in local state, editable. Continue saves each answered
- * policy as a written knowledge source and leaves the modal for the test page.
+ * Step 3, on both knowledge URLs. Empty, focusing any answer, checking the reference box or Continue
+ * moves to the filled URL, as on the persona; filled, Brand One's answers sit in local state,
+ * editable. Continue saves each answered policy as a written knowledge source, the reference as a
+ * website or file source, and leaves the modal for the test page. With nothing asked (no scenario
+ * picked) Continue is always open.
  */
 function KnowledgeStep({ filled }: { filled: boolean }) {
   const navigate = useNavigate();
-  const [answers, setAnswers] = useFilledState(filled, () => suggestedAnswers);
-  const answered = policies.some((p) => answers[p.key].trim() !== "");
+  const scenarios = useDemo((s) => s.scenarios);
+  const picked = (useLocation().state as Pick<Knowledge, "reference"> | null)?.reference ?? null;
+  const [knowledge, setKnowledge] = useFilledState(filled, () => suggestedKnowledge(picked));
+  const asked = neededPolicies(scenarios.map((s) => s.name));
+  const ready = asked.length === 0 || asked.some((p) => knowledge.answers[p.key].trim() !== "") || (knowledge.reference ?? "").trim() !== "";
   return (
     <SetupCard
       step="knowledge"
@@ -327,8 +334,8 @@ function KnowledgeStep({ filled }: { filled: boolean }) {
           <ContinueButton
             variant="default"
             to={filled ? "/ai/setup/test" : knowledgeFilledPath}
-            disabled={filled && !answered}
-            onClick={filled ? () => saveKnowledge(answers) : undefined}
+            disabled={filled && !ready}
+            onClick={filled ? () => saveKnowledge(knowledge) : undefined}
           >
             Continue to test
           </ContinueButton>
@@ -337,8 +344,9 @@ function KnowledgeStep({ filled }: { filled: boolean }) {
     >
       <div className="px-6 py-5">
         <KnowledgeForm
-          answers={filled ? answers : noAnswers}
-          onChange={(key, value) => filled && setAnswers((a) => ({ ...a, [key]: value }))}
+          asked={asked}
+          value={filled ? knowledge : noKnowledge}
+          onChange={(patch) => (filled ? setKnowledge((k) => ({ ...k, ...patch })) : navigate(knowledgeFilledPath, { state: { reference: patch.reference ?? null } }))}
           onFocus={filled ? undefined : () => navigate(knowledgeFilledPath)}
         />
       </div>

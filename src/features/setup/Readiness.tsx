@@ -1,24 +1,29 @@
 import { useDemo } from "@/store/store";
 import { isTemplateName, templates } from "../ai/scenarioTemplates";
 import { FormCard } from "../ai/parts";
-import { channelLanguage, policies, type Language } from "./content";
+import { channelLanguage, neededPolicies, type Language } from "./content";
 import { IconRow } from "./IconRow";
 import { setupCard, setupCardTitle } from "./SetupPage";
 
 type Row = { ok: boolean; text: string };
 
-function readiness(scenarioNames: string[], sourceNames: string[], language: Language): Row[] {
+function readiness(scenarioNames: string[], sourceNames: string[], referenced: boolean, language: Language): Row[] {
   // Template names in their catalog order, then the scenarios written by hand.
   const fromTemplates = templates.map((t) => t.form.name).filter((n) => scenarioNames.includes(n));
   const covered = [...fromTemplates, ...scenarioNames.filter((n) => !isTemplateName(n))];
-  const answered = policies.filter((p) => sourceNames.includes(p.label)).length;
+  const needed = neededPolicies(scenarioNames);
+  const answered = needed.filter((p) => sourceNames.includes(p.label)).length;
   return [
     covered.length
       ? { ok: true, text: `Scenarios: ${covered.join(", ")}` }
-      : { ok: false, text: "Scenarios: none. Refunds and cancellations will go to your team." },
-    answered === policies.length
-      ? { ok: true, text: "Policies: shipping, returns and cancellations answered" }
-      : { ok: false, text: answered ? `Policies: ${answered} of ${policies.length} answered` : "Policies: none answered yet" },
+      : { ok: false, text: "Scenarios: none. Refunds and complaints will go to your team." },
+    needed.length === 0
+      ? { ok: true, text: "Policies: none needed by your scenarios" }
+      : answered === needed.length
+        ? { ok: true, text: `Policies: ${needed.map((p) => p.label.toLowerCase()).join(", ")} answered` }
+        : referenced
+          ? { ok: true, text: "Policies: in the file or website you added" }
+          : { ok: false, text: answered ? `Policies: ${answered} of ${needed.length} answered` : "Policies: none answered yet" },
     language === channelLanguage
       ? { ok: true, text: `Language: ${language}, matches your Test (Demo) customers` }
       : { ok: false, text: `Language: ${language}. Most of your Test (Demo) customers write in ${channelLanguage}.` },
@@ -34,6 +39,7 @@ export function Readiness() {
   const rows = readiness(
     scenarios.map((s) => s.name),
     sources.map((k) => k.name),
+    sources.some((k) => k.type === "website" || k.type === "file"),
     language,
   );
   return (
