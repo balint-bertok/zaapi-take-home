@@ -46,3 +46,7 @@ Why: the path should create the product's own go-live mechanism for the merchant
 | All five steps in the modal | The test chat and go-live do not fit a modal | User |
 | A sixth "Deploy" step mirroring the live Deploy page | That page was never captured, so it would be drawn blind; the memo's path has five steps | User |
 | The Flow Builder canvas as the go-live screen | Reopens ADR 0003 and reinstalls the dependency it removed | User |
+
+## Amendment, 2026-10-03: the inbox points at the path
+
+After sign-up a viewer may click around the inbox instead of starting. A small "Start here" callout beside the rail's AI Agent entry, with an arrow at it, links to the setup until the first step is done (user decision). It is positioned against the entry's measured box, since the rail's item list clips what overflows it, and it is gone the moment a step is done or the agent is live.

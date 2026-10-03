@@ -1,5 +1,6 @@
 import { useSearchParams } from "react-router";
 import { Rail } from "@/shell/Rail";
+import { StartHere } from "@/shell/StartHere";
 import { GetStartedCard, OnboardingModals } from "../auth/onboarding";
 import { useDemo } from "@/store/store";
 import { asset } from "@/lib/asset";
@@ -30,6 +31,7 @@ export default function TicketsPage() {
       <OnboardingModals />
       <div className="shrink-0 w-[296px]" />
       <Rail section="tickets" />
+      <StartHere />
       <TicketsSidebar tickets={tickets} />
       <section className="rounded-lg border border-gray-200 bg-(--content-area-background) shadow-medium grow relative overflow-hidden mr-(--content-area-margin) my-[calc(var(--content-area-margin)-2px)]">
         <main className="flex w-full h-(--height-page-content-with-banner)">
