@@ -10,7 +10,8 @@
  * readiness summary on the Test step reads the store. Go live shows the flow it publishes, its "Let
  * AI handle" block following the picked share; the done page names that flow. "Go live" opens the AI Agent pages (the rest
  * of the rail stays inert, ADR 0003); `?reset=1`
- * restores the path, and the done page's "start again" resets the demo and returns to sign-up. "Finish later" is inert: the modal stays.
+ * restores the path, and the done page, the end of the demo, stands alone and its "start again"
+ * resets the demo and returns to sign-up; arriving on sign-up resets it too. "Finish later" is inert: the modal stays.
  * Skipping scenarios states the consequence inline, in the same dialog, and changes what the
  * knowledge step asks. Picking a template opens its prefilled scenario form in the same card, as
  * the "Add scenario" sheet does; creating it checks the card, Back leaves it unchecked. "Manual entry"
@@ -142,9 +143,12 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   await expect(blocks.getByRole("listitem").nth(1)).toHaveText(/^Let AI handle: half/);
   await page.getByRole("main").getByRole("link", { name: "Go live" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/live\/done$/);
-  await expect(page.getByText(/answering half .* through the flow “AI handles new conversations on Test \(Demo\)”\. Pausing the agent/)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Your agent is live. That's the end of the demo." })).toBeVisible();
+  await expect(page.getByText(/answers half .* through the flow “AI handles new conversations on Test \(Demo\)”\. Pausing the agent/)).toBeVisible();
 
-  // After go-live the AI Agent pages open and every step links; pages outside the journey stay inert (ADR 0003).
+  // After go-live the AI Agent pages open and every step links; pages outside the journey stay inert
+  // (ADR 0003). The done page stands alone, so this is checked from an AI Agent page.
+  await page.goto("ai/setup/test");
   for (const name of ["Automations", "Settings"]) {
     await expect(rail.locator(`button[aria-disabled="true"][aria-label="${name}"]`)).toBeVisible();
   }
@@ -162,10 +166,18 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   for (const name of ["Shipping times and areas", "Returns and refunds", "Cancellations"])
     await expect(page.getByRole("row").filter({ hasText: name })).toHaveCount(1);
 
-  // The journey loops: the done page sends the viewer back to sign-up with the demo reset.
+  // The journey ends on a page of its own, with nothing to click but a restart that sends the viewer
+  // back to sign-up with the demo reset.
   await page.goto("ai/setup/live/done");
-  await page.getByRole("button", { name: "Start the journey again from sign-up" }).click();
+  await expect(page.getByRole("heading", { name: "Your agent is live. That's the end of the demo." })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Main" })).toHaveCount(0);
+  await expect(page.getByRole("link")).toHaveCount(0);
+  await page.getByRole("button", { name: "Start again from sign-up" }).click();
   await expect(page).toHaveURL(/\/register$/);
+  await expect(page.getByRole("heading", { name: "Start your 7-day free trial" })).toBeVisible();
+  await page.goto("ai/train/scenario-handling");
+  await expect(page.getByRole("columnheader").first()).toBeVisible();
+  await expect(page.getByRole("row").filter({ hasText: "Check order status" })).toHaveCount(0);
   await page.goto("tickets");
   await expect(page.getByRole("dialog", { name: "Tell us a bit about yourself" })).toBeVisible();
   await page.goto("ai/train/personality");
@@ -271,6 +283,22 @@ test("skipping scenarios states the consequence inline and the knowledge step fo
 
   await page.goto("ai/setup/test");
   await expect(page.getByText(/^Scenarios: none/)).toBeVisible();
+
+  expect(errors).toEqual([]);
+});
+
+test("arriving on sign-up starts a fresh run", async ({ page }) => {
+  const errors = collectErrors(page);
+
+  await page.goto("ai/setup/persona/filled?reset=1");
+  await page.getByRole("dialog", { name: "Persona" }).getByRole("link", { name: "Continue" }).click();
+  await page.goto("ai/train/personality");
+  await expect(page.getByRole("row").filter({ hasText: "Brand One assistant" })).toHaveCount(1);
+  await page.goto("register");
+  await expect(page.getByRole("heading", { name: "Start your 7-day free trial" })).toBeVisible();
+  await page.goto("ai/train/personality");
+  await expect(page.getByRole("columnheader").first()).toBeVisible();
+  await expect(page.getByRole("row").filter({ hasText: "Brand One assistant" })).toHaveCount(0);
 
   expect(errors).toEqual([]);
 });

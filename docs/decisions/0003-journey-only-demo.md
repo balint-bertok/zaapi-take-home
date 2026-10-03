@@ -8,14 +8,14 @@
 
 ## Context
 
-The demo exists to show the memo's journey: register, the inbox with its two onboarding modals, the AI Agent rail icon, the guided setup, and the done page, which leads to the inbox and to Scenario Handling and can restart the journey. Login, verify-email, settings with billing, automations and the flow builder were built from the captures before the journey existed. They sat outside it: they invited a viewer to wander off the path, and they carried code, a dependency (`@xyflow/react`) and suites of their own.
+The demo exists to show the memo's journey: register, the inbox with its two onboarding modals, the AI Agent rail icon, the guided setup, and the done page, which (until the amendment below) leads to the inbox and to Scenario Handling and can restart the journey. Login, verify-email, settings with billing, automations and the flow builder were built from the captures before the journey existed. They sat outside it: they invited a viewer to wander off the path, and they carried code, a dependency (`@xyflow/react`) and suites of their own.
 
 ## Decision
 
 - **Removed:** the login, verify-email, settings, billing, automations and flow builder pages, with their routes, document titles, sidebar sections, store slice and e2e suites.
 - **Their entry points render inert.** The rail's Automations and Settings entries join Analytics, Broadcast and Contacts as `<Inert>` items, before and after go-live; the register page's "Log in" and the Test page's "Go to Flow Builder" render through `<Inert>` with their original classes. The trial banner always shows its button, since the billing page that hid it is gone.
 - **`/` and unknown URLs land on `/register`,** where the journey starts.
-- **The AI Agent pages stay** (Knowledge Source, Scenario Handling, Personality, Test): the setup writes into their store slices, and the done page links to them.
+- **The AI Agent pages stay** (Knowledge Source, Scenario Handling, Personality, Test): the setup writes into their store slices, and the done page links to them (superseded, see the amendment below).
 
 ## Consequences
 
@@ -30,3 +30,7 @@ The demo exists to show the memo's journey: register, the inbox with its two onb
 |---|---|---|
 | Keep the pages but make their entry points inert | Dead code: pages no click can reach, still built, tested and maintained | User |
 | Remove the AI Agent pages too | The done page and the setup's store writes need them to show what the setup created | User |
+
+## Amendment, 2026-10-03
+
+The done page no longer leads anywhere: it is the end of the demo (user decision, "once the agent is live, redirect to an end-of-demo page from where they can start again at sign-up"). It stands alone (`layout: "auth"`), with one action, "Start again from sign-up", which resets the store. Sign-up resets the store on arrival too, so no scenario or knowledge from an earlier run is seen again. The AI Agent pages stay for the setup's store writes and the rail after go-live.

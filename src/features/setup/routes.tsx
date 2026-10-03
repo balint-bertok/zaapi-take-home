@@ -16,5 +16,6 @@ export const setupRoutes: AppRoute[] = [
   { path: "/ai/setup/knowledge/filled", title: titles.ai, layout: "setup", Page: homePage },
   { path: "/ai/setup/test", title: titles.ai, layout: "setup", Page: lazy(() => import("./SetupTestPage")) },
   { path: "/ai/setup/live", title: titles.ai, layout: "setup", Page: lazy(() => import("./GoLivePage")) },
-  { path: "/ai/setup/live/done", title: titles.ai, layout: "setup", Page: lazy(() => import("./LiveDonePage")) },
+  // The end of the demo stands alone: no rail, no step list, only the way back to sign-up.
+  { path: "/ai/setup/live/done", title: titles.ai, layout: "auth", Page: lazy(() => import("./LiveDonePage")) },
 ];
