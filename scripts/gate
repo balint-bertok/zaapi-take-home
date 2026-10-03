@@ -15,7 +15,7 @@ if [ "$installed" != "$expected" ]; then
 fi
 
 echo "gate: secret scan over full history"
-gitleaks git --redact --no-banner --config .gitleaks.toml .
+gitleaks git --redact --no-banner .
 
 echo "gate: tests"
 scripts/test

@@ -1,6 +1,6 @@
 # Third parties
 
-Answers: which external services does this project talk to, and which identifiers are safe to write down? Tenant IDs, client IDs, hostnames and account names belong here. Secret values never do; they live only in `.env`.
+Answers: which external services does this project talk to, and which identifiers are safe to write down? Hostnames and account names belong here. The project holds no secret: no backend, no network.
 
 | Service | Purpose | Safe identifiers | Rotation steps |
 |---|---|---|---|

@@ -3,8 +3,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-echo "test: typecheck"; npx tsc -b
-echo "test: lint"; npx eslint . --max-warnings 0
-echo "test: unit"; npx vitest run
-echo "test: build"; npm run build --silent
-echo "test: e2e against the built preview"; npx playwright test
+echo "test: typecheck"; npm run --silent typecheck
+echo "test: lint"; npm run --silent lint
+echo "test: unit"; npm run --silent test:unit
+echo "test: build"; npm run --silent build
+echo "test: e2e against the built preview"; npm run --silent test:e2e

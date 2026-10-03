@@ -18,11 +18,11 @@ Each has one suite in `docs/testing.md` and is never weakened to make a feature 
 
 1. **No outbound network.** The built demo requests nothing from any host but its own origin: no CDN fonts, no analytics, no API.
 2. **Every route renders.** Every route in the table answers 200, renders with no console error or uncaught exception, carries its catalog title, and links only to routes in the table.
-3. **No secret reaches git or output.** Gitleaks over the full history (pre-commit hook, `scripts/gate`, CI), plus a test that `.env` stays git-ignored and that `src/`, which ships to a public page, holds no credential-shaped literal.
+3. **No secret reaches git or output.** The project needs no secret (no backend, no network), so any credential-shaped value is a mistake: gitleaks over the full history (pre-commit hook, `scripts/gate`, CI), plus a test that `src/`, which ships to a public page, holds no credential-shaped literal.
 
 ## Roadmap
 
-From the validated plan (`Original files/extracted/PLAN.md`), one PR each:
+From the validated plan (`Original files/extracted/PLAN.md`, git-ignored), one PR each:
 
 - PR 0, scaffold and shell.
 - PR 1, auth and onboarding: register, verify-email redirect, login, onboarding modals, get-started card. Built; login and verify-email were later removed (ADR 0003).
@@ -43,6 +43,7 @@ PRs 1 to 6 run in parallel after PR 0 merges; each touches only its own feature 
 | Rejected | Why | Date | Whose decision |
 |---|---|---|---|
 | Backend, database, cloud or VPS deployment of any kind | Out of scope for this take-home; front-end only, GitHub is the only destination | 2026-10-01 | User |
+| `.env` scaffolding, secret-store rules and a runbook for rotation | No secret exists: no backend, no network. Removed with the general practices doc; gitleaks and the `src/` literal test remain | 2026-10-03 | User |
 | Next.js static export | Heavier, no fidelity gain over Vite (ADR 0001) | 2026-10-01 | Session, on the user's stack-agnostic brief |
 | Lucide or any other icon library | The user wants identical glyphs; icons are extracted from the saved pages | 2026-10-01 | User |
 | Live capture of pages that were never screenshotted | Dropped | 2026-10-01 | User |
