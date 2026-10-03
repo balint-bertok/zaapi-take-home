@@ -3,6 +3,7 @@ import { templates } from "../ai/scenarioTemplates";
 import { FormCard } from "../ai/parts";
 import { channelLanguage, policies, type Language } from "./content";
 import { IconRow } from "./IconRow";
+import { setupCard, setupCardTitle } from "./SetupPage";
 
 type Row = { ok: boolean; text: string };
 
@@ -34,8 +35,8 @@ export function Readiness() {
     language,
   );
   return (
-    <FormCard className="border border-gray-200">
-      <h2 className="text-base font-medium text-gray-800">Ready to go live?</h2>
+    <FormCard className={setupCard}>
+      <h2 className={setupCardTitle}>Ready to go live?</h2>
       <ul className="space-y-3 mt-3">
         {rows.map((r) => (
           <IconRow key={r.text} icon={r.ok ? "circle-check" : "circle-exclamation"} iconClassName={r.ok ? "text-electric-green-600" : "text-warning-500"}>

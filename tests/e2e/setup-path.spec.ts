@@ -131,7 +131,7 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   await expect(blocks.getByRole("listitem").nth(1)).toHaveText(/^Let AI handle: half/);
   await page.getByRole("main").getByRole("link", { name: "Go live" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/live\/done$/);
-  await expect(page.getByText(/answering half .* through the flow "AI handles new conversations on Test \(Demo\)"\. Pausing the agent/)).toBeVisible();
+  await expect(page.getByText(/answering half .* through the flow “AI handles new conversations on Test \(Demo\)”\. Pausing the agent/)).toBeVisible();
 
   // After go-live the AI Agent pages open and every step links; pages outside the journey stay inert (ADR 0003).
   for (const name of ["Automations", "Settings"]) {

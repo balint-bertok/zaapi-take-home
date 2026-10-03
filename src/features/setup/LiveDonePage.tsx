@@ -24,7 +24,7 @@ export default function LiveDonePage() {
         </div>
         <h2 className="text-lg font-medium text-gray-800">Live on Test (Demo)</h2>
         <p className="text-sm text-gray-500 max-w-[480px]">
-          Your agent is answering {shareLabel(share)} of new conversations on Chat Widget, through the flow "{flowName}". {pauseNote} We'll
+          Your agent is answering {shareLabel(share)} of the new conversations on Chat Widget, through the flow “{flowName}”. {pauseNote} We'll
           suggest widening to all of them after a week with no handoffs. Everything it knows is in the AI Agent pages, which are now open.
         </p>
         <div className="flex gap-3">

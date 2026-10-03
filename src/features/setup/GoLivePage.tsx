@@ -5,10 +5,7 @@ import { FormCard, RadioCard } from "../ai/parts";
 import { AccountLabel } from "../ai/TestChat";
 import { flowBlocks, flowName, pauseNote, shares } from "./content";
 import { IconRow } from "./IconRow";
-import { BackLink, ContinueButton, SetupPage } from "./SetupPage";
-
-const card = "border border-gray-200";
-const cardTitle = "text-base font-medium text-gray-800";
+import { BackLink, ContinueButton, SetupPage, setupCard, setupCardTitle } from "./SetupPage";
 
 /** Step 5: pick the channel's share, see the flow this publishes, then go live. Nothing is stored until "Go live". */
 export default function GoLivePage() {
@@ -29,8 +26,8 @@ export default function GoLivePage() {
         </>
       }
     >
-      <FormCard className={card}>
-        <h2 className={cardTitle}>Channel</h2>
+      <FormCard className={setupCard}>
+        <h2 className={setupCardTitle}>Channel</h2>
         {/* The account row of the Test chat's account picker. */}
         <div className="text-sm text-gray-800 mt-3">
           <AccountLabel />
@@ -38,8 +35,8 @@ export default function GoLivePage() {
         <p className="text-sm text-gray-500 mt-1">Chat Widget</p>
       </FormCard>
 
-      <FormCard className={card}>
-        <h2 className={cardTitle}>Share of new conversations</h2>
+      <FormCard className={setupCard}>
+        <h2 className={setupCardTitle}>Share of new conversations</h2>
         <div role="radiogroup" aria-label="Share of new conversations" className="flex gap-4 mt-3">
           {shares.map((s) => (
             <RadioCard key={s.value} checked={share === s.value} onSelect={() => setShare(s.value)}>
@@ -53,10 +50,10 @@ export default function GoLivePage() {
         </p>
       </FormCard>
 
-      <FormCard className={card}>
-        <h2 className={cardTitle}>What this publishes</h2>
+      <FormCard className={setupCard}>
+        <h2 className={setupCardTitle}>What this publishes</h2>
         <p className="text-sm text-gray-500 mt-1">
-          A flow in Flow Builder, "{flowName}". You can change it there later.
+          A flow in Flow Builder, “{flowName}”. You can change it there later.
         </p>
         <ol aria-label="Flow blocks" className="mt-3 divide-y divide-gray-200 rounded-lg border border-gray-200">
           {flowBlocks(share).map((b) => (
