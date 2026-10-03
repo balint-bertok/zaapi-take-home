@@ -378,12 +378,13 @@ const editor =
 /**
  * The app's rich-text editor (tiptap) as captured: toolbar plus a 200px editing area. The demo's
  * editing area is plain contenteditable; `onText` reports its text.
+ * `className` fixes the editor's height where the form must not grow (the setup modal); the text then scrolls inside.
  */
-export function RichTextEditor({ label, children, onText }: { label: string; children?: ReactNode; onText?: (text: string) => void }) {
+export function RichTextEditor({ label, children, onText, className }: { label: string; children?: ReactNode; onText?: (text: string) => void; className?: string }) {
   return (
-    <div className="flex flex-col rounded-md border border-gray-200 bg-white">
+    <div className={cn("flex flex-col rounded-md border border-gray-200 bg-white", className)}>
       {/* Formatting controls render as captured; the demo editor is plain contenteditable. */}
-      <div className="flex shrink-0 items-center gap-0.5 border-b border-gray-200 px-2 py-1">
+      <div className="flex flex-wrap shrink-0 items-center gap-0.5 border-b border-gray-200 px-2 py-1">
         {toolbar.map((group, g) => (
           <div key={g} className="contents">
             {g > 0 && <div className="mx-1 h-5 w-px bg-gray-200" />}

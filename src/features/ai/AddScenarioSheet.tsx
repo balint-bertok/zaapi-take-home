@@ -95,7 +95,8 @@ function Steps({ markdown }: { markdown: string }) {
 /**
  * The scenario form, prefilled from `start`: submitting appends the row, toasts, then `onDone`.
  * The guided setup's modal reuses it: `compact` leaves out the integration card (the setup has one
- * channel), `frame` places the form and its own submit button, tied to the form by `submit.form`, and
+ * channel) and lays the cards out in two columns with a fixed-height editor, so the modal's body
+ * does not scroll; `frame` places the form and its own submit button, tied to the form by `submit.form`, and
  * `onTouch` runs when any field gets focus (the setup fills an empty form in on first touch).
  * Without `frame` it is the sheet's section with the sheet's footer.
  */
@@ -144,8 +145,8 @@ export function ScenarioForm({
     onDone();
   }
 
-  const fields = (
-    <div className="space-y-6">
+  const nameAndTrigger = (
+    <>
       <FormCard className="space-y-2">
         <h3 className="text-base font-medium text-gray-800">Scenario name</h3>
         <p className="text-gray-500 whitespace-pre-line">Create a short, clear name to organize this scenario.</p>
@@ -175,10 +176,12 @@ export function ScenarioForm({
           placeholder="For AI agent to identify this scenario."
           value={trigger}
           onChange={(e) => setTrigger(e.target.value)}
+          className={compact ? "min-h-[140px] resize-none" : undefined}
         />
       </FormCard>
-
-      {!compact && (
+    </>
+  );
+  const integrationsCard = !compact && (
         <FormCard className="space-y-3">
           <div className="space-y-1">
             <label className="text-base font-medium text-gray-800 mb-2">Where should this scenario run?</label>
@@ -189,8 +192,8 @@ export function ScenarioForm({
           </div>
           <IntegrationPicker value={integrations} onChange={setIntegrations} />
         </FormCard>
-      )}
-
+  );
+  const handlingCard = (
       <FormCard className="space-y-4">
         <div>
           <h3 className="text-base font-medium text-gray-800">How should AI respond?</h3>
@@ -215,19 +218,32 @@ export function ScenarioForm({
             </p>
           </div>
           <div className="mt-4">
-            <RichTextEditor key={start.instruction ?? ""} label="Reply steps">{start.instruction ? <Steps markdown={start.instruction} /> : undefined}</RichTextEditor>
+            <RichTextEditor key={start.instruction ?? ""} label="Reply steps" className={compact ? "h-[250px]" : undefined}>
+              {start.instruction ? <Steps markdown={start.instruction} /> : undefined}
+            </RichTextEditor>
           </div>
         </div>
         {handling === "escalate_to_human_agent" && (
           <p className="text-gray-500">The AI Agent will send a message informing the customer that their ticket is being escalated to a human agent.</p>
         )}
       </FormCard>
+  );
+  const fields = compact ? (
+    <div className="grid grid-cols-2 gap-6 items-start">
+      <div className="space-y-6">{nameAndTrigger}</div>
+      {handlingCard}
+    </div>
+  ) : (
+    <div className="space-y-6">
+      {nameAndTrigger}
+      {integrationsCard}
+      {handlingCard}
     </div>
   );
 
   if (frame)
     return frame(
-      <form id={id} className="bg-gray-50 p-6 text-sm" onSubmit={submit} onFocus={onTouch}>
+      <form id={id} className="min-h-full bg-gray-50 p-6 text-sm" onSubmit={submit} onFocus={onTouch}>
         {fields}
       </form>,
       { form: id, disabled: !ready },
