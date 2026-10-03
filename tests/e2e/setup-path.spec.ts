@@ -306,6 +306,11 @@ test("skipping scenarios states the consequence inline and the knowledge step fo
   await expect(page).toHaveURL(/\/ai\/setup\/knowledge\/filled$/);
   await expect(knowledge.getByRole("checkbox", { name: "I have a file or website URL that includes this info" })).toHaveAttribute("aria-checked", "true");
   await knowledge.getByRole("textbox", { name: "File name or website URL" }).fill("https://brand-one.example/policies");
+  // The upload button is inert: a click opens nothing and changes nothing.
+  await expect(knowledge.getByRole("button", { name: "Upload a file" })).toHaveAttribute("aria-disabled", "true");
+  await knowledge.getByRole("button", { name: "Upload a file" }).click({ force: true });
+  await expect(page).toHaveURL(/\/ai\/setup\/knowledge\/filled$/);
+  await expect(knowledge.getByRole("textbox", { name: "File name or website URL" })).toHaveValue("https://brand-one.example/policies");
   await knowledge.getByRole("link", { name: "Continue to test" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/test$/);
   await expect(page.getByText("Policies: none needed by your scenarios")).toBeVisible();

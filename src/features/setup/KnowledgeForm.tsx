@@ -1,6 +1,10 @@
+import { Inert } from "@/components/Inert";
+import { buttonClass } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input, Textarea } from "@/components/ui/input";
 import { fieldLabel } from "@/components/ModalTour";
+import { Icon } from "@/icons/Icon";
+import { cn } from "@/lib/cn";
 import { templates } from "../ai/scenarioTemplates";
 import type { Policy } from "./content";
 
@@ -13,9 +17,9 @@ export const referenceLabel = "I have a file or website URL that includes this i
 
 /**
  * The knowledge step's form in the setup modal: one answer per policy the picked scenarios need,
- * each tagged with that scenario, and a line for a file name or website URL that holds the
- * information instead (user decision 2026-10-03). With no scenario picked there is nothing to
- * answer, and the line is the one field.
+ * each tagged with that scenario, and a line for a website URL (or a file name) that holds the
+ * information instead, with an upload button beside it that is inert, since no file leaves the
+ * browser (user decisions 2026-10-03). With no scenario picked there is nothing to answer, and the line is the one field.
  */
 export function KnowledgeForm({
   asked,
@@ -64,14 +68,20 @@ export function KnowledgeForm({
           </span>
         </div>
         {checked && (
-          <Input
-            aria-label="File name or website URL"
-            placeholder="Paste the URL or the file name"
-            maxLength={200}
-            value={value.reference ?? ""}
-            onChange={(e) => onChange({ reference: e.target.value })}
-            onFocus={onFocus}
-          />
+          <div className="flex items-center gap-2">
+            <Input
+              aria-label="File name or website URL"
+              placeholder="Paste the website URL"
+              maxLength={200}
+              value={value.reference ?? ""}
+              onChange={(e) => onChange({ reference: e.target.value })}
+              onFocus={onFocus}
+            />
+            <Inert className={cn(buttonClass("outline"), "h-10 shrink-0")}>
+              <Icon name="paperclip" className="size-4!" />
+              Upload a file
+            </Inert>
+          </div>
         )}
       </div>
     </div>
