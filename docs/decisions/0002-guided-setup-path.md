@@ -49,4 +49,4 @@ Why: the path should create the product's own go-live mechanism for the merchant
 
 ## Amendment, 2026-10-03: the inbox points at the path
 
-After sign-up a viewer may click around the inbox instead of starting. A small "Start here" callout beside the rail's AI Agent entry, with an arrow at it, links to the setup until the first step is done (user decision). It is positioned against the entry's measured box, since the rail's item list clips what overflows it, and it is gone the moment a step is done or the agent is live.
+After sign-up a viewer may click around the inbox instead of starting. A small "Start the demo here" callout beside the rail's AI Agent entry, with an arrow at it, links to the setup until the first step is done (user decision). It is positioned against the entry's measured box, since the rail's item list clips what overflows it, and it is gone the moment a step is done or the agent is live.

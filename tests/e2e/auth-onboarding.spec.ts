@@ -54,7 +54,7 @@ test("register with one click, then finish onboarding", async ({ page }) => {
   await expect(step2).toBeHidden();
   await expect(page.getByText("Select a customer to open the ticket")).toBeVisible();
   // With the modals gone, the inbox points at the guided path.
-  const startHere = page.getByRole("link", { name: "Start here: set up your first AI Agent" });
+  const startHere = page.getByRole("link", { name: "Start the demo here: set up your first AI Agent" });
   await expect(startHere).toBeVisible();
   await expect(startHere).toHaveAttribute("href", /\/ai\/setup$/);
 
