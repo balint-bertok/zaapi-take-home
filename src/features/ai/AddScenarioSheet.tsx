@@ -8,7 +8,7 @@ import { updateDemo, useDemo } from "@/store/store";
 import type { ScenarioHandling } from "./fixtures";
 import { handlingLabel, stamp } from "./format";
 import { FormCard, IntegrationPicker, RadioCard, Rich, RichTextEditor, SheetFooter } from "./parts";
-import { scratch, templates, type Template } from "./scenarioTemplates";
+import { manualEntry, scratch, templates, type Template } from "./scenarioTemplates";
 
 /** "Add scenario" sheet (Step 10 (2) to (4)): pick scratch or a template, then fill the form. */
 export function AddScenarioSheet({ onDone }: { onDone: () => void }) {
@@ -70,7 +70,7 @@ function Chooser({ onPick }: { onPick: (form: Template["form"]) => void }) {
       <div className="space-y-4 p-4 rounded-lg bg-white">
         <h2 className="text-base font-medium">Create from scratch</h2>
         <div className="grid grid-cols-3 gap-4">
-          <ChoiceCard plain icon="pencil" title="Manual entry" description="Manually create a unique scenario tailored to your use case." onClick={() => onPick(scratch)} />
+          <ChoiceCard plain icon="pencil" title={manualEntry.title} description={manualEntry.description} onClick={() => onPick(scratch)} />
         </div>
       </div>
       <div className="space-y-4 p-4 rounded-lg bg-white">

@@ -13,7 +13,8 @@
  * restores the path, and the done page's "start again" resets the demo and returns to sign-up. "Finish later" is inert: the modal stays.
  * Skipping scenarios states the consequence inline, in the same dialog, and changes what the
  * knowledge step asks. Picking a template opens its prefilled scenario form in the same card, as
- * the "Add scenario" sheet does; creating it checks the card, Back leaves it unchecked.
+ * the "Add scenario" sheet does; creating it checks the card, Back leaves it unchecked. "Manual entry"
+ * opens the empty form; what it creates counts on its card and enables Continue.
  */
 import { expect, test, type Page } from "@playwright/test";
 
@@ -226,6 +227,30 @@ test("Back from a template's scenario form returns to the cards with nothing new
   await expect(scenarios.getByRole("button", { name: "Continue to knowledge" })).toBeDisabled();
   await page.goto("ai/train/scenario-handling");
   await expect(page.getByText("No data").first()).toBeVisible();
+
+  expect(errors).toEqual([]);
+});
+
+test("Manual entry opens an empty scenario form; the written scenario counts and enables Continue", async ({ page }) => {
+  const errors = collectErrors(page);
+
+  await page.goto("ai/setup/scenarios?reset=1");
+  const scenarios = page.getByRole("dialog", { name: "Scenarios" });
+  await expect(scenarios.getByRole("button", { name: "Continue to knowledge" })).toBeDisabled();
+  await scenarios.getByRole("button", { name: /Manual entry/ }).click();
+  const form = page.getByRole("dialog", { name: "Manual entry" });
+  await expect(form.getByLabel("Scenario name")).toHaveValue("");
+  await form.getByLabel("Scenario name").fill("Opening hours");
+  await form.getByRole("textbox", { name: "When this scenario should trigger" }).fill("When a customer asks when the shop is open.");
+  await form.getByRole("button", { name: "Create scenario" }).click();
+  await expect(scenarios.getByRole("button", { name: /Manual entry/ })).toContainText("1 written so far");
+  await expect(scenarios.getByRole("checkbox", { checked: true })).toHaveCount(0);
+  await scenarios.getByRole("link", { name: "Continue to knowledge" }).click();
+  await expect(page).toHaveURL(/\/ai\/setup\/knowledge$/);
+  await page.goto("ai/setup/test");
+  await expect(page.getByText("Scenarios: Opening hours")).toBeVisible();
+  await page.goto("ai/train/scenario-handling");
+  await expect(page.getByRole("row").filter({ hasText: "Opening hours" })).toHaveCount(1);
 
   expect(errors).toEqual([]);
 });
