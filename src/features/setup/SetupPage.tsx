@@ -36,14 +36,29 @@ export function SetupPage({
   );
 }
 
+const back = (
+  <>
+    {/* The saved pages carry no arrow-left glyph; arrow-right mirrored is the same shape. */}
+    <Icon name="arrow-right" variant="far" className="size-3.5 -scale-x-100" />
+    Back
+  </>
+);
+
 /** Outline "Back" to the previous step. */
 export function BackLink({ to }: { to: string }) {
   return (
     <Link to={to} className={buttonClass("outline")}>
-      {/* The saved pages carry no arrow-left glyph; arrow-right mirrored is the same shape. */}
-      <Icon name="arrow-right" variant="far" className="size-3.5 -scale-x-100" />
-      Back
+      {back}
     </Link>
+  );
+}
+
+/** The same "Back" within a step: a button, since it changes the screen's own state rather than the URL. */
+export function BackButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} className={buttonClass("outline")}>
+      {back}
+    </button>
   );
 }
 

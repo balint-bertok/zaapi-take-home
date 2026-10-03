@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useId, useState, type FormEvent, type ReactNode } from "react";
 import { toast } from "sonner";
 import { Input, Textarea } from "@/components/ui/input";
 import { SheetContent } from "@/components/ui/sheet";
@@ -92,7 +92,24 @@ function Steps({ markdown }: { markdown: string }) {
   );
 }
 
-function ScenarioForm({ start, onDone }: { start: Template["form"]; onDone: () => void }) {
+/**
+ * The scenario form, prefilled from `start`: submitting appends the row, toasts, then `onDone`.
+ * The guided setup's modal reuses it: `compact` leaves out the integration card (the setup has one
+ * channel), and `frame` places the form and its own submit button, tied to the form by `submit.form`.
+ * Without `frame` it is the sheet's section with the sheet's footer.
+ */
+export function ScenarioForm({
+  start,
+  onDone,
+  compact,
+  frame,
+}: {
+  start: Template["form"];
+  onDone: () => void;
+  compact?: boolean;
+  frame?: (form: ReactNode, submit: { form: string; disabled: boolean }) => ReactNode;
+}) {
+  const id = useId();
   const user = useDemo((s) => s.user);
   const [name, setName] = useState(start.name);
   const [trigger, setTrigger] = useState(start.trigger);
@@ -115,86 +132,99 @@ function ScenarioForm({ start, onDone }: { start: Template["form"]; onDone: () =
     onDone();
   }
 
-  return (
-    <section className="flex flex-col gap-5 bg-gray-50 overflow-auto p-6 text-sm">
-      <form className="space-y-5" onSubmit={submit}>
-        {/* The cards keep their wider spacing; the footer keeps the section's gap, as in the live sheet. */}
-        <div className="space-y-6">
-          <FormCard className="space-y-2">
-            <h3 className="text-base font-medium text-gray-800">Scenario name</h3>
-            <p className="text-gray-500 whitespace-pre-line">Create a short, clear name to organize this scenario.</p>
-            <Input
-              aria-label="Scenario name"
-              className="rounded-md"
-              maxLength={255}
-              placeholder="For your reference only—AI agent won’t read this."
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </FormCard>
+  const fields = (
+    <div className="space-y-6">
+      <FormCard className="space-y-2">
+        <h3 className="text-base font-medium text-gray-800">Scenario name</h3>
+        <p className="text-gray-500 whitespace-pre-line">Create a short, clear name to organize this scenario.</p>
+        <Input
+          aria-label="Scenario name"
+          className="rounded-md"
+          maxLength={255}
+          placeholder="For your reference only—AI agent won’t read this."
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      </FormCard>
 
-          <FormCard className="space-y-2">
-            <h3 className="text-base font-medium text-gray-800">When this scenario should trigger</h3>
+      <FormCard className="space-y-2">
+        <h3 className="text-base font-medium text-gray-800">When this scenario should trigger</h3>
+        <p className="text-gray-500 whitespace-pre-line">
+          <Rich
+            bold="font-medium"
+            text={
+              "Describe the scenario when this scenario should trigger so the AI agent can recognize it and respond properly. Think about what the customer might say or need help with.\n\n<b>Examples</b>: ‘If a customer asks about delivery status.’"
+            }
+          />
+        </p>
+        <Textarea
+          aria-label="When this scenario should trigger"
+          maxLength={500}
+          placeholder="For AI agent to identify this scenario."
+          value={trigger}
+          onChange={(e) => setTrigger(e.target.value)}
+        />
+      </FormCard>
+
+      {!compact && (
+        <FormCard className="space-y-3">
+          <div className="space-y-1">
+            <label className="text-base font-medium text-gray-800 mb-2">Where should this scenario run?</label>
             <p className="text-gray-500 whitespace-pre-line">
+              Select the integrations where this scenario will be active. AI only replies to unassigned tickets from selected integrations. It won’t respond if a human agent is
+              already assigned.
+            </p>
+          </div>
+          <IntegrationPicker value={integrations} onChange={setIntegrations} />
+        </FormCard>
+      )}
+
+      <FormCard className="space-y-4">
+        <div>
+          <h3 className="text-base font-medium text-gray-800">How should AI respond?</h3>
+          <p className="text-gray-500 whitespace-pre-line mt-1">Choose how AI should handle the customer intent.</p>
+          <div role="radiogroup" aria-label="How should AI respond?" className="flex gap-4 mt-3">
+            {(Object.keys(handlingLabel) as ScenarioHandling[]).map((h) => (
+              <RadioCard key={h} checked={handling === h} onSelect={() => setHandling(h)}>
+                {handlingLabel[h]}
+              </RadioCard>
+            ))}
+          </div>
+        </div>
+        {/* Hidden rather than unmounted, so edits to the steps survive switching to Escalate and back. */}
+        <div hidden={handling !== "follow_instruction"}>
+          <div className="space-y-1">
+            <h4 className="font-medium text-gray-800">Describe reply steps the AI should take</h4>
+            <p className="whitespace-pre-line text-gray-500">
               <Rich
                 bold="font-medium"
-                text={
-                  "Describe the scenario when this scenario should trigger so the AI agent can recognize it and respond properly. Think about what the customer might say or need help with.\n\n<b>Examples</b>: ‘If a customer asks about delivery status.’"
-                }
+                text="<b>Tip</b>: organize the text using proper headings (like H1, H2) and paragraphs into a step-by-step format like 1, 2, 3 for clarity."
               />
             </p>
-            <Textarea
-              aria-label="When this scenario should trigger"
-              maxLength={500}
-              placeholder="For AI agent to identify this scenario."
-              value={trigger}
-              onChange={(e) => setTrigger(e.target.value)}
-            />
-          </FormCard>
-
-          <FormCard className="space-y-3">
-            <div className="space-y-1">
-              <label className="text-base font-medium text-gray-800 mb-2">Where should this scenario run?</label>
-              <p className="text-gray-500 whitespace-pre-line">
-                Select the integrations where this scenario will be active. AI only replies to unassigned tickets from selected integrations. It won’t respond if a human agent is
-                already assigned.
-              </p>
-            </div>
-            <IntegrationPicker value={integrations} onChange={setIntegrations} />
-          </FormCard>
-
-          <FormCard className="space-y-4">
-            <div>
-              <h3 className="text-base font-medium text-gray-800">How should AI respond?</h3>
-              <p className="text-gray-500 whitespace-pre-line mt-1">Choose how AI should handle the customer intent.</p>
-              <div role="radiogroup" aria-label="How should AI respond?" className="flex gap-4 mt-3">
-                {(Object.keys(handlingLabel) as ScenarioHandling[]).map((h) => (
-                  <RadioCard key={h} checked={handling === h} onSelect={() => setHandling(h)}>
-                    {handlingLabel[h]}
-                  </RadioCard>
-                ))}
-              </div>
-            </div>
-            {/* Hidden rather than unmounted, so edits to the steps survive switching to Escalate and back. */}
-            <div hidden={handling !== "follow_instruction"}>
-              <div className="space-y-1">
-                <h4 className="font-medium text-gray-800">Describe reply steps the AI should take</h4>
-                <p className="whitespace-pre-line text-gray-500">
-                  <Rich
-                    bold="font-medium"
-                    text="<b>Tip</b>: organize the text using proper headings (like H1, H2) and paragraphs into a step-by-step format like 1, 2, 3 for clarity."
-                  />
-                </p>
-              </div>
-              <div className="mt-4">
-                <RichTextEditor label="Reply steps">{start.instruction ? <Steps markdown={start.instruction} /> : undefined}</RichTextEditor>
-              </div>
-            </div>
-            {handling === "escalate_to_human_agent" && (
-              <p className="text-gray-500">The AI Agent will send a message informing the customer that their ticket is being escalated to a human agent.</p>
-            )}
-          </FormCard>
+          </div>
+          <div className="mt-4">
+            <RichTextEditor label="Reply steps">{start.instruction ? <Steps markdown={start.instruction} /> : undefined}</RichTextEditor>
+          </div>
         </div>
+        {handling === "escalate_to_human_agent" && (
+          <p className="text-gray-500">The AI Agent will send a message informing the customer that their ticket is being escalated to a human agent.</p>
+        )}
+      </FormCard>
+    </div>
+  );
+
+  if (frame)
+    return frame(
+      <form id={id} className="bg-gray-50 p-6 text-sm" onSubmit={submit}>
+        {fields}
+      </form>,
+      { form: id, disabled: !ready },
+    );
+  return (
+    <section className="flex flex-col gap-5 bg-gray-50 overflow-auto p-6 text-sm">
+      {/* The cards keep their wider spacing; the footer keeps the section's gap, as in the live sheet. */}
+      <form className="space-y-5" onSubmit={submit}>
+        {fields}
         <SheetFooter onCancel={onDone} submitLabel="Create scenario" disabled={!ready} />
       </form>
     </section>

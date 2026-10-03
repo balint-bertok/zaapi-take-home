@@ -10,7 +10,8 @@
  * readiness summary on the Test step reads the store. "Go live" opens the dashboard; `?reset=1`
  * restores the path. "Finish later" closes the modal onto the page, whose button reopens it.
  * Skipping scenarios states the consequence inline, in the same dialog, and changes what the
- * knowledge step asks.
+ * knowledge step asks. Picking a template opens its prefilled scenario form in the same card, as
+ * the "Add scenario" sheet does; creating it checks the card, Back leaves it unchecked.
  */
 import { expect, test, type Page } from "@playwright/test";
 
@@ -66,11 +67,25 @@ test("the guided setup runs from sign-up to a live agent, then opens the dashboa
   await persona.getByRole("link", { name: "Continue" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/scenarios$/);
 
-  // Scenarios: Continue needs at least one pick.
+  // Scenarios: Continue needs at least one pick. Picking a template opens its prefilled scenario
+  // form in the same card; creating it returns to the cards with that one checked.
   const scenarios = page.getByRole("dialog", { name: "Scenarios" });
   await expect(scenarios.getByRole("button", { name: "Continue to knowledge" })).toBeDisabled();
-  await scenarios.getByRole("checkbox", { name: /Check order status/ }).click();
-  await scenarios.getByRole("checkbox", { name: /Return or refund/ }).click();
+  for (const [title, step] of [
+    ["Check order status", "Share the status clearly"],
+    ["Return or refund", "Request relevant order information"],
+  ]) {
+    await scenarios.getByRole("checkbox", { name: new RegExp(title) }).click();
+    const form = page.getByRole("dialog", { name: title });
+    await expect(form.getByRole("heading", { name: title, exact: true })).toBeVisible();
+    await expect(progress(form).filter({ hasText: "Scenarios" })).toHaveAttribute("aria-current", "step");
+    await expect(form.getByLabel("Scenario name")).toHaveValue(title);
+    await expect(form.getByRole("textbox", { name: "Reply steps" })).toContainText(step);
+    await expect(form.getByText("Where should this scenario run?")).toHaveCount(0);
+    await form.getByRole("button", { name: "Create scenario" }).click();
+    await expect(page.getByText("Scenario successfully created").first()).toBeVisible();
+    await expect(scenarios.getByRole("checkbox", { name: new RegExp(title) })).toHaveAttribute("aria-checked", "true");
+  }
   await scenarios.getByRole("link", { name: "Continue to knowledge" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/knowledge$/);
 
@@ -159,6 +174,25 @@ test("Finish later closes the setup modal onto the page, whose Start reopens it"
   await page.getByRole("main").getByRole("link", { name: "Start" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/persona$/);
   await expect(page.getByRole("dialog", { name: "Persona" })).toBeVisible();
+
+  expect(errors).toEqual([]);
+});
+
+test("Back from a template's scenario form returns to the cards with nothing new checked", async ({ page }) => {
+  const errors = collectErrors(page);
+
+  await page.goto("ai/setup/scenarios?reset=1");
+  const scenarios = page.getByRole("dialog", { name: "Scenarios" });
+  await scenarios.getByRole("checkbox", { name: /Customer complaint/ }).click();
+  // The complaint template hands the ticket to a person: Escalate, no reply steps.
+  const form = page.getByRole("dialog", { name: "Customer complaint" });
+  await expect(form.getByRole("radio", { name: /^Escalate/ })).toHaveAttribute("aria-checked", "true");
+  await expect(form.getByText("The AI Agent will send a message informing the customer")).toBeVisible();
+  await form.getByRole("button", { name: "Back" }).click();
+  await expect(scenarios.getByRole("checkbox", { checked: true })).toHaveCount(0);
+  await expect(scenarios.getByRole("button", { name: "Continue to knowledge" })).toBeDisabled();
+  await page.goto("ai/train/scenario-handling");
+  await expect(page.getByText("No data").first()).toBeVisible();
 
   expect(errors).toEqual([]);
 });

@@ -1,16 +1,17 @@
 import { useState, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { ModalTour, StepCard } from "@/components/ModalTour";
+import { buttonClass } from "@/components/ui/button";
 import { updateDemo, useDemo } from "@/store/store";
-import { ChoiceCard } from "../ai/AddScenarioSheet";
-import { templates } from "../ai/scenarioTemplates";
+import { ChoiceCard, ScenarioForm } from "../ai/AddScenarioSheet";
+import { templates, type Template } from "../ai/scenarioTemplates";
 import { personaSuggestion, policies, skipConsequence, type Language } from "./content";
 import { ChannelRow, StepsAhead } from "./Intro";
 import { KnowledgeForm, type Answers } from "./KnowledgeForm";
 import { PersonaForm, type Persona } from "./PersonaForm";
 import type { SetupStep } from "./fixtures";
 import { saveKnowledge, savePersona, saveScenarios, skipScenarios } from "./save";
-import { BackLink, ContinueButton } from "./SetupPage";
+import { BackButton, BackLink, ContinueButton } from "./SetupPage";
 import { SetupProgress } from "./SetupProgress";
 
 // The setup's first four screens, in the inbox onboarding's modal frame, over the setup page.
@@ -36,8 +37,9 @@ const screens: Record<string, () => ReactNode> = {
 
 // The screens' body height, so the card is one size and its footer sits at the same place on every
 // screen: the tallest body, the persona form's with the step bar above it, measured in Chrome at
-// 1440×900 and rounded up to 4px (docs/measurements.md). Shorter bodies leave space under their content.
-const bodyHeight = "min-h-[492px]";
+// 1440×900 and rounded up to 4px (docs/measurements.md). Shorter bodies leave space under their content;
+// the scenario form, taller, scrolls inside it.
+const bodyHeight = 492;
 const footerClass = "border-t bg-gray-50 px-6 py-3 flex justify-between items-center gap-4";
 const sectionTitle = "text-base font-medium text-gray-800";
 
@@ -50,13 +52,29 @@ const focusCard = (e: Event) => {
 
 /**
  * The modal's card: one size for every screen, so the footer does not move between steps; the
- * step bar on top (`step` current, none on the welcome), the screen's body, the gray footer row.
- * Opened with the card focused.
+ * step bar on top (`step` current, none on the welcome), the screen's body (held at the body height
+ * and scrolling, with `scroll`), the gray footer row. Opened with the card focused.
  */
-function SetupCard({ step, title, subtitle, footer, children }: { step?: SetupStep; title: string; subtitle: string; footer: ReactNode; children: ReactNode }) {
+function SetupCard({
+  step,
+  title,
+  subtitle,
+  footer,
+  scroll,
+  children,
+}: {
+  step?: SetupStep;
+  title: string;
+  subtitle: string;
+  footer: ReactNode;
+  scroll?: boolean;
+  children: ReactNode;
+}) {
   return (
     <StepCard width="w-[668px]" top={<SetupProgress current={step} />} title={title} subtitle={subtitle} onOpenAutoFocus={focusCard}>
-      <div className={bodyHeight}>{children}</div>
+      <div className={scroll ? "overflow-y-auto" : undefined} style={{ minHeight: bodyHeight, maxHeight: scroll ? bodyHeight : undefined }}>
+        {children}
+      </div>
       <div className={footerClass}>{footer}</div>
     </StepCard>
   );
@@ -174,21 +192,63 @@ function PersonaStep({ filled }: { filled: boolean }) {
   );
 }
 
-/** Step 2: pick the scenario templates. Opens with what the store holds, so coming back shows the picks. */
+/**
+ * Step 2: pick the scenario templates. Opens with what the store holds, so coming back shows the picks.
+ * Picking a template opens its prefilled scenario form in the same card, as the "Add scenario" sheet
+ * does; creating it returns to the cards with that one checked. Unchecking a card only drops the pick:
+ * Continue removes its row.
+ */
 function ScenariosStep() {
   const scenarios = useDemo((s) => s.scenarios);
   const navigate = useNavigate();
   const [picked, setPicked] = useState(() => templates.filter((t) => scenarios.some((s) => s.name === t.form.name)).map((t) => t.id));
+  const [editing, setEditing] = useState<Template | null>(null);
   // Skipping asks inline, not in a second dialog over this one.
   const [skipping, setSkipping] = useState(false);
-  const toggle = (id: string) => {
+  const check = (id: string) => setPicked((p) => [...p, id]);
+  const pick = (t: Template) => {
     setSkipping(false);
-    setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+    if (picked.includes(t.id)) setPicked((p) => p.filter((x) => x !== t.id));
+    // Created earlier and unchecked since: its row is still there, so checking it again needs no second one.
+    else if (scenarios.some((s) => s.name === t.form.name)) check(t.id);
+    else setEditing(t);
   };
   const skip = () => {
     skipScenarios();
     navigate(knowledgePath);
   };
+  if (editing)
+    return (
+      <ScenarioForm
+        start={editing.form}
+        compact
+        onDone={() => {
+          check(editing.id);
+          setEditing(null);
+        }}
+        frame={(form, submit) => (
+          <SetupCard
+            step="scenarios"
+            title={editing.title}
+            subtitle="Review the ready-made steps, then create the scenario. You can edit it later."
+            scroll
+            footer={
+              <>
+                <div className="flex items-center gap-4">
+                  <BackButton onClick={() => setEditing(null)} />
+                  <LaterButton />
+                </div>
+                <button type="submit" {...submit} className={buttonClass("default")}>
+                  Create scenario
+                </button>
+              </>
+            }
+          >
+            {form}
+          </SetupCard>
+        )}
+      />
+    );
   return (
     <SetupCard
       step="scenarios"
@@ -221,7 +281,7 @@ function ScenariosStep() {
       <div className="px-6 py-5 space-y-4">
         <div className="grid grid-cols-3 gap-4">
           {templates.map((t) => (
-            <ChoiceCard key={t.id} icon={t.icon} title={t.title} description={t.description} checked={picked.includes(t.id)} onClick={() => toggle(t.id)} />
+            <ChoiceCard key={t.id} icon={t.icon} title={t.title} description={t.description} checked={picked.includes(t.id)} onClick={() => pick(t)} />
           ))}
         </div>
         <p className="text-sm text-gray-500">The complaint scenario hands the conversation to your team straight away.</p>
