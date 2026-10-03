@@ -39,6 +39,24 @@ export const shares = [
   { value: 100, label: "All" },
 ];
 
+/** The share's label in lower case, for mid-sentence use. */
+export const shareLabel = (value: number) => (shares.find((s) => s.value === value) ?? shares[0]).label.toLowerCase();
+
+/**
+ * Going live publishes a flow: in the live app, the agent answers customers only through Flow
+ * Builder's "Let AI handle" block, so the path creates that flow for the merchant. These are its
+ * blocks in order; the trigger is the catalog's own condition for AI handling unassigned chats.
+ */
+export const flowName = "AI handles new conversations on Test (Demo)";
+export const flowBlocks = (share: number): { icon: "bolt" | "ai-symbol" | "user-group"; label: string; detail: string }[] => [
+  { icon: "bolt", label: "Trigger", detail: "Customer sends a new message and the ticket is unassigned" },
+  { icon: "ai-symbol", label: "Let AI handle", detail: `${shareLabel(share)} of those conversations` },
+  { icon: "user-group", label: "Assign to", detail: "your team: the rest, and any conversation the agent hands over" },
+];
+
+/** How the agent is switched off: by pausing its flow, as in the live app. */
+export const pauseNote = "Pausing the agent is one click: pause the flow in Flow Builder.";
+
 /** One policy the agent needs, which scenario template needs it, and Brand One's answer. */
 export type Policy = {
   key: "shipping" | "returns" | "cancellations";

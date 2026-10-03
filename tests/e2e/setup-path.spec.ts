@@ -7,7 +7,8 @@
  * modal's step bar marks the current step and the done ones. Each empty form moves to its filled
  * twin on first touch, Continue included. Continue appends to the Personality and Knowledge
  * Source lists, once: a second Continue adds no duplicate; a scenario row is added on Create. The
- * readiness summary on the Test step reads the store. "Go live" opens the AI Agent pages (the rest
+ * readiness summary on the Test step reads the store. Go live shows the flow it publishes, its "Let
+ * AI handle" block following the picked share; the done page names that flow. "Go live" opens the AI Agent pages (the rest
  * of the rail stays inert, ADR 0003); `?reset=1`
  * restores the path, and the done page's "start again" resets the demo and returns to sign-up. "Finish later" closes the modal onto the page, whose button reopens it.
  * Skipping scenarios states the consequence inline, in the same dialog, and changes what the
@@ -121,12 +122,16 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   await page.getByRole("main").getByRole("link", { name: "Continue", exact: true }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/live$/);
 
-  // Go live: a small share by default.
+  // Go live: a small share by default. The page shows the flow it publishes, and the "Let AI handle"
+  // block follows the picked share; the done page names the flow and says pausing it pauses the agent.
   await expect(page.getByRole("radio", { name: "1 in 5" })).toHaveAttribute("aria-checked", "true");
+  const blocks = page.getByRole("list", { name: "Flow blocks" });
+  await expect(blocks.getByRole("listitem")).toHaveText([/^Trigger/, /^Let AI handle: 1 in 5 of/, /^Assign to/]);
   await page.getByRole("radio", { name: "Half" }).click();
+  await expect(blocks.getByRole("listitem").nth(1)).toHaveText(/^Let AI handle: half of/);
   await page.getByRole("main").getByRole("link", { name: "Go live" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/live\/done$/);
-  await expect(page.getByText(/answering half/)).toBeVisible();
+  await expect(page.getByText(/answering half .* through the flow "AI handles new conversations on Test \(Demo\)"\. Pausing the agent/)).toBeVisible();
 
   // After go-live the AI Agent pages open and every step links; pages outside the journey stay inert (ADR 0003).
   for (const name of ["Automations", "Settings"]) {
