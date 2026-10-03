@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { updateDemo, useDemo } from "@/store/store";
 import { ChoiceCard, ScenarioForm } from "../ai/AddScenarioSheet";
 import { templates, type Template } from "../ai/scenarioTemplates";
-import { personaSuggestion, policies, skipConsequence, type Language } from "./content";
+import { personaSuggestion, policies, skipConsequence } from "./content";
 import { ChannelRow, StepsAhead } from "./Intro";
 import { KnowledgeForm, type Answers } from "./KnowledgeForm";
 import { PersonaForm, type Persona } from "./PersonaForm";
@@ -36,9 +36,9 @@ const screens: Record<string, () => ReactNode> = {
 };
 
 // The screens' body height, so the card is one size and its footer sits at the same place on every
-// screen: the tallest body, the persona form's with the step bar above it, measured in Chrome at
-// 1440×900 and rounded up to 4px (docs/measurements.md). Shorter bodies leave space under their content;
-// the scenario form, taller, scrolls inside it.
+// screen: the persona form's with the step bar above it, before its help texts and signature cards
+// were added, measured in Chrome at 1440×900 and rounded up to 4px (docs/measurements.md). Shorter
+// bodies leave space under their content; the persona and scenario forms, taller, scroll inside it.
 const bodyHeight = 492;
 const footerClass = "border-t bg-gray-50 px-6 py-3 flex justify-between items-center gap-4";
 const sectionTitle = "text-base font-medium text-gray-800";
@@ -147,27 +147,34 @@ function WelcomeStep() {
   );
 }
 
-const empty: Persona = { name: "", style: "", guidelines: "", language: null };
-const suggestion = (language?: Language) => ({ ...personaSuggestion, language: language ?? personaSuggestion.language });
+const empty: Persona = { name: "", style: "", guidelines: "", language: null, signature: false };
+// A choice made on the empty form (language card, signature card) that the filled form keeps.
+type Picked = Partial<Pick<Persona, "language" | "signature">>;
+const suggestion = ({ language, signature }: Picked) => ({
+  ...personaSuggestion,
+  language: language ?? personaSuggestion.language,
+  signature: signature ?? personaSuggestion.signature,
+});
 
 /**
  * Step 1, on both persona URLs. Empty, the demo fills the form in for the viewer rather than making
- * them type, whichever way they reach for it: touching any field or language card, or Continue,
- * moves to the filled URL, a picked language carried along. Filled, the suggestion sits in local
- * state, editable; arriving on the filled URL resets it.
+ * them type, whichever way they reach for it: touching any field, language or signature card, or
+ * Continue, moves to the filled URL, a picked language or signature carried along. Filled, the
+ * suggestion sits in local state, editable; arriving on the filled URL resets it.
  */
 function PersonaStep({ filled }: { filled: boolean }) {
   const navigate = useNavigate();
-  // A language picked on the empty form arrives as navigation state and wins over the suggestion.
-  const picked = (useLocation().state as Pick<Persona, "language"> | null)?.language ?? undefined;
+  // A card picked on the empty form arrives as navigation state and wins over the suggestion.
+  const picked = (useLocation().state as Picked | null) ?? {};
   const [persona, setPersona] = useFilledState<Persona>(filled, () => suggestion(picked));
-  const fill = (patch?: Partial<Persona>) => navigate(filledPath, { state: patch?.language ? { language: patch.language } : undefined });
+  const fill = ({ language, signature }: Picked = {}) => navigate(filledPath, { state: { language, signature } });
   const name = persona.name.trim();
   return (
     <SetupCard
       step="persona"
       title="Persona"
       subtitle="Name your agent and decide how it sounds. Language defaults to what your customers write in."
+      scroll
       footer={
         <>
           <div className="flex items-center gap-4">

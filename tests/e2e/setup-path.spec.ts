@@ -61,11 +61,21 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   await expect(page).toHaveURL(/\/ai\/setup\/persona$/);
   await persona.getByRole("radio", { name: "English" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/persona\/filled$/);
-  // The picked language carries over; the suggestion's Thai is one click away.
+  // The picked language carries over; the suggestion's Thai is one click away. A signature card
+  // picked on the empty form carries over the same way.
   await expect(persona.getByRole("radio", { name: "English" })).toHaveAttribute("aria-checked", "true");
+  await page.goBack();
+  await persona.getByRole("radio", { name: "No signature" }).click();
+  await expect(page).toHaveURL(/\/ai\/setup\/persona\/filled$/);
+  await expect(persona.getByRole("radio", { name: "No signature" })).toHaveAttribute("aria-checked", "true");
+  await expect(persona.getByRole("radio", { name: "Thai" })).toHaveAttribute("aria-checked", "true");
   await persona.getByRole("radio", { name: "Thai" }).click();
   await expect(persona.getByLabel("Name", { exact: true })).toHaveValue("Brand One assistant");
   await expect(persona.getByRole("radio", { name: "Thai" })).toHaveAttribute("aria-checked", "true");
+  // The sheet's help text and signature cards are on the step too; the suggestion signs replies.
+  await expect(persona.getByText("calm and witty tech expert")).toBeVisible();
+  await persona.getByRole("radio", { name: "Custom signature" }).click();
+  await expect(persona.getByRole("radio", { name: "Custom signature" })).toHaveAttribute("aria-checked", "true");
   await persona.getByRole("link", { name: "Continue" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/scenarios$/);
 

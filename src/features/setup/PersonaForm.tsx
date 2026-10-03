@@ -1,14 +1,16 @@
-// The persona step's form in the setup modal. The Name, Style and Guidelines fields are the "Add new
-// personality" sheet's, with the inbox onboarding's labels and no help text; Integrations and the
-// signature are left out (the setup has one channel, and the signature can wait). Language is the
-// setup's own field.
+// The persona step's form in the setup modal. The Name, Style, Guidelines and Signature fields are
+// the "Add new personality" sheet's, with its help texts and examples under the inbox onboarding's
+// labels (user decision 2026-10-03); Integrations is left out (the setup has one channel). Language
+// is the setup's own field.
 import { Input, Textarea } from "@/components/ui/input";
 import { fieldLabel } from "@/components/ModalTour";
 import { Icon } from "@/icons/Icon";
+import { cn } from "@/lib/cn";
 import { Counter, RadioCard } from "../ai/parts";
+import { GuidelinesHelp, SignatureIntro, SignatureOptions, StyleHelp } from "../ai/personalityHelp";
 import { languageNote, languages, type Language } from "./content";
 
-export type Persona = { name: string; style: string; guidelines: string; language: Language | null };
+export type Persona = { name: string; style: string; guidelines: string; language: Language | null; signature: boolean };
 
 /** `onFocus` runs when any text field gets focus; `onChange` gets each edit as a patch. */
 export function PersonaForm({ value, onChange, onFocus }: { value: Persona; onChange: (patch: Partial<Persona>) => void; onFocus?: () => void }) {
@@ -34,6 +36,9 @@ export function PersonaForm({ value, onChange, onFocus }: { value: Persona; onCh
         <label htmlFor="persona-style" className={fieldLabel}>
           Style your AI agent to match your brand personality
         </label>
+        <div className="mb-2">
+          <StyleHelp />
+        </div>
         <Input
           id="persona-style"
           className="rounded-md"
@@ -50,6 +55,9 @@ export function PersonaForm({ value, onChange, onFocus }: { value: Persona; onCh
         <label htmlFor="persona-guidelines" className={fieldLabel}>
           Custom guidelines for response generation
         </label>
+        <div className="mb-2">
+          <GuidelinesHelp />
+        </div>
         <Textarea
           id="persona-guidelines"
           className="min-h-[108px] resize-none"
@@ -75,6 +83,14 @@ export function PersonaForm({ value, onChange, onFocus }: { value: Persona; onCh
           <Icon name="circle-exclamation" className="size-3.5! text-gray-400" />
           {languageNote}
         </div>
+      </div>
+
+      <div className="space-y-4">
+        <div className="space-y-1">
+          <span className={cn(fieldLabel, "mb-0")}>Signature Settings</span>
+          <SignatureIntro />
+        </div>
+        <SignatureOptions value={value.signature} onChange={(signature) => onChange({ signature })} />
       </div>
     </form>
   );
