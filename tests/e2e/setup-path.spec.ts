@@ -23,7 +23,7 @@ function collectErrors(page: Page) {
   return errors;
 }
 
-test("the guided setup runs from sign-up to a live agent, then opens the dashboard", async ({ page }) => {
+test("the guided setup runs from sign-up to a live agent, then opens the AI Agent pages", async ({ page }) => {
   const errors = collectErrors(page);
 
   await page.goto("register?reset=1");
