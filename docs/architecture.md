@@ -34,7 +34,7 @@ From the validated plan (`Original files/extracted/PLAN.md`), one PR each:
 - PR 7, fidelity pass against the live app. Built; differences and waivers in `docs/fidelity.md`.
 - Prefilled login: register and login open with fake demo credentials (`src/features/auth/demoCredentials.ts`), so one click on "Get started" or "Log in" lands on `/tickets`; `/register/verify` stays routable but leaves the click path (user decision, 2026-10-02). Built.
 - Prefilled onboarding: the first onboarding modal opens with the store's demo user as the name and a staff count from `src/features/auth/demoCredentials.ts`, so Continue is enabled on arrival; both stay editable (user decision, 2026-10-02). Built.
-- Guided setup path: intro, persona, scenarios, knowledge, test, go live, each form state its own route under `/ai/setup`, the dashboard gated until go-live (ADR 0002). The first four steps run in a modal over the setup page, test and go live stay pages (ADR 0002 amendment). Built.
+- Guided setup path: intro, persona, scenarios, knowledge, test, go live, each form state its own route under `/ai/setup`, the dashboard gated until go-live (ADR 0002). The first four steps run in a modal over the setup page, test and go live stay pages (ADR 0002 amendment). The done page can reset the demo and return to sign-up, so the journey loops (user decision, 2026-10-03). Built.
 
 PRs 1 to 6 run in parallel after PR 0 merges; each touches only its own feature folder.
 

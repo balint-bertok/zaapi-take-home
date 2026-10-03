@@ -8,7 +8,7 @@
  * twin on first touch, Continue included. Continue appends to the Personality and Knowledge
  * Source lists, once: a second Continue adds no duplicate; a scenario row is added on Create. The
  * readiness summary on the Test step reads the store. "Go live" opens the dashboard; `?reset=1`
- * restores the path. "Finish later" closes the modal onto the page, whose button reopens it.
+ * restores the path, and the done page's "start again" resets the demo and returns to sign-up. "Finish later" closes the modal onto the page, whose button reopens it.
  * Skipping scenarios states the consequence inline, in the same dialog, and changes what the
  * knowledge step asks. Picking a template opens its prefilled scenario form in the same card, as
  * the "Add scenario" sheet does; creating it checks the card, Back leaves it unchecked.
@@ -142,6 +142,15 @@ test("the guided setup runs from sign-up to a live agent, then opens the dashboa
   await page.goto("ai/train/knowledge-source");
   for (const name of ["Shipping times and areas", "Returns and refunds", "Cancellations"])
     await expect(page.getByRole("row").filter({ hasText: name })).toHaveCount(1);
+
+  // The journey loops: the done page sends the viewer back to sign-up with the demo reset.
+  await page.goto("ai/setup/live/done");
+  await page.getByRole("button", { name: "Start the journey again from sign-up" }).click();
+  await expect(page).toHaveURL(/\/register$/);
+  await page.goto("tickets");
+  await expect(page.getByRole("dialog", { name: "Tell us a bit about yourself" })).toBeVisible();
+  await page.goto("ai/train/personality");
+  await expect(page.getByRole("row").filter({ hasText: "Brand One assistant" })).toHaveCount(0);
 
   // A second Continue on the persona adds no duplicate.
   await page.goto("ai/setup/persona/filled");

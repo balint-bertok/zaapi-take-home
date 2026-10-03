@@ -42,6 +42,17 @@ export function updateDemo(update: (current: DemoState) => DemoState) {
   listeners.forEach((l) => l());
 }
 
+/** Back to the fixtures, as `?reset=1` does on load, but from inside the app: the demo can be run again. */
+export function resetDemo() {
+  state = seed;
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Storage blocked: the in-memory state is reset all the same.
+  }
+  listeners.forEach((l) => l());
+}
+
 /** Read a slice of the state. The selector must return a stored reference, not build a new object. */
 export function useDemo<T>(select: (s: DemoState) => T): T {
   return useSyncExternalStore(subscribe, () => select(state));
