@@ -3,7 +3,8 @@
  * (`src/features/auth/demoCredentials.ts`), so one click lands on the inbox; its "Log in" control
  * is inert, since login is outside the journey (ADR 0003), and "/" lands on register. Over the
  * (still empty) inbox the two onboarding modals run; finishing them sets `onboardingDone`, so a
- * reload shows the inbox without them and `?reset=1` brings them back. The first modal opens
+ * reload shows the inbox without them and `?reset=1` brings them back; with them gone, a "Start
+ * here" callout links the inbox to the guided path. The first modal opens
  * prefilled too, so Continue is enabled on arrival. The demo password must never reach storage or
  * the URL.
  */
@@ -52,6 +53,10 @@ test("register with one click, then finish onboarding", async ({ page }) => {
   await step2.getByRole("button", { name: "Do it later and explore the inbox" }).click();
   await expect(step2).toBeHidden();
   await expect(page.getByText("Select a customer to open the ticket")).toBeVisible();
+  // With the modals gone, the inbox points at the guided path.
+  const startHere = page.getByRole("link", { name: "Start here: set up your first AI Agent" });
+  await expect(startHere).toBeVisible();
+  await expect(startHere).toHaveAttribute("href", /\/ai\/setup$/);
 
   const stored = await page.evaluate(() =>
     [localStorage, sessionStorage].flatMap((s) => Object.keys(s).map((k) => `${k}=${s.getItem(k)}`)).join("\n"),
