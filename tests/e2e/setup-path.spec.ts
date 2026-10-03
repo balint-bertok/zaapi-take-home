@@ -16,7 +16,8 @@
  * only the policies the picked scenarios need (none after a skip), with a file-or-URL line that
  * becomes a source. Picking a template opens its prefilled scenario form in the same card, as
  * the "Add scenario" sheet does; creating it checks the card, Back leaves it unchecked. "Manual entry"
- * opens the empty form; what it creates counts on its card and enables Continue.
+ * opens the empty form, which fills itself in on first touch; what it creates counts on its card and
+ * enables Continue.
  */
 import { expect, test, type Page } from "@playwright/test";
 
@@ -261,8 +262,18 @@ test("Manual entry opens an empty scenario form; the written scenario counts and
   await scenarios.getByRole("button", { name: /Manual entry/ }).click();
   const form = page.getByRole("dialog", { name: "Manual entry" });
   await expect(form.getByLabel("Scenario name")).toHaveValue("");
+  // Empty, Create fills the form in instead of submitting, like Continue on the persona.
+  await form.getByRole("button", { name: "Create scenario" }).click();
+  await expect(form.getByLabel("Scenario name")).toHaveValue("Opening hours");
+  await form.getByRole("button", { name: "Back" }).click();
+  // Touching any field fills it in too, and the field keeps focus; the filled form is editable.
+  await scenarios.getByRole("button", { name: /Manual entry/ }).click();
+  await form.getByLabel("Scenario name").click();
+  await expect(form.getByLabel("Scenario name")).toHaveValue("Opening hours");
+  await expect(form.getByLabel("Scenario name")).toBeFocused();
+  await expect(form.getByRole("textbox", { name: "When this scenario should trigger" })).toHaveValue(/available/);
+  await expect(form.getByRole("textbox", { name: "Reply steps" })).toContainText("Give the hours");
   await form.getByLabel("Scenario name").fill("Opening hours");
-  await form.getByRole("textbox", { name: "When this scenario should trigger" }).fill("When a customer asks when the shop is open.");
   await form.getByRole("button", { name: "Create scenario" }).click();
   await expect(scenarios.getByRole("button", { name: /Manual entry/ })).toContainText("1 written so far");
   await expect(scenarios.getByRole("checkbox", { checked: true })).toHaveCount(0);
