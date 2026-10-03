@@ -95,10 +95,10 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   await persona.getByRole("link", { name: "Continue" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/scenarios$/);
 
-  // The inbox's "Start here" callout is gone as soon as the first step is done.
+  // The inbox's "Start the demo here" callout is gone as soon as the first step is done.
   await page.goto("tickets");
   await expect(page.getByText("Select a customer to open the ticket")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Start here: set up your first AI Agent" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Start the demo here: set up your first AI Agent" })).toHaveCount(0);
   await page.goto("ai/setup/scenarios");
 
   // Scenarios: Continue needs at least one pick. Picking a template opens its prefilled scenario
