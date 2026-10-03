@@ -195,23 +195,25 @@ function PersonaStep({ filled }: { filled: boolean }) {
 /**
  * Step 2: pick the scenario templates. Opens with what the store holds, so coming back shows the picks.
  * Picking a template opens its prefilled scenario form in the same card, as the "Add scenario" sheet
- * does; creating it adds the row and returns to the cards with that one checked. Unchecking a card
- * only drops the pick: Continue removes its row.
+ * does; creating it adds the row and returns to the cards with that one checked (unless renamed: the
+ * card stands for the template's name). Unchecking a card only drops the pick: Continue removes its row.
  */
 function ScenariosStep() {
   const scenarios = useDemo((s) => s.scenarios);
   const navigate = useNavigate();
+  // A card is checked while its template has a row (matched by name, as the knowledge step does) and
+  // it has not been unchecked here; unchecked rows go on Continue.
+  const [unchecked, setUnchecked] = useState<string[]>([]);
   const created = (t: Template) => scenarios.some((s) => s.name === t.form.name);
-  const [picked, setPicked] = useState(() => templates.filter(created).map((t) => t.id));
+  const picked = templates.filter((t) => created(t) && !unchecked.includes(t.id)).map((t) => t.id);
   const [editing, setEditing] = useState<Template | null>(null);
   // Skipping asks inline, not in a second dialog over this one.
   const [skipping, setSkipping] = useState(false);
-  const check = (id: string) => setPicked((p) => [...p, id]);
   const pick = (t: Template) => {
     setSkipping(false);
-    if (picked.includes(t.id)) setPicked((p) => p.filter((x) => x !== t.id));
+    if (picked.includes(t.id)) setUnchecked((u) => [...u, t.id]);
     // Created earlier and unchecked since: its row is still there, so checking it again needs no second one.
-    else if (created(t)) check(t.id);
+    else if (created(t)) setUnchecked((u) => u.filter((x) => x !== t.id));
     else setEditing(t);
   };
   const skip = () => {
@@ -223,10 +225,8 @@ function ScenariosStep() {
       <ScenarioForm
         start={editing.form}
         compact
-        onDone={() => {
-          check(editing.id);
-          setEditing(null);
-        }}
+        // Its new row checks the card.
+        onDone={() => setEditing(null)}
         frame={(form, submit) => (
           <SetupCard
             step="scenarios"
