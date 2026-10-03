@@ -1,8 +1,9 @@
 import { useState, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router";
+import { Inert } from "@/components/Inert";
 import { ModalTour, StepCard } from "@/components/ModalTour";
 import { Button } from "@/components/ui/button";
-import { updateDemo, useDemo } from "@/store/store";
+import { useDemo } from "@/store/store";
 import { ChoiceCard, ScenarioForm } from "../ai/AddScenarioSheet";
 import { templates, type Template } from "../ai/scenarioTemplates";
 import { personaSuggestion, policies, skipConsequence } from "./content";
@@ -81,15 +82,13 @@ function SetupCard({
 }
 
 /**
- * Shown on the welcome, persona, scenarios and knowledge URLs; on the welcome alone, "Finish later" keeps it
- * closed. Mounted once by SetupShell, so it survives moving between its screens.
+ * Shown on the welcome, persona, scenarios and knowledge URLs. Mounted once by SetupShell, so it
+ * survives moving between its screens.
  */
 export default function SetupModal() {
   const { pathname } = useLocation();
-  const dismissed = useDemo((s) => s.setupModalDismissed);
   const screen = screens[pathname];
-  if (!screen || (pathname === welcomePath && dismissed)) return null;
-  return <ModalTour>{screen()}</ModalTour>;
+  return screen ? <ModalTour>{screen()}</ModalTour> : null;
 }
 
 /**
@@ -107,18 +106,9 @@ function useFilledState<T>(filled: boolean, initial: () => T) {
   return [value, setValue] as const;
 }
 
-/** "Finish later": closes the modal onto the setup page, and keeps it closed there. */
+/** "Finish later" is inert: the demo keeps its viewer on the path (user decision 2026-10-03). */
 function LaterButton() {
-  const navigate = useNavigate();
-  const later = () => {
-    updateDemo((s) => ({ ...s, setupModalDismissed: true }));
-    navigate(welcomePath);
-  };
-  return (
-    <button type="button" onClick={later} className="text-sm font-medium text-gray-800 hover:text-gray-600 transition-colors">
-      Finish later
-    </button>
-  );
+  return <Inert className="text-sm font-medium text-gray-800 hover:text-gray-600 transition-colors">Finish later</Inert>;
 }
 
 function WelcomeStep() {
@@ -178,7 +168,6 @@ function PersonaStep({ filled }: { filled: boolean }) {
       footer={
         <>
           <div className="flex items-center gap-4">
-            {/* After "Finish later" the welcome stays closed, so Back lands on the page Start came from. */}
             <BackLink to={welcomePath} />
             <LaterButton />
           </div>
