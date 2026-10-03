@@ -12,8 +12,9 @@
  * of the rail stays inert, ADR 0003); `?reset=1`
  * restores the path, and the done page, the end of the demo, stands alone and its "start again"
  * resets the demo and returns to sign-up; arriving on sign-up resets it too. "Finish later" is inert: the modal stays.
- * Skipping scenarios states the consequence inline, in the same dialog, and changes what the
- * knowledge step asks. Picking a template opens its prefilled scenario form in the same card, as
+ * Skipping scenarios states the consequence inline, in the same dialog, and the knowledge step asks
+ * only the policies the picked scenarios need (none after a skip), with a file-or-URL line that
+ * becomes a source. Picking a template opens its prefilled scenario form in the same card, as
  * the "Add scenario" sheet does; creating it checks the card, Back leaves it unchecked. "Manual entry"
  * opens the empty form; what it creates counts on its card and enables Continue.
  */
@@ -107,7 +108,10 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   const knowledge = page.getByRole("dialog", { name: "Knowledge" });
   for (const name of ["Persona", "Scenarios"]) await expect(progress(knowledge).filter({ hasText: name })).toContainText("done");
   await expect(progress(knowledge).filter({ hasText: "Knowledge" })).toHaveAttribute("aria-current", "step");
+  // Only the policies the picked scenarios need are asked: no complaint scenario, no complaints policy.
   await expect(knowledge.getByText("Needed by Check order status")).toBeVisible();
+  await expect(knowledge.getByText("Needed by Return or refund")).toBeVisible();
+  await expect(knowledge.getByRole("textbox", { name: "Complaints and handover" })).toHaveCount(0);
   await knowledge.getByRole("link", { name: "Continue to test" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/knowledge\/filled$/);
   await page.goBack();
@@ -120,7 +124,7 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   // Test is a page, not a modal screen; the readiness summary reads what the earlier steps stored.
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.getByText("Scenarios: Check order status, Return or refund")).toBeVisible();
-  await expect(page.getByText("Policies: shipping, returns and cancellations answered")).toBeVisible();
+  await expect(page.getByText("Policies: shipping times and areas, returns and refunds answered")).toBeVisible();
   await expect(page.getByText("Language: Thai, matches your Test (Demo) customers")).toBeVisible();
   await expect(page.getByRole("textbox", { name: "Message" })).toBeVisible();
 
@@ -163,8 +167,8 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   await expect(page.getByRole("row").filter({ hasText: "Return or refund" })).toHaveCount(1);
   await expect(page.getByRole("row").filter({ hasText: "Customer complaint" })).toHaveCount(0);
   await page.goto("ai/train/knowledge-source");
-  for (const name of ["Shipping times and areas", "Returns and refunds", "Cancellations"])
-    await expect(page.getByRole("row").filter({ hasText: name })).toHaveCount(1);
+  for (const name of ["Shipping times and areas", "Returns and refunds"]) await expect(page.getByRole("row").filter({ hasText: name })).toHaveCount(1);
+  await expect(page.getByRole("row").filter({ hasText: "Complaints and handover" })).toHaveCount(0);
 
   // The journey ends on a page of its own, with nothing to click but a restart that sends the viewer
   // back to sign-up with the demo reset.
@@ -273,13 +277,26 @@ test("skipping scenarios states the consequence inline and the knowledge step fo
   await page.goto("ai/setup/scenarios?reset=1");
   const scenarios = page.getByRole("dialog", { name: "Scenarios" });
   await scenarios.getByRole("button", { name: "Skip this step" }).click();
-  await expect(scenarios.getByText("Without a scenario, refunds and cancellations go to your team.")).toBeVisible();
+  await expect(scenarios.getByText("Without a scenario, refunds and complaints go to your team.")).toBeVisible();
   // Inline, not a second dialog over the modal.
   await expect(page.getByRole("dialog")).toHaveCount(1);
   await scenarios.getByRole("button", { name: "Skip anyway" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/knowledge$/);
   const knowledge = page.getByRole("dialog", { name: "Knowledge" });
-  await expect(knowledge.getByText("Not needed by the scenarios you picked, still useful").first()).toBeVisible();
+  await expect(knowledge.getByText("None of your scenarios needs a policy answer", { exact: false })).toBeVisible();
+  await expect(knowledge.getByRole("textbox")).toHaveCount(0);
+  // The reference line is the one field: checking it fills the step, the URL becomes a website source.
+  await knowledge.getByRole("checkbox", { name: "I have a file or website URL that includes this info" }).click();
+  await expect(page).toHaveURL(/\/ai\/setup\/knowledge\/filled$/);
+  await expect(knowledge.getByRole("checkbox", { name: "I have a file or website URL that includes this info" })).toHaveAttribute("aria-checked", "true");
+  await knowledge.getByRole("textbox", { name: "File name or website URL" }).fill("https://brand-one.example/policies");
+  await knowledge.getByRole("link", { name: "Continue to test" }).click();
+  await expect(page).toHaveURL(/\/ai\/setup\/test$/);
+  await expect(page.getByText("Policies: none needed by your scenarios")).toBeVisible();
+  await page.goto("ai/train/knowledge-source");
+  const row = page.getByRole("row").filter({ hasText: "https://brand-one.example/policies" });
+  await expect(row).toHaveCount(1);
+  await expect(row).toContainText("Website");
 
   await page.goto("ai/setup/test");
   await expect(page.getByText(/^Scenarios: none/)).toBeVisible();

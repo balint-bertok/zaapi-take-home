@@ -1,7 +1,7 @@
 // Copy and fixture values the guided setup shows. None of it comes from the catalog: the setup is
 // this demo's proposal, not a captured page. Business values follow the fixture convention.
 import type { IconName } from "@/icons/Icon";
-import type { Template } from "../ai/scenarioTemplates";
+import { templates, type Template } from "../ai/scenarioTemplates";
 import type { SetupStep } from "./fixtures";
 
 /** The five steps in tour order, as the step list and the intro name them. "Go live" has no SetupStep; `agentLive` marks it done. */
@@ -61,7 +61,7 @@ export const pauseNote = "Pausing the agent is one click: pause the flow in Flow
 
 /** One policy the agent needs, which scenario template needs it, and Brand One's answer. */
 export type Policy = {
-  key: "shipping" | "returns" | "cancellations";
+  key: "shipping" | "returns" | "complaints";
   label: string;
   question: string;
   neededBy: Template["id"];
@@ -84,13 +84,20 @@ export const policies: Policy[] = [
     answer: "Returns within 14 days if unused and in the original packaging. Refunds go back to the original payment method within 5 business days of receiving the item.",
   },
   {
-    key: "cancellations",
-    label: "Cancellations",
-    question: "Can a customer cancel an order, and until when?",
-    neededBy: "returnOrRefund",
-    answer: "Orders can be cancelled free of charge until they are dispatched. After dispatch, the returns policy applies.",
+    key: "complaints",
+    label: "Complaints and handover",
+    question: "When should a complaint go to your team, and what should the agent say until someone takes over?",
+    neededBy: "customerComplaint",
+    answer: "Every complaint goes to the team straight away. Until someone takes over, the agent apologises and says a person will follow up within one business day.",
   },
 ];
 
+/** The policies the picked scenarios need: one per template, matched by the scenario row's name. */
+export const neededPolicies = (scenarioNames: string[]) =>
+  policies.filter((p) => scenarioNames.includes(templates.find((t) => t.id === p.neededBy)?.form.name ?? ""));
+
+/** Where the inline reference goes: a URL is a website source, anything else a file. */
+export const referenceType = (reference: string): "website" | "file" => (/^(https?:\/\/|www\.)/i.test(reference.trim()) ? "website" : "file");
+
 /** The consequence of skipping scenarios, stated when the merchant tries to. */
-export const skipConsequence = "Without a scenario, refunds and cancellations go to your team.";
+export const skipConsequence = "Without a scenario, refunds and complaints go to your team.";
