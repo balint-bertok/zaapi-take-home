@@ -3,7 +3,7 @@ import type { ComponentProps } from "react";
 import { cn } from "@/lib/cn";
 
 // Default size is the w-12 h-6 switch from the AI pages; pass className/thumbClassName for the
-// h-5 w-10 one used in Flow Builder (thumb "w-3.5 h-3.5 data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0").
+// h-5 w-10 one in the tickets list's Follow Up filter (thumb "w-3.5 h-3.5 data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0").
 export function Switch({
   className,
   thumbClassName,

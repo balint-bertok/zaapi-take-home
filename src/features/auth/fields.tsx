@@ -5,7 +5,7 @@ import { Icon } from "@/icons/Icon";
 import { cn } from "@/lib/cn";
 import { Flag } from "./flags";
 
-// Form pieces shared by the register and login pages, class lists from the saved pages.
+// Form pieces of the register page, class lists from the saved pages.
 
 export function Label({ className, ...props }: ComponentProps<"label">) {
   return (
@@ -19,9 +19,9 @@ export function Label({ className, ...props }: ComponentProps<"label">) {
   );
 }
 
-/** Inline field error, as under the login password. */
-export function FieldError({ children }: { children?: string }) {
-  return <p className="mt-1 text-xs text-red-500">{children}</p>;
+/** The empty field-error line under the password, kept for the saved page's spacing. */
+export function FieldError() {
+  return <p className="mt-1 text-xs text-red-500" />;
 }
 
 /**

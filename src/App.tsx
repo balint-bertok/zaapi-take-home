@@ -37,8 +37,8 @@ export function App() {
               </Route>
             ))}
           </Route>
-          {/* Unknown URLs (and "/") land on the login page, so nothing dead-ends in a 404. */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          {/* Unknown URLs (and "/") land on the register page, where the journey starts, so nothing dead-ends in a 404. */}
+          <Route path="*" element={<Navigate to="/register" replace />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

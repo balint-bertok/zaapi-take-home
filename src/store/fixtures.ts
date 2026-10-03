@@ -3,7 +3,6 @@
 // the reference screenshots; nothing here is real customer data.
 import { aiSeed } from "../features/ai/fixtures";
 import { authSeed } from "../features/auth/fixtures";
-import { automationsSeed } from "../features/automations/fixtures";
 import { setupSeed } from "../features/setup/fixtures";
 import { ticketsSeed } from "../features/tickets/fixtures";
 
@@ -17,8 +16,7 @@ export type Channel =
   | "lazada"
   | "tiktok-shop"
   | "gmail"
-  | "outlook"
-  | "shopify";
+  | "outlook";
 
 export type Integration = { id: string; channel: Channel; name: string };
 
@@ -27,15 +25,13 @@ const sharedSeed: {
   workspace: { name: string };
   user: { id: string; name: string };
   integrations: Integration[];
-  aiTokens: number;
   freeTrialDaysLeft: number;
 } = {
   workspace: { name: "Brand One" },
   user: { id: "user-1", name: "Balint" },
   integrations: [{ id: "integration-1", channel: "chat-widget", name: "Test (Demo)" }],
-  aiTokens: 300,
   freeTrialDaysLeft: 6,
 };
 
-export const seed = { ...sharedSeed, ...authSeed, ...ticketsSeed, ...aiSeed, ...automationsSeed, ...setupSeed };
+export const seed = { ...sharedSeed, ...authSeed, ...ticketsSeed, ...aiSeed, ...setupSeed };
 export type DemoState = typeof seed;

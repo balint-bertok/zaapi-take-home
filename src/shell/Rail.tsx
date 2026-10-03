@@ -12,7 +12,8 @@ const button =
   "gap-x-2 whitespace-nowrap text-sm ease-(--ease-out-quart) duration-300 active:scale-[0.98] focus-visible:outline-0 focus-visible:ring-1 focus-visible:ring-gray-300 relative hover:bg-sidebar-accent flex items-center justify-center size-9 rounded-md transition-colors";
 const divider = <div className="w-8 h-px bg-gray-200 my-3" />;
 
-// Order, labels and icon styles from the saved markup. Only captured sections navigate.
+// Order, labels and icon styles from the saved markup. Only the journey's sections navigate; the rest
+// render inert (ADR 0003).
 const top: RailItem[] = [
   { label: "Notifications", icon: "bell" },
   { label: "Search", icon: "magnifying-glass" },
@@ -21,17 +22,17 @@ const main: RailItem[] = [
   { label: "Tickets", icon: "message-dots", section: "tickets" },
   { label: "AI Agent", icon: "ai-symbol", section: "ai" },
   { label: "Analytics", icon: "chart-line" },
-  { label: "Automations", icon: "bolt", section: "automations" },
+  { label: "Automations", icon: "bolt" },
   { label: "Broadcast", icon: "bullhorn" },
   { label: "Contacts", icon: "user-group" },
-  { label: "Settings", icon: "gear", section: "settings" },
+  { label: "Settings", icon: "gear" },
 ];
 
-// Demo tour: until the first AI Agent is live, AI Agent leads into the guided setup and every other
-// section but Tickets is inert; the dashboard opens up once the agent goes live.
+// Demo tour: until the first AI Agent is live, AI Agent leads into the guided setup; once it is live,
+// to the AI Agent pages the setup wrote into. Tickets always links.
 function railTarget(section: SectionKey | undefined, agentLive: boolean) {
-  if (!section || agentLive || section === "tickets") return section && sectionHome(section);
-  return section === "ai" ? "/ai/setup" : undefined;
+  if (section === "ai" && !agentLive) return "/ai/setup";
+  return section && sectionHome(section);
 }
 
 function RailButton({ item, current }: { item: RailItem; current?: SectionKey }) {

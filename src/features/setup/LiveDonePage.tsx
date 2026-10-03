@@ -5,7 +5,7 @@ import { resetDemo, useDemo } from "@/store/store";
 import { shares } from "./content";
 import { SetupPage } from "./SetupPage";
 
-/** After "Go live": what the agent now does, and the way out into the opened dashboard. */
+/** After "Go live": what the agent now does, and the way out into the inbox and the opened AI Agent pages. */
 export default function LiveDonePage() {
   // Opened by URL before going live, the page describes the seeded share.
   const share = useDemo((s) => s.agentShare);
@@ -26,7 +26,7 @@ export default function LiveDonePage() {
         <h2 className="text-lg font-medium text-gray-800">Live on Test (Demo)</h2>
         <p className="text-sm text-gray-500 max-w-[480px]">
           Your agent is answering {label} of new conversations on Chat Widget. We'll suggest widening to all of them after a week with no
-          handoffs. Everything it knows is in the AI Agent pages, and the rest of the dashboard is now open.
+          handoffs. Everything it knows is in the AI Agent pages, which are now open.
         </p>
         <div className="flex gap-3">
           <Link to="/tickets" className={buttonClass("ai")}>

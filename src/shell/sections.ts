@@ -34,38 +34,6 @@ export const sections = {
       { label: "Monitor", items: [{ label: "Analyse" }] },
     ],
   },
-  automations: {
-    title: "Automations",
-    groups: [
-      {
-        items: [
-          { label: "Basic Automations", to: "/automations/basic-automations" },
-          { label: "Flow Builder", to: "/automations/flows" },
-        ],
-      },
-    ],
-  },
-  settings: {
-    title: "Settings",
-    groups: [
-      {
-        label: "Account",
-        items: [
-          { label: "Business Information" },
-          { label: "Account Settings" },
-          { label: "Billing", to: "/settings/billing" },
-          { label: "Team Management" },
-        ],
-      },
-      {
-        label: "Workspace",
-        items: [{ label: "Labels" }, { label: "Quick Replies" }, { label: "Ticket Fields" }, { label: "Contact Fields" }],
-      },
-      { label: "System", items: [{ label: "Integrations" }, { label: "Workflows" }, { label: "Data Exports" }] },
-      // On app.zaapi.com since the capture (common.navigation.settings.*); not built, so inert.
-      { label: "Developers", items: [{ label: "API keys" }, { label: "Webhooks" }] },
-    ],
-  },
 } satisfies Record<string, Section>;
 
 export type SectionKey = keyof typeof sections;
