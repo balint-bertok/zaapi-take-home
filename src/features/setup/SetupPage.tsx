@@ -17,7 +17,7 @@ export function SetupPage({
   children,
   footer,
 }: {
-  step?: 4 | 5;
+  step?: 5;
   title: string;
   description?: ReactNode;
   children?: ReactNode;
@@ -36,7 +36,7 @@ export function SetupPage({
   );
 }
 
-/** The bordered card and its title on the Test and Go live pages. */
+/** The bordered card and its title on the test screen's readiness card and the Go live page. */
 export const setupCard = "border border-gray-200";
 export const setupCardTitle = "text-base font-medium text-gray-800";
 

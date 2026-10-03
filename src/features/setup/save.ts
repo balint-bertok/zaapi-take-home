@@ -37,6 +37,11 @@ export function saveScenarios(pickedIds: string[]) {
   }));
 }
 
+/** The test step marked done (Continue on the test screen). */
+export function markTested() {
+  updateDemo((s) => ({ ...s, setupDone: withStep(s.setupDone, "test") }));
+}
+
 /** The step marked done with no scenario rows. */
 export function skipScenarios() {
   updateDemo((s) => ({ ...s, setupDone: withStep(s.setupDone, "scenarios") }));
