@@ -1,7 +1,7 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { buttonClass } from "@/components/ui/button";
 import { Icon } from "@/icons/Icon";
-import { useDemo } from "@/store/store";
+import { resetDemo, useDemo } from "@/store/store";
 import { shares } from "./content";
 import { SetupPage } from "./SetupPage";
 
@@ -9,6 +9,13 @@ import { SetupPage } from "./SetupPage";
 export default function LiveDonePage() {
   // Opened by URL before going live, the page describes the seeded share.
   const share = useDemo((s) => s.agentShare);
+  const navigate = useNavigate();
+  // The journey is a loop: the demo goes back to its fixtures and the sign-up page, as `?reset=1`
+  // would, so a viewer can run it again (user decision, 2026-10-03).
+  const restart = () => {
+    resetDemo();
+    navigate("/register");
+  };
   const label = (shares.find((s) => s.value === share) ?? shares[0]).label.toLowerCase();
   return (
     <SetupPage step={5} title="Your agent is live">
@@ -29,6 +36,9 @@ export default function LiveDonePage() {
             See your scenarios
           </Link>
         </div>
+        <button type="button" onClick={restart} className="text-sm text-gray-500 hover:text-gray-700 underline-offset-2 hover:underline">
+          Start the journey again from sign-up
+        </button>
       </div>
     </SetupPage>
   );
