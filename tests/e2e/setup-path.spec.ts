@@ -10,7 +10,7 @@
  * readiness summary on the Test step reads the store. Go live shows the flow it publishes, its "Let
  * AI handle" block following the picked share; the done page names that flow. "Go live" opens the AI Agent pages (the rest
  * of the rail stays inert, ADR 0003); `?reset=1`
- * restores the path, and the done page's "start again" resets the demo and returns to sign-up. "Finish later" closes the modal onto the page, whose button reopens it.
+ * restores the path, and the done page's "start again" resets the demo and returns to sign-up. "Finish later" is inert: the modal stays.
  * Skipping scenarios states the consequence inline, in the same dialog, and changes what the
  * knowledge step asks. Picking a template opens its prefilled scenario form in the same card, as
  * the "Add scenario" sheet does; creating it checks the card, Back leaves it unchecked.
@@ -179,29 +179,34 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
 
   // `?reset=1` brings the gated path back, welcome modal included.
   await page.goto("ai/setup?reset=1");
-  await welcome.getByRole("button", { name: "Finish later" }).click();
-  await expect(sidebar.locator('button[aria-disabled="true"]', { hasText: "Scenarios" })).toBeVisible();
-  await expect(rail.locator('button[aria-disabled="true"][aria-label="Automations"]')).toBeVisible();
-  await expect(rail.getByRole("link", { name: "AI Agent" })).toHaveAttribute("href", /\/ai\/setup$/);
+  await expect(welcome).toBeVisible();
+  // The open modal hides the page from the accessibility tree, so the frame is located by CSS here.
+  const behind = (label: string) => page.locator(`[aria-label="${label}"]`);
+  await expect(behind("Set up your AI Agent").locator('button[aria-disabled="true"]', { hasText: "Scenarios" })).toBeVisible();
+  await expect(behind("Main").locator('button[aria-disabled="true"][aria-label="Automations"]')).toBeVisible();
+  await expect(behind("Main").locator('a[aria-label="AI Agent"]')).toHaveAttribute("href", /\/ai\/setup$/);
 
   expect(errors).toEqual([]);
 });
 
-test("Finish later closes the setup modal onto the page, whose Start reopens it", async ({ page }) => {
+test("Finish later is inert: the setup modal stays on the welcome and on a step", async ({ page }) => {
   const errors = collectErrors(page);
 
   await page.goto("ai/setup?reset=1");
-  await page.getByRole("dialog", { name: "Set up your first AI Agent" }).getByRole("button", { name: "Finish later" }).click();
-  await expect(page.getByRole("dialog")).toHaveCount(0);
+  const welcome = page.getByRole("dialog", { name: "Set up your first AI Agent" });
+  const later = welcome.getByRole("button", { name: "Finish later" });
+  await expect(later).toHaveAttribute("aria-disabled", "true");
+  await later.click({ force: true }); // Playwright skips aria-disabled targets unless forced
+  await expect(welcome).toBeVisible();
   await expect(page).toHaveURL(/\/ai\/setup$/);
-  await expect(page.getByRole("heading", { name: "Set up your first AI Agent" })).toBeVisible();
 
-  // Dismissed stays dismissed on a reload; the page's button is the way back in.
-  await page.reload();
-  await expect(page.getByRole("dialog")).toHaveCount(0);
-  await page.getByRole("main").getByRole("link", { name: "Start" }).click();
+  await page.goto("ai/setup/persona");
+  const persona = page.getByRole("dialog", { name: "Persona" });
+  await expect(persona.getByRole("button", { name: "Finish later" })).toHaveAttribute("aria-disabled", "true");
+  await persona.getByRole("button", { name: "Finish later" }).click({ force: true });
+  await expect(persona).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(1);
   await expect(page).toHaveURL(/\/ai\/setup\/persona$/);
-  await expect(page.getByRole("dialog", { name: "Persona" })).toBeVisible();
 
   expect(errors).toEqual([]);
 });
