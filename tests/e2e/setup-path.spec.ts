@@ -167,6 +167,7 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   await welcome.getByRole("button", { name: "Finish later" }).click();
   await expect(sidebar.locator('button[aria-disabled="true"]', { hasText: "Scenarios" })).toBeVisible();
   await expect(rail.locator('button[aria-disabled="true"][aria-label="Automations"]')).toBeVisible();
+  await expect(rail.getByRole("link", { name: "AI Agent" })).toHaveAttribute("href", /\/ai\/setup$/);
 
   expect(errors).toEqual([]);
 });

@@ -277,7 +277,7 @@ export function IntegrationPicker({ value, onChange }: { value: string[]; onChan
             <h3 className="font-semibold">Integrations</h3>
             <div className="flex justify-between items-center">
               <p>{value.length} Integrations Selected</p>
-              <Checkbox className="size-6"
+              <Checkbox
                 label="All integrations"
                 checked={value.length === integrations.length && integrations.length > 0}
                 onCheckedChange={() => onChange(value.length === integrations.length ? [] : integrations.map((i) => i.name))}
@@ -301,7 +301,7 @@ export function IntegrationPicker({ value, onChange }: { value: string[]; onChan
                       </div>
                       <span className="select-none">{channelLabel[channel] ?? channel}</span>
                     </div>
-                    <Checkbox className="size-6"
+                    <Checkbox
                       label={channelLabel[channel] ?? channel}
                       checked={all}
                       onCheckedChange={() =>
@@ -320,7 +320,7 @@ export function IntegrationPicker({ value, onChange }: { value: string[]; onChan
                             <span className="truncate text-gray-800 min-w-0">{i.name}</span>
                           </div>
                           <div className="shrink-0">
-                            <Checkbox className="size-6" label={i.name} checked={value.includes(i.name)} onCheckedChange={() => toggle(i.name)} />
+                            <Checkbox label={i.name} checked={value.includes(i.name)} onCheckedChange={() => toggle(i.name)} />
                           </div>
                         </div>
                       </div>

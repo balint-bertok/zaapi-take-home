@@ -16,8 +16,7 @@ export type Channel =
   | "lazada"
   | "tiktok-shop"
   | "gmail"
-  | "outlook"
-  | "shopify";
+  | "outlook";
 
 export type Integration = { id: string; channel: Channel; name: string };
 
@@ -26,13 +25,11 @@ const sharedSeed: {
   workspace: { name: string };
   user: { id: string; name: string };
   integrations: Integration[];
-  aiTokens: number;
   freeTrialDaysLeft: number;
 } = {
   workspace: { name: "Brand One" },
   user: { id: "user-1", name: "Balint" },
   integrations: [{ id: "integration-1", channel: "chat-widget", name: "Test (Demo)" }],
-  aiTokens: 300,
   freeTrialDaysLeft: 6,
 };
 

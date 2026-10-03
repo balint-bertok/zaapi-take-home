@@ -1,13 +1,12 @@
 import { Icon } from "@/icons/Icon";
 import { cn } from "@/lib/cn";
 
-// The green Radix checkbox of the app's forms and pickers (saved create page and live popovers),
-// rebuilt without the extra package. Size varies by place: size-5 in forms, size-6 in pickers.
+// The green Radix checkbox of the AI Agent pickers (live popovers), rebuilt without the extra package.
 export function Checkbox({
   checked,
   onCheckedChange,
   label,
-  className = "size-5",
+  className = "size-6",
 }: {
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;

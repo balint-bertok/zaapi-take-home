@@ -9,43 +9,33 @@ import { cn } from "@/lib/cn";
 export const Sheet = DialogPrimitive.Root;
 export const SheetTrigger = DialogPrimitive.Trigger;
 
-type FrameProps = ComponentProps<typeof DialogPrimitive.Content>;
+type Props = Omit<ComponentProps<typeof DialogPrimitive.Content>, "title"> & { title: ReactNode };
 
 /**
- * Every right-hand sheet in the demo (the AI Agent pages): a plain black/50 backdrop with
- * no blur (unlike centred dialogs) and the sliding gray-50 panel. Callers add their own header.
+ * Every right-hand sheet in the demo (the AI Agent pages): a plain black/50 backdrop with no blur
+ * (unlike centred dialogs), the sliding gray-50 panel, a title row on top and a close "x" top right.
  */
-export function SheetFrame({ className, children, ...props }: FrameProps) {
+export function SheetContent({ title, className, children, ...props }: Props) {
   return (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
       <DialogPrimitive.Content
+        aria-describedby={undefined}
         className={cn(
           "fixed z-50 rounded-lg overflow-hidden shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500 top-3 bottom-3 right-3 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right bg-gray-50 flex flex-col gap-0 p-0 max-w-[800px] w-3/5",
           className,
         )}
         {...props}
       >
+        <div className="flex flex-col space-y-2 text-left px-7 py-4 border-b bg-gray-50">
+          <DialogPrimitive.Title className="font-semibold text-gray-800 text-lg">{title}</DialogPrimitive.Title>
+        </div>
         {children}
+        <DialogPrimitive.Close className="absolute flex right-4 top-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:outline-hidden disabled:pointer-events-none">
+          <Icon name="x" className="size-4! m-auto" />
+          <span className="sr-only">Close</span>
+        </DialogPrimitive.Close>
       </DialogPrimitive.Content>
     </DialogPrimitive.Portal>
-  );
-}
-
-type Props = Omit<FrameProps, "title"> & { title: ReactNode };
-
-/** The AI Agent sheets: title row on top, close "x" top right. */
-export function SheetContent({ title, children, ...props }: Props) {
-  return (
-    <SheetFrame aria-describedby={undefined} {...props}>
-      <div className="flex flex-col space-y-2 text-left px-7 py-4 border-b bg-gray-50">
-        <DialogPrimitive.Title className="font-semibold text-gray-800 text-lg">{title}</DialogPrimitive.Title>
-      </div>
-      {children}
-      <DialogPrimitive.Close className="absolute flex right-4 top-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:outline-hidden disabled:pointer-events-none">
-        <Icon name="x" className="size-4! m-auto" />
-        <span className="sr-only">Close</span>
-      </DialogPrimitive.Close>
-    </SheetFrame>
   );
 }
