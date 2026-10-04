@@ -17,7 +17,7 @@ export const shareLabel = (value: number) => (shares.find((s) => s.value === val
  * The steps in tour order, as the step list and the intro name them. "Go live" has no SetupStep;
  * `agentLive` marks it done. The scenarios, knowledge and go-live steps each carry one of the memo's
  * features: `text` names it looking ahead, `feature` looking back, for the end-of-demo recap (user
- * decision 2026-10-04: the three features are said where they happen).
+ * decision 2026-10-04: the features are said where they happen).
  */
 const steps = [
   { label: "Persona", to: "/ai/setup/persona", step: "persona", text: "Name your agent and pick how it sounds and which language it answers in." },
@@ -48,9 +48,6 @@ const steps = [
 export type SetupStep = Extract<(typeof steps)[number], { step: string }>["step"];
 export const setupSteps: readonly { label: string; to: string; step?: SetupStep; text: string; feature?: string }[] = steps;
 
-/** The three features, in tour order, for the end-of-demo recap. */
-export const shownFeatures = setupSteps.flatMap((s) => (s.feature ? [s.feature] : []));
-
 /** The welcome's subtitle, on the page behind the modal and in the modal itself. */
 export const stepsIntro = "Five short steps, then your agent answers customers on one channel.";
 
@@ -74,15 +71,53 @@ export const personaSuggestion = {
 
 
 /**
+ * The savings estimate: the live app's own ROI Summary formula (Analyse, catalog `analyse.roiSummary`),
+ * a minute of agent time saved per message the AI sends, and money saved as the monthly agent salary
+ * over the standard working hours in a month, times the hours saved. The live app computes it only
+ * after go live, for an agent already running; the path shows it before, on the merchant's own
+ * replies, so the merchant knows what the setup is worth before doing it (user decision 2026-10-05:
+ * their own replies and the product's own formula, never a claim about other merchants). The
+ * salary is the catalog example's; the month is the one the knowledge step's chat history quotes.
+ */
+export type Replies = { count: number; label: string };
+export const savingsMonth = "September";
+export const agentSalary = 500;
+const workingHours = 160;
+const num = (n: number) => n.toLocaleString("en", { maximumFractionDigits: 1 });
+const money = (n: number) => `$${n.toLocaleString("en", { maximumFractionDigits: 0 })}`;
+
+/** The replies the agent would have taken at `share` percent, and the hours and money they stand for. */
+export const savings = (replies: Replies, share: number) => {
+  const taken = Math.round((replies.count * share) / 100);
+  const hours = taken / 60;
+  return { taken, hours, money: (agentSalary / workingHours) * hours };
+};
+
+/** The estimate in one sentence, short enough for two lines in a go-live card: "The agent would take 240 of September's 1,200 replies: about 4 hours a month, or $13 at a $500 monthly agent salary." */
+export const savingsLine = (replies: Replies, share: number) => {
+  const { taken, hours, money: saved } = savings(replies, share);
+  const which = share === 100 ? `all ${num(replies.count)} of ${savingsMonth}'s ${replies.label}` : `${num(taken)} of ${savingsMonth}'s ${num(replies.count)} ${replies.label}`;
+  return `The agent would take ${which}: about ${num(hours)} hours a month, or ${money(saved)} at a ${money(agentSalary)} monthly agent salary.`;
+};
+
+/** The recap line for the estimate, after the steps' own. */
+export const savingsFeature = "The savings estimate ran the product's own ROI formula on the merchant's replies before go live, where the live app shows it only after.";
+
+/** The features, in tour order, for the end-of-demo recap: the steps' own, then the savings estimate's. */
+export const shownFeatures = [...setupSteps.flatMap((s) => (s.feature ? [s.feature] : [])), savingsFeature];
+
+/**
  * Go live's "when" options: the two "AI agent" templates of Flow Builder's "Create new flow"
  * gallery, each with the flow it creates. In the live app the agent answers customers only through
  * Flow Builder's "Let AI handle" block, so go live creates that flow for the merchant and publishes
  * it; the merchant picks when it answers, not a workflow (user decision 2026-10-04: a one-parameter
  * choice is a go-live setting, not a step). `trigger` is the catalog's own condition for AI
- * handling unassigned chats, narrowed to business hours for the second option.
+ * handling unassigned chats, narrowed to business hours for the second option. `replies` is the
+ * fixture count of the team's replies last month that the flow would have routed to the agent, the
+ * input of the savings estimate below.
  */
 export type FlowTemplateId = "all-new" | "out-of-hours";
-export type FlowTemplate = { id: FlowTemplateId; label: string; detail: string; name: string; trigger: string };
+export type FlowTemplate = { id: FlowTemplateId; label: string; detail: string; name: string; trigger: string; replies: Replies };
 export const flowTemplates: FlowTemplate[] = [
   {
     id: "all-new",
@@ -90,6 +125,7 @@ export const flowTemplates: FlowTemplate[] = [
     detail: "Every new conversation, any time of day.",
     name: "AI handles new conversations on Test (Demo)",
     trigger: "Customer sends a new message and the ticket is unassigned",
+    replies: { count: 1200, label: "replies" },
   },
   {
     id: "out-of-hours",
@@ -97,6 +133,7 @@ export const flowTemplates: FlowTemplate[] = [
     detail: "Only when your team is away.",
     name: "AI handles out-of-hours conversations on Test (Demo)",
     trigger: "Customer sends a new message outside business hours and the ticket is unassigned",
+    replies: { count: 360, label: "out-of-hours replies" },
   },
 ];
 export const flowTemplate = (id: FlowTemplateId) => flowTemplates.find((t) => t.id === id) ?? flowTemplates[0];

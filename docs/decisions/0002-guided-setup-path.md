@@ -29,25 +29,6 @@ Status stays accepted. The intro, persona, scenarios and knowledge steps now run
 
 Why: the user wanted the first AI Agent click to feel like the product's existing onboarding pop-ups; go live stayed a page until 2026-10-03 because a modal suits short, focused steps (user decision, 2026-10-02).
 
-## Amendment, 2026-10-03: go-live publishes the flow
-
-Status stays accepted. In the live app the agent answers customers only through Flow Builder's "Let AI handle" block: the AI Agent section's Deploy entry and the Test page's callout both say so, and nothing goes live until such a flow is published. The go-live step now shows the flow it publishes (trigger, "Let AI handle" with the chosen share, "Assign to" the team) as a plain list under the share, names it, and the done page names it too. Switching the agent off is described as pausing that flow, not as a click on the AI Agent page. No step, route or Flow Builder page is added; the flow is text, and "Flow Builder" stays outside the journey (ADR 0003).
-
-Why: the path should create the product's own go-live mechanism for the merchant rather than hide it, which is the memo's argument for every other step (user decision, 2026-10-03).
-
-## Alternatives considered
-
-| Rejected | Why | Whose decision |
-|---|---|---|
-| Knowledge before scenarios (the live app's order) | Loses the scenario-derived policy checklist; see the memo | User |
-| Gating other features behind finishing the path, in the proposal | Adds a restriction to features that exist today; the reward for finishing is the live agent | User |
-| Making the path mandatory, in the proposal | Contradicts the campaign-season finding (merchants must be able to leave) and hides the exit rate | User |
-| Renaming the live app's "Set command" page | Out of scope; only the path uses "Scenarios" | User |
-| All five steps in the modal | The test chat and go-live do not fit a modal | User |
-| A sixth "Deploy" step mirroring the live Deploy page | That page was never captured, so it would be drawn blind; the memo's path has five steps | User |
-| The Flow Builder canvas as the go-live screen | Reopens ADR 0003 and reinstalls the dependency it removed | User |
-| A Workflow step of its own between Test and Go live (built and reverted on 2026-10-04) | Its two templates differ by one parameter, when the agent answers, which is a go-live setting like the share; a step named after a product mechanism is the gap the memo describes; and it duplicated go live's block list | User |
-
 ## Amendment, 2026-10-04: a Workflow step between Test and Go live (superseded the same day, see below)
 
 Status stays accepted. The path has six steps: persona, scenarios, knowledge, test, workflow, go live. The user judged the workflow missing from the demo: the flow that connects the agent to the channel was created silently at go live, where the previous amendment lists it as text. The new step is Flow Builder's "Create new flow" gallery narrowed to its "AI agent" templates, drawn from the captured page (the Step 13 reference), with the picked flow's blocks beside the cards; the gallery's "Custom flow" row is shown but inert, since the canvas stays outside the journey (ADR 0003). The pick is stored and go live publishes that flow, naming it; the done page names it too. The step comes after Test, not before as in the reference onboarding's order, because the live app's Test page is a sandbox that needs no flow, while publishing one is what going live means. The "sixth Deploy step" rejection below stands: the Deploy page was never captured, the flow gallery was.
@@ -71,3 +52,28 @@ Why: the user asked for the follow-up the memo deferred (user decision, 2026-10-
 ## Amendment, 2026-10-03: the inbox points at the path
 
 After sign-up a viewer may click around the inbox instead of starting. A small "Start the demo here" callout beside the rail's AI Agent entry, with an arrow at it, links to the setup until the first step is done (user decision). It is positioned against the entry's measured box, since the rail's item list clips what overflows it, and it is gone the moment a step is done or the agent is live.
+
+## Amendment, 2026-10-03: go-live publishes the flow
+
+Status stays accepted. In the live app the agent answers customers only through Flow Builder's "Let AI handle" block: the AI Agent section's Deploy entry and the Test page's callout both say so, and nothing goes live until such a flow is published. The go-live step now shows the flow it publishes (trigger, "Let AI handle" with the chosen share, "Assign to" the team) as a plain list under the share, names it, and the done page names it too. Switching the agent off is described as pausing that flow, not as a click on the AI Agent page. No step, route or Flow Builder page is added; the flow is text, and "Flow Builder" stays outside the journey (ADR 0003).
+
+Why: the path should create the product's own go-live mechanism for the merchant rather than hide it, which is the memo's argument for every other step (user decision, 2026-10-03).
+
+## Amendment, 2026-10-05: the payoff before the work
+
+Status stays accepted. The welcome and the go-live screen carry a savings estimate: on the welcome at full volume, under its own heading; in go live's share card, following the "when" and share picks. The end-of-demo recap gains its line. The formula is the live app's own, from Analyse's "ROI Summary" (`analyse.roiSummary` in the saved catalog): a minute of agent time per message the AI sends, money saved as the monthly agent salary over the month's working hours times the hours saved. The inputs are fixtures: last month's team replies on the channel, per flow template (the out-of-hours template counts only those replies), and the catalog example's salary.
+
+Why: the interviews name frictions, which are concrete and blameless, and never the payoff, which nobody had been shown. The live app computes the payoff but only after go live, for an agent already running, where it convinces nobody who is still deciding. A cross-merchant claim ("merchants with an agent spend less") was considered and rejected: the figure would be invented, and a reader at Zaapi could falsify it on sight; Zaapi holds the per-merchant figures to make that claim truthfully, which the memo says. The per-merchant estimate on the merchant's own replies claims nothing about anyone else (user decision, 2026-10-05). A card of its own on the go-live screen overflowed the laptop-window body in one variant (`docs/measurements.md`), so the line sits in the share card, which it follows.
+
+## Alternatives considered
+
+| Rejected | Why | Whose decision |
+|---|---|---|
+| Knowledge before scenarios (the live app's order) | Loses the scenario-derived policy checklist; see the memo | User |
+| Gating other features behind finishing the path, in the proposal | Adds a restriction to features that exist today; the reward for finishing is the live agent | User |
+| Making the path mandatory, in the proposal | Contradicts the campaign-season finding (merchants must be able to leave) and hides the exit rate | User |
+| Renaming the live app's "Set command" page | Out of scope; only the path uses "Scenarios" | User |
+| All five steps in the modal | The test chat and go-live do not fit a modal | User |
+| A sixth "Deploy" step mirroring the live Deploy page | That page was never captured, so it would be drawn blind; the memo's path has five steps | User |
+| The Flow Builder canvas as the go-live screen | Reopens ADR 0003 and reinstalls the dependency it removed | User |
+| A Workflow step of its own between Test and Go live (built and reverted on 2026-10-04) | Its two templates differ by one parameter, when the agent answers, which is a go-live setting like the share; a step named after a product mechanism is the gap the memo describes; and it duplicated go live's block list | User |

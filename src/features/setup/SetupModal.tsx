@@ -24,6 +24,7 @@ import {
 } from "./content";
 import { IconRow } from "./IconRow";
 import { ChannelRow, StepsAhead } from "./Intro";
+import { SavingsLine } from "./Savings";
 import { KnowledgeForm, type Knowledge } from "./KnowledgeForm";
 import { PersonaForm, type Persona } from "./PersonaForm";
 import { Readiness } from "./Readiness";
@@ -149,6 +150,10 @@ function WelcomeStep() {
         <div className="space-y-3">
           <h2 className={sectionTitle}>Channel</h2>
           <ChannelRow />
+        </div>
+        <div className="space-y-3">
+          <h2 className={sectionTitle}>What it's worth</h2>
+          <SavingsLine replies={flowTemplates[0].replies} share={100} className="text-gray-500" />
         </div>
         <div className="space-y-3">
           <h2 className={sectionTitle}>What's ahead</h2>
@@ -476,6 +481,8 @@ function GoLiveStep() {
               A wrong answer in the first week then affects one conversation in five, not every customer. We'll suggest widening after a week with
               no handoffs.
             </p>
+            {/* What the picks are worth, by the product's own formula (content.ts). */}
+            <SavingsLine replies={flow.replies} share={share} className="text-gray-800 mt-2" />
           </FormCard>
         </div>
         <div className="space-y-5">
