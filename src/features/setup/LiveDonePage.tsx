@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/icons/Icon";
 import { asset } from "@/lib/asset";
 import { useDemo } from "@/store/store";
-import { flowName, pauseNote, shareLabel } from "./content";
+import { flowTemplate, pauseNote, shareLabel } from "./content";
 
 /**
  * After "Go live": the end of the demo. It stands alone, with nothing to click but a restart to the
@@ -13,6 +13,7 @@ import { flowName, pauseNote, shareLabel } from "./content";
 export default function LiveDonePage() {
   // Opened by URL before going live, the page describes the seeded share.
   const share = useDemo((s) => s.agentShare);
+  const flow = useDemo((s) => flowTemplate(s.flowTemplate));
   const navigate = useNavigate();
   const restart = () => navigate("/register");
   return (
@@ -24,7 +25,7 @@ export default function LiveDonePage() {
         </div>
         <h1 className="text-2xl font-medium text-gray-800">Your agent is live. That's the end of the demo.</h1>
         <p className="text-sm text-gray-500">
-          It answers {shareLabel(share)} of the new conversations on Chat Widget for Test (Demo), through the flow “{flowName}”. {pauseNote}
+          It answers {shareLabel(share)} of the new conversations on Chat Widget for Test (Demo), through the flow “{flow.name}”. {pauseNote}
         </p>
         <p className="text-sm text-gray-500">Nothing from this run is kept. Start again to walk the journey from sign-up with a fresh workspace.</p>
         <Button variant="ai" onClick={restart} className="mt-2">

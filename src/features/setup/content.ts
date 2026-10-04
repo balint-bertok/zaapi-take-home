@@ -4,14 +4,18 @@ import type { IconName } from "@/icons/Icon";
 import { templates, type Template } from "../ai/scenarioTemplates";
 import type { SetupStep } from "./fixtures";
 
-/** The five steps in tour order, as the step list and the intro name them. "Go live" has no SetupStep; `agentLive` marks it done. */
+/** The steps in tour order, as the step list and the intro name them. "Go live" has no SetupStep; `agentLive` marks it done. */
 export const setupSteps: { label: string; to: string; step?: SetupStep; text: string }[] = [
   { label: "Persona", to: "/ai/setup/persona", step: "persona", text: "Name your agent and pick how it sounds and which language it answers in." },
   { label: "Scenarios", to: "/ai/setup/scenarios", step: "scenarios", text: "Pick what the agent should handle, from ready-made templates." },
   { label: "Knowledge", to: "/ai/setup/knowledge", step: "knowledge", text: "Answer the few policy questions those scenarios need." },
   { label: "Test", to: "/ai/setup/test", step: "test", text: "See what's covered and try a conversation." },
+  { label: "Workflow", to: "/ai/setup/workflow", step: "workflow", text: "Pick the flow that connects your agent to the channel, from a template." },
   { label: "Go live", to: "/ai/setup/live", text: "Start on a small share of conversations, widen when you're ready." },
 ];
+
+/** The welcome's subtitle, on the page behind the modal and in the modal itself. */
+export const stepsIntro = "Six short steps, then your agent answers customers on one channel.";
 
 export type Language = "Thai" | "English";
 export const languages: Language[] = ["Thai", "English"];
@@ -42,16 +46,48 @@ export const shares = [
 export const shareLabel = (value: number) => (shares.find((s) => s.value === value) ?? shares[0]).label.toLowerCase();
 
 /**
- * Going live publishes a flow: in the live app, the agent answers customers only through Flow
- * Builder's "Let AI handle" block, so the path creates that flow for the merchant. These are its
- * blocks in order; the trigger is the catalog's own condition for AI handling unassigned chats.
+ * The workflow step's templates: the two "AI agent" cards of Flow Builder's "Create new flow"
+ * gallery, title and description verbatim from the saved page, each with the flow it creates. In
+ * the live app the agent answers customers only through Flow Builder's "Let AI handle" block, so
+ * the path creates that flow for the merchant and go live publishes it. `trigger` is the catalog's
+ * own condition for AI handling unassigned chats, narrowed to business hours for the second card.
  */
-export const flowName = "AI handles new conversations on Test (Demo)";
-export const flowBlocks = (share: number): { icon: IconName; iconClassName: string; label: string; detail: string }[] => [
-  { icon: "bolt", iconClassName: "text-gray-500", label: "Trigger", detail: "Customer sends a new message and the ticket is unassigned" },
-  { icon: "ai-symbol", iconClassName: "ai-gradient-icon", label: "Let AI handle", detail: `${shareLabel(share)} of those conversations` },
+export type FlowTemplateId = "all-new" | "out-of-hours";
+export type FlowTemplate = { id: FlowTemplateId; title: string; description: string; icon: IconName; name: string; trigger: string };
+export const flowTemplates: FlowTemplate[] = [
+  {
+    id: "all-new",
+    title: "AI handles all new tickets",
+    description: "Let the AI Agent handle all new tickets, and escalate to a human agent when it can no longer reply.",
+    icon: "ai-symbol",
+    name: "AI handles new conversations on Test (Demo)",
+    trigger: "Customer sends a new message and the ticket is unassigned",
+  },
+  {
+    id: "out-of-hours",
+    title: "AI handles out of hours tickets",
+    description: "Let the AI handle all tickets outside of business hours.",
+    icon: "hourglass-clock",
+    name: "AI handles out-of-hours conversations on Test (Demo)",
+    trigger: "Customer sends a new message outside business hours and the ticket is unassigned",
+  },
+];
+export const flowTemplate = (id: FlowTemplateId) => flowTemplates.find((t) => t.id === id) ?? flowTemplates[0];
+
+/** The flow's blocks in order; "Let AI handle" takes the share picked at go live, left out before it is. */
+export const flowBlocks = (flow: FlowTemplate, share?: number): { icon: IconName; iconClassName: string; label: string; detail: string }[] => [
+  { icon: "bolt", iconClassName: "text-gray-500", label: "Trigger", detail: flow.trigger },
+  {
+    icon: "ai-symbol",
+    iconClassName: "ai-gradient-icon",
+    label: "Let AI handle",
+    detail: share === undefined ? "the share of those conversations you pick at go live" : `${shareLabel(share)} of those conversations`,
+  },
   { icon: "user-group", iconClassName: "text-gray-500", label: "Assign to", detail: "your team: the rest, and any conversation the agent hands over" },
 ];
+
+/** The gallery's "Custom flow" row, verbatim; the canvas is outside the journey, so it is inert. */
+export const customFlow = { title: "Custom flow", description: "Start fresh by choosing triggers, conditions, and actions to design your own flow and steps." };
 
 /** How the agent is switched off: by pausing its flow, as in the live app. */
 export const pauseNote = "Pausing the agent is one click: pause the flow in Flow Builder.";

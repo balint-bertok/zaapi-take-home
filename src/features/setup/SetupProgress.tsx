@@ -15,7 +15,7 @@ const labels = { done: "text-electric-green-700", current: "text-gray-800", upco
 export type ProgressStep = SetupStep | "live";
 
 /**
- * The five setup steps as a bar row at the top of the setup modal's card: done in green, the
+ * The setup steps as a bar row at the top of the setup modal's card: done in green, the
  * screen's own step in the AI gradient, the rest gray. The welcome passes no `current`, so nothing
  * there is; done is what the step list marks done.
  */
