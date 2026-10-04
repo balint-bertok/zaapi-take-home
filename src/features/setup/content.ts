@@ -46,7 +46,7 @@ const steps = [
       "The savings estimate ran the product's own ROI formula on the merchant's replies before go live, where the live app shows it only after.",
     ],
   },
-] as const satisfies { label: string; to: string; step?: string; text: string; features?: string[] }[];
+] as const satisfies { label: string; to: string; step?: string; text: string; features?: readonly string[] }[];
 
 /** A step the store marks done; derived from the table, so a row is the only place a step exists. */
 export type SetupStep = Extract<(typeof steps)[number], { step: string }>["step"];
@@ -96,9 +96,10 @@ const money = (n: number) => `$${n.toLocaleString("en", { maximumFractionDigits:
 /** The estimate in one sentence, short enough for two lines in a go-live card: "The agent would take 240 of September's 1,200 replies: about 4 hours a month, or $13 at a $500 monthly agent salary." */
 export const savingsLine = (replies: Replies, share: number) => {
   const taken = Math.round((replies.count * share) / 100);
-  const hours = taken / 60;
+  // Hours to a tenth before the money is taken from them, so the two printed figures agree.
+  const hours = Math.round(taken / 6) / 10;
   const which = taken === replies.count ? `all ${num(replies.count)} of ${savingsMonth}'s ${replies.label}` : `${num(taken)} of ${savingsMonth}'s ${num(replies.count)} ${replies.label}`;
-  return `The agent would take ${which}: about ${num(hours)} hours a month, or ${money((agentSalary / workingHours) * hours)} at a ${money(agentSalary)} monthly agent salary.`;
+  return `The agent would take ${which}: about ${num(hours)} ${hours === 1 ? "hour" : "hours"} a month, or ${money((agentSalary / workingHours) * hours)} at a ${money(agentSalary)} monthly agent salary.`;
 };
 
 /**
