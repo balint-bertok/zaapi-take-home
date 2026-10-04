@@ -92,7 +92,6 @@ export const customFlow = { title: "Custom flow", description: "Start fresh by c
 /** How the agent is switched off: by pausing its flow, as in the live app. */
 export const pauseNote = "Pausing the agent is one click: pause the flow in Flow Builder.";
 
-/** One policy the agent needs, which scenario template needs it, and Brand One's answer. */
 /**
  * A policy the knowledge step asks for. `answer` is pre-filled from the merchant's Helpdesk chat
  * history: `history` is the past reply, from the team to a customer on Test (Demo), it was drawn
@@ -107,9 +106,6 @@ export type Policy = {
   answer: string;
   history: { when: string; quote: string };
 };
-
-/** The knowledge step's subtitle: where the answers come from. */
-export const historyNote = "We filled these in from your Helpdesk chat history. Check them; short edits are fine.";
 
 export const policies: Policy[] = [
   {

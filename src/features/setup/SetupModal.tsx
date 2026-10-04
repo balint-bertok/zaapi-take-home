@@ -15,7 +15,6 @@ import {
   flowBlocks,
   flowTemplate,
   flowTemplates,
-  historyNote,
   neededPolicies,
   pauseNote,
   personaSuggestion,
@@ -40,7 +39,7 @@ import { SetupProgress, type ProgressStep } from "./SetupProgress";
 // The setup's screens, welcome through go live, in the inbox onboarding's modal frame, over the
 // setup page. Copy is not from the catalog (see content.ts).
 
-// The step URLs from the step list, in tour order; the filled twins and the welcome are not steps.
+// The step URLs from the step list, in tour order; the persona's filled twin and the welcome are not steps.
 const [personaPath, scenariosPath, knowledgePath, testPath, workflowPath, livePath] = setupSteps.map((s) => s.to);
 const filledPath = "/ai/setup/persona/filled";
 const welcomePath = "/ai/setup";
@@ -118,16 +117,18 @@ export default function SetupModal() {
 }
 
 /**
- * A filled form's local state: `initial()` on mount, and again each time the filled URL is entered
- * (a new history entry has a new key), reset during render rather than in an effect.
+ * The persona form's local state: `initial()` on mount, and again each time its URL is entered (a
+ * new history entry has a new key), reset during render rather than in an effect. Both persona
+ * URLs render the same component in the same slot, so without the reset the filled twin would keep
+ * the earlier run's edits; the empty twin never reads the value.
  */
-function useFilledState<T>(filled: boolean, initial: () => T) {
+function useFilledState<T>(initial: () => T) {
   const { key } = useLocation();
   const [value, setValue] = useState(initial);
   const [shownKey, setShownKey] = useState(key);
   if (shownKey !== key) {
     setShownKey(key);
-    if (filled) setValue(initial());
+    setValue(initial());
   }
   return [value, setValue] as const;
 }
@@ -182,7 +183,7 @@ function PersonaStep({ filled }: { filled: boolean }) {
   const navigate = useNavigate();
   // A card picked on the empty form arrives as navigation state and wins over the suggestion.
   const picked = (useLocation().state as Picked | null) ?? {};
-  const [persona, setPersona] = useFilledState<Persona>(filled, () => suggestion(picked));
+  const [persona, setPersona] = useFilledState<Persona>(() => suggestion(picked));
   const fill = ({ language, signature }: Picked = {}) => navigate(filledPath, { state: { language, signature } });
   const name = persona.name.trim();
   return (
@@ -350,20 +351,20 @@ const historyKnowledge = (): Knowledge => ({ answers: Object.fromEntries(policie
 /**
  * Knowledge: opens filled in from the merchant's Helpdesk chat history, each answer citing the past
  * reply it came from (user decision 2026-10-04: the checklist no longer starts blank, so it has no
- * empty twin URL). The answers sit in local state, editable; arriving resets them. Continue saves
+ * empty twin URL). The answers sit in local state, editable. Continue saves
  * each answered policy as a written knowledge source, the reference as a website or file source,
  * and moves to the test screen. With nothing asked (no scenario picked) Continue is always open.
  */
 function KnowledgeStep() {
   const scenarios = useDemo((s) => s.scenarios);
-  const [knowledge, setKnowledge] = useFilledState(true, historyKnowledge);
+  const [knowledge, setKnowledge] = useState(historyKnowledge);
   const asked = neededPolicies(scenarios.map((s) => s.name));
   const ready = asked.length === 0 || asked.some((p) => knowledge.answers[p.key].trim() !== "") || (knowledge.reference ?? "").trim() !== "";
   return (
     <SetupCard
       step="knowledge"
       title="Knowledge"
-      subtitle={historyNote}
+      subtitle="We filled these in from your Helpdesk chat history. Check them; short edits are fine."
       footer={
         <>
           <div className="flex items-center gap-4">

@@ -31,30 +31,32 @@ export function KnowledgeForm({ asked, value, onChange }: { asked: Policy[]; val
         <p className="text-gray-500">None of your scenarios needs a policy answer. Add a file or website below, or continue to test.</p>
       )}
       {/* One column per policy, so three policies with their history lines fit the modal body without scrolling. */}
-      <div className="grid grid-cols-3 gap-4">
-        {asked.map((p) => (
-          <div key={p.key}>
-            <label htmlFor={`policy-${p.key}`} className={fieldLabel}>
-              {p.label}
-            </label>
-            <p className="text-xs text-gray-500 -mt-1 mb-2">{p.question}</p>
-            <Textarea
-              id={`policy-${p.key}`}
-              maxLength={500}
-              className="min-h-[104px] resize-none"
-              value={value.answers[p.key]}
-              onChange={(e) => onChange({ answers: { ...value.answers, [p.key]: e.target.value } })}
-            />
-            <p className="text-xs text-gray-500 mt-1 flex gap-1.5">
-              <Icon name="clock-rotate-left" className="size-3! mt-0.5 shrink-0" />
-              <span>
-                From your chat history, your team to a customer, {p.history.when}: “{p.history.quote}”
-              </span>
-            </p>
-            <p className="text-xs text-gray-400 mt-1">Needed by {templates.find((t) => t.id === p.neededBy)?.title}</p>
-          </div>
-        ))}
-      </div>
+      {asked.length > 0 && (
+        <div className="grid grid-flow-col auto-cols-fr gap-4">
+          {asked.map((p) => (
+            <div key={p.key}>
+              <label htmlFor={`policy-${p.key}`} className={fieldLabel}>
+                {p.label}
+              </label>
+              <p className="text-xs text-gray-500 -mt-1 mb-2">{p.question}</p>
+              <Textarea
+                id={`policy-${p.key}`}
+                maxLength={500}
+                className="min-h-[104px] resize-none"
+                value={value.answers[p.key]}
+                onChange={(e) => onChange({ answers: { ...value.answers, [p.key]: e.target.value } })}
+              />
+              <p className="text-xs text-gray-500 mt-1 flex gap-1.5">
+                <Icon name="clock-rotate-left" className="size-3! mt-0.5 shrink-0" />
+                <span>
+                  From your chat history, your team to a customer, {p.history.when}: “{p.history.quote}”
+                </span>
+              </p>
+              <p className="text-xs text-gray-400 mt-1">Needed by {templates.find((t) => t.id === p.neededBy)?.title}</p>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <Checkbox checked={checked} onCheckedChange={toggle} label={referenceLabel} className="size-4.5" />
