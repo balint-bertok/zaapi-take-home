@@ -15,6 +15,7 @@ import {
   flowBlocks,
   flowTemplate,
   flowTemplates,
+  historyNote,
   neededPolicies,
   pauseNote,
   personaSuggestion,
@@ -26,7 +27,6 @@ import {
   writtenScenario,
   type FlowTemplate,
   type FlowTemplateId,
-  type Policy,
 } from "./content";
 import { IconRow } from "./IconRow";
 import { ChannelRow, StepsAhead } from "./Intro";
@@ -43,7 +43,6 @@ import { SetupProgress, type ProgressStep } from "./SetupProgress";
 // The step URLs from the step list, in tour order; the filled twins and the welcome are not steps.
 const [personaPath, scenariosPath, knowledgePath, testPath, workflowPath, livePath] = setupSteps.map((s) => s.to);
 const filledPath = "/ai/setup/persona/filled";
-const knowledgeFilledPath = "/ai/setup/knowledge/filled";
 const welcomePath = "/ai/setup";
 
 /** Each modal URL's screen. */
@@ -52,8 +51,7 @@ const screens: Record<string, () => ReactNode> = {
   [personaPath]: () => <PersonaStep filled={false} />,
   [filledPath]: () => <PersonaStep filled />,
   [scenariosPath]: () => <ScenariosStep />,
-  [knowledgePath]: () => <KnowledgeStep filled={false} />,
-  [knowledgeFilledPath]: () => <KnowledgeStep filled />,
+  [knowledgePath]: () => <KnowledgeStep />,
   [testPath]: () => <TestStep />,
   [workflowPath]: () => <WorkflowStep />,
   [livePath]: () => <GoLiveStep />,
@@ -346,54 +344,40 @@ function ScenariosStep() {
   );
 }
 
-const answersFrom = (text: (p: Policy) => string) => Object.fromEntries(policies.map((p) => [p.key, text(p)])) as Knowledge["answers"];
-const noKnowledge: Knowledge = { answers: answersFrom(() => ""), reference: null };
-// The reference box checked on the empty form arrives as navigation state and stays checked.
-const suggestedKnowledge = (reference: string | null) => ({ answers: answersFrom((p) => p.answer), reference });
+/** The answers as they open: pre-filled from the chat history (content.ts), no reference yet. */
+const historyKnowledge = (): Knowledge => ({ answers: Object.fromEntries(policies.map((p) => [p.key, p.answer])) as Knowledge["answers"], reference: null });
 
 /**
- * Knowledge, on both its URLs. Empty, focusing any answer, checking the reference box or Continue
- * moves to the filled URL, as on the persona; filled, Brand One's answers sit in local state,
- * editable. Continue saves each answered policy as a written knowledge source, the reference as a
- * website or file source, and moves to the test screen. With nothing asked (no scenario
- * picked) Continue is always open.
+ * Knowledge: opens filled in from the merchant's Helpdesk chat history, each answer citing the past
+ * reply it came from (user decision 2026-10-04: the checklist no longer starts blank, so it has no
+ * empty twin URL). The answers sit in local state, editable; arriving resets them. Continue saves
+ * each answered policy as a written knowledge source, the reference as a website or file source,
+ * and moves to the test screen. With nothing asked (no scenario picked) Continue is always open.
  */
-function KnowledgeStep({ filled }: { filled: boolean }) {
-  const navigate = useNavigate();
+function KnowledgeStep() {
   const scenarios = useDemo((s) => s.scenarios);
-  const picked = (useLocation().state as Pick<Knowledge, "reference"> | null)?.reference ?? null;
-  const [knowledge, setKnowledge] = useFilledState(filled, () => suggestedKnowledge(picked));
+  const [knowledge, setKnowledge] = useFilledState(true, historyKnowledge);
   const asked = neededPolicies(scenarios.map((s) => s.name));
   const ready = asked.length === 0 || asked.some((p) => knowledge.answers[p.key].trim() !== "") || (knowledge.reference ?? "").trim() !== "";
   return (
     <SetupCard
       step="knowledge"
       title="Knowledge"
-      subtitle="Answer the policies your scenarios need. Short answers are fine; the agent fills in the wording."
+      subtitle={historyNote}
       footer={
         <>
           <div className="flex items-center gap-4">
             <BackLink to={scenariosPath} />
             <LaterButton />
           </div>
-          <ContinueButton
-            variant="default"
-            to={filled ? testPath : knowledgeFilledPath}
-            disabled={filled && !ready}
-            onClick={filled ? () => saveKnowledge(knowledge) : undefined}
-          >
+          <ContinueButton variant="default" to={testPath} disabled={!ready} onClick={() => saveKnowledge(knowledge)}>
             Continue to test
           </ContinueButton>
         </>
       }
     >
       <div className="px-6 py-5">
-        <KnowledgeForm
-          asked={asked}
-          value={filled ? knowledge : noKnowledge}
-          onChange={(patch) => (filled ? setKnowledge((k) => ({ ...k, ...patch })) : navigate(knowledgeFilledPath, { state: { reference: patch.reference ?? null } }))}
-          onFocus={filled ? undefined : () => navigate(knowledgeFilledPath)}
-        />
+        <KnowledgeForm asked={asked} value={knowledge} onChange={(patch) => setKnowledge((k) => ({ ...k, ...patch }))} />
       </div>
     </SetupCard>
   );

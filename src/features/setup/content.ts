@@ -93,13 +93,23 @@ export const customFlow = { title: "Custom flow", description: "Start fresh by c
 export const pauseNote = "Pausing the agent is one click: pause the flow in Flow Builder.";
 
 /** One policy the agent needs, which scenario template needs it, and Brand One's answer. */
+/**
+ * A policy the knowledge step asks for. `answer` is pre-filled from the merchant's Helpdesk chat
+ * history: `history` is the past reply, from the team to a customer on Test (Demo), it was drawn
+ * from, shown under the answer so the merchant can check it (user decision 2026-10-04: the
+ * checklist no longer starts blank). Fixture values, like the rest of the step.
+ */
 export type Policy = {
   key: "shipping" | "returns" | "complaints";
   label: string;
   question: string;
   neededBy: Template["id"];
   answer: string;
+  history: { when: string; quote: string };
 };
+
+/** The knowledge step's subtitle: where the answers come from. */
+export const historyNote = "We filled these in from your Helpdesk chat history. Check them; short edits are fine.";
 
 export const policies: Policy[] = [
   {
@@ -108,6 +118,7 @@ export const policies: Policy[] = [
     question: "How long does delivery take, and where do you ship?",
     neededBy: "checkOrderStatus",
     answer: "Bangkok: 1-2 business days. Rest of Thailand: 2-4 business days. We do not ship outside Thailand yet.",
+    history: { when: "Sep 2026", quote: "Bangkok orders arrive in 1-2 business days, the rest of Thailand in 2-4. We don't ship abroad yet, sorry!" },
   },
   {
     key: "returns",
@@ -115,6 +126,7 @@ export const policies: Policy[] = [
     question: "When can a customer return an order, and how is the refund made?",
     neededBy: "returnOrRefund",
     answer: "Returns within 14 days if unused and in the original packaging. Refunds go back to the original payment method within 5 business days of receiving the item.",
+    history: { when: "Aug 2026", quote: "You can return it within 14 days if it's unused and in the original box. The refund goes back to your card within 5 business days of us receiving it." },
   },
   {
     key: "complaints",
@@ -122,6 +134,7 @@ export const policies: Policy[] = [
     question: "When should a complaint go to your team, and what should the agent say until someone takes over?",
     neededBy: "customerComplaint",
     answer: "Every complaint goes to the team straight away. Until someone takes over, the agent apologises and says a person will follow up within one business day.",
+    history: { when: "Sep 2026", quote: "I'm so sorry about this. I've passed it to a colleague who will get back to you within one business day." },
   },
 ];
 
