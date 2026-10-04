@@ -2,11 +2,9 @@
 // inert until the tour's last step sets `agentLive`. `setupDone` lists the steps finished so far;
 // "Go live" is not a step here, `agentLive` stands for it. `personaLanguage` is the one persona
 // field the later steps read back (the readiness summary compares it with the channel);
-// `flowTemplate` is the workflow step's pick, which go live publishes and the done page names.
+// `flowTemplate` is go live's "when" pick, the flow it publishes and the done page names.
 
-import { channelLanguage, flowTemplates, shares, type FlowTemplateId, type Language } from "./content";
-
-export type SetupStep = "persona" | "scenarios" | "knowledge" | "test" | "workflow";
+import { channelLanguage, flowTemplates, shares, type FlowTemplateId, type Language, type SetupStep } from "./content";
 
 export const setupSeed: { agentLive: boolean; agentShare: number; setupDone: SetupStep[]; personaLanguage: Language; flowTemplate: FlowTemplateId } = {
   agentLive: false,

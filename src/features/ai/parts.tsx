@@ -217,8 +217,8 @@ export function Counter({ value, max, className = "mt-2" }: { value: string; max
   );
 }
 
-/** Bordered radio card, teal when selected (source type, how AI should respond). */
-export function RadioCard({ checked, onSelect, children, className }: { checked: boolean; onSelect: () => void; children: ReactNode; className?: string }) {
+/** Bordered radio card, teal when selected (source type, how AI should respond); `detail` is a second, lighter line under the label. */
+export function RadioCard({ checked, onSelect, children, detail, className }: { checked: boolean; onSelect: () => void; children: ReactNode; detail?: string; className?: string }) {
   return (
     <button
       type="button"
@@ -232,8 +232,25 @@ export function RadioCard({ checked, onSelect, children, className }: { checked:
       )}
     >
       <RadioDot checked={checked} />
-      <span className="text-sm font-medium">{children}</span>
+      <span className="text-sm font-medium">
+        {children}
+        {detail && <span className="block font-normal text-gray-500">{detail}</span>}
+      </span>
     </button>
+  );
+}
+
+/** The AI Agent section's gradient callout: a left border and the AI glyph beside gradient text (the Test page's, the go-live screen's). */
+export function AiCallout({ role, className, children }: { role: "alert" | "note"; className?: string; children: ReactNode }) {
+  return (
+    <div className={cn("p-3.5 rounded-md border-l-4 bg-(image:--color-ai-gradient-light) border-electric-green-500", className)} role={role}>
+      <div className="flex flex-row gap-2">
+        <div className="mt-[2px]">
+          <Icon name="ai-symbol" className="size-5! ai-gradient-icon shrink-0" />
+        </div>
+        <div className="ai-gradient-text">{children}</div>
+      </div>
+    </div>
   );
 }
 

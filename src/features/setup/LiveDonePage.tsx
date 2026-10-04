@@ -3,12 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/icons/Icon";
 import { asset } from "@/lib/asset";
 import { useDemo } from "@/store/store";
-import { flowTemplate, pauseNote, shareLabel } from "./content";
+import { flowTemplate, pauseNote, shareLabel, shownFeatures } from "./content";
 
 /**
  * After "Go live": the end of the demo. It stands alone, with nothing to click but a restart to the
  * sign-up page, which puts the demo back to its fixtures on arrival, so a viewer can run it again
- * without seeing this run's scenarios or knowledge (user decision, 2026-10-03).
+ * without seeing this run's scenarios or knowledge (user decision, 2026-10-03). It recaps the three
+ * features the path carried, for the memo's reader (user decision 2026-10-04: said here, outside the
+ * product's own screens).
  */
 export default function LiveDonePage() {
   // Opened by URL before going live, the page describes the seeded share.
@@ -27,6 +29,16 @@ export default function LiveDonePage() {
         <p className="text-sm text-gray-500">
           It answers {shareLabel(share)} of the new conversations on Chat Widget for Test (Demo), through the flow “{flow.name}”. {pauseNote}
         </p>
+        <section className="w-full rounded-lg bg-gray-50 px-5 py-4 text-left">
+          <h2 id="shown" className="text-sm font-medium text-gray-800">
+            What this demo showed
+          </h2>
+          <ol aria-labelledby="shown" className="mt-2 space-y-1.5 text-sm text-gray-600 list-decimal pl-5">
+            {shownFeatures.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ol>
+        </section>
         <p className="text-sm text-gray-500">Nothing from this run is kept. Start again to walk the journey from sign-up with a fresh workspace.</p>
         <Button variant="ai" onClick={restart} className="mt-2">
           Start again from sign-up

@@ -1,7 +1,7 @@
 import { Inert } from "@/components/Inert";
-import { Icon } from "@/icons/Icon";
 import { asset } from "@/lib/asset";
 import { ShellPage } from "@/shell/ShellPage";
+import { AiCallout } from "./parts";
 import { TestChat } from "./TestChat";
 
 /** AI Agent > Test (Step 14): a scripted test chat. Nothing is sent anywhere. */
@@ -28,20 +28,11 @@ export default function TestPage() {
           </p>
         </section>
 
-        <div className="p-3.5 rounded-md text-sm border-l-4 bg-(image:--color-ai-gradient-light) border-electric-green-500" role="alert">
-          <div className="flex flex-row gap-2">
-            <div className="mt-[2px]">
-              <Icon name="ai-symbol" className="size-5! ai-gradient-icon shrink-0" />
-            </div>
-            <div className="flex flex-col gap-1">
-              <div className="ai-gradient-text">
-                Activate AI by adding the ‘Let AI handle’ block in Flow Builder or by using one of our templates.{" "}
-                {/* Flow Builder is outside the demo's journey (ADR 0003). */}
-                <Inert className="border-b border-purple-600">Go to Flow Builder</Inert>
-              </div>
-            </div>
-          </div>
-        </div>
+        <AiCallout role="alert" className="text-sm">
+          Activate AI by adding the ‘Let AI handle’ block in Flow Builder or by using one of our templates.{" "}
+          {/* Flow Builder is outside the demo's journey (ADR 0003). */}
+          <Inert className="border-b border-purple-600">Go to Flow Builder</Inert>
+        </AiCallout>
 
         <TestChat />
       </div>
