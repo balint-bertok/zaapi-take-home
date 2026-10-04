@@ -190,7 +190,8 @@ function Section({
 /**
  * One contact field, read-only: editing contact information is outside the demo (user decision
  * 2026-10-03). Same box and hover border as the app's input, with "Empty" where the app shows the
- * placeholder; the copy button stays.
+ * placeholder. The copy button stays but renders inert: nothing in the demo writes the viewer's
+ * clipboard (user decision 2026-10-04).
  */
 function ContactField({ ticket, field }: { ticket: Ticket; field: (typeof contactFields)[number] }) {
   const value = ticket.contact[field.key] ?? "";
@@ -210,14 +211,9 @@ function ContactField({ ticket, field }: { ticket: Ticket; field: (typeof contac
         </div>
         {value && (
           <span className="absolute right-1 z-10 flex items-center gap-0.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100">
-            <button
-              type="button"
-              aria-label="Copy"
-              onClick={() => void navigator.clipboard?.writeText(value).catch(() => {})}
-              className={cn(buttonClass("outline"), "size-5 rounded-sm p-0")}
-            >
+            <Inert aria-label="Copy" className={cn(buttonClass("outline"), "size-5 rounded-sm p-0")}>
               <Icon name="copy" className="size-3! text-gray-400" />
-            </button>
+            </Inert>
           </span>
         )}
       </div>

@@ -6,7 +6,7 @@ Answers: which suite guards which invariant? One line per suite. Scenario detail
 |---|---|---|
 | `tests/e2e/no-outbound-network.spec.ts` | The built demo requests nothing outside its own origin, on every route in the table | yes |
 | `tests/e2e/route-walk.spec.ts` | Every route in the table renders: 200, no console error, no page error, catalog title, the "Demo" badge in view, no link outside the table; `/` lands on `/register` | yes |
-| `tests/e2e/tickets.spec.ts` | The inbox click path on the store: select, reply, assign; Close, bulk close and the Closed entry stay inert and the contact fields are read-only text | no |
+| `tests/e2e/tickets.spec.ts` | The inbox click path on the store: select, reply, assign; Close, bulk close and the Closed entry stay inert and the contact fields are read-only text, and the contact fields' Copy control is inert (no clipboard write) | no |
 | Gitleaks in `.githooks/pre-commit`, `scripts/gate`, CI | No secret in git history | yes |
 | `tests/unit/secrets.test.ts` | No credential-shaped literal in `src/`, which ships to a public page | yes |
 | `tests/e2e/auth-onboarding.spec.ts` | Prefilled register lands on the inbox in one click and its "Log in" control is inert, both onboarding modals click through and the "Start the demo here" callout then links to the setup; the demo password never reaches storage or the URL; a reload keeps onboarding done and `?reset=1` brings it back; `/` lands on register | no |

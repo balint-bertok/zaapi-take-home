@@ -2,11 +2,12 @@
  * The inbox's main click path, driven only by the in-memory store: select the visitor ticket,
  * reply, assign it to the signed-in user. Closing a ticket (header and bulk), reopening it and
  * editing the contact fields are outside the demo (user decision 2026-10-03): those controls
- * render inert, and the contact fields are plain text.
+ * render inert, and the contact fields are plain text whose Copy control is inert too, since nothing
+ * in the demo writes the clipboard (user decision 2026-10-04).
  */
 import { expect, test } from "@playwright/test";
 
-test("tickets inbox: reply and assign; close, bulk close and contact fields are inert", async ({ page }) => {
+test("tickets inbox: reply and assign; close, bulk close, contact fields and their Copy control are inert", async ({ page }) => {
   await page.goto("tickets");
   // Get past the first-visit modals (auth-onboarding.spec covers them in detail).
   await page.getByRole("button", { name: "Continue" }).click();
@@ -41,4 +42,6 @@ test("tickets inbox: reply and assign; close, bulk close and contact fields are 
   const contact = page.getByRole("complementary", { name: "Contact" });
   await expect(contact.getByRole("textbox")).toHaveCount(0);
   await expect(contact.getByText("Visitor 01 Oct 2026, 11:18").first()).toBeVisible();
+  // The Copy control beside a value (shown on hover) is inert: no clipboard write in the demo.
+  await expect(contact.locator('button[aria-label="Copy"]').first()).toHaveAttribute("aria-disabled", "true");
 });
