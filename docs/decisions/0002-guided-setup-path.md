@@ -46,12 +46,21 @@ Why: the path should create the product's own go-live mechanism for the merchant
 | All five steps in the modal | The test chat and go-live do not fit a modal | User |
 | A sixth "Deploy" step mirroring the live Deploy page | That page was never captured, so it would be drawn blind; the memo's path has five steps | User |
 | The Flow Builder canvas as the go-live screen | Reopens ADR 0003 and reinstalls the dependency it removed | User |
+| A Workflow step of its own between Test and Go live (built and reverted on 2026-10-04) | Its two templates differ by one parameter, when the agent answers, which is a go-live setting like the share; a step named after a product mechanism is the gap the memo describes; and it duplicated go live's block list | User |
 
-## Amendment, 2026-10-04: a Workflow step between Test and Go live
+## Amendment, 2026-10-04: a Workflow step between Test and Go live (superseded the same day, see below)
 
 Status stays accepted. The path has six steps: persona, scenarios, knowledge, test, workflow, go live. The user judged the workflow missing from the demo: the flow that connects the agent to the channel was created silently at go live, where the previous amendment lists it as text. The new step is Flow Builder's "Create new flow" gallery narrowed to its "AI agent" templates, drawn from the captured page (the Step 13 reference), with the picked flow's blocks beside the cards; the gallery's "Custom flow" row is shown but inert, since the canvas stays outside the journey (ADR 0003). The pick is stored and go live publishes that flow, naming it; the done page names it too. The step comes after Test, not before as in the reference onboarding's order, because the live app's Test page is a sandbox that needs no flow, while publishing one is what going live means. The "sixth Deploy step" rejection below stands: the Deploy page was never captured, the flow gallery was.
 
 Why: the step should show the product's own mechanism rather than hide it, the argument of the previous amendment, and a merchant should see the choice before the publish (user decision, 2026-10-04).
+
+## Amendment, 2026-10-04: the Workflow step folds into Go live; the three features are named where they happen
+
+Status stays accepted. The path is back to five steps: persona, scenarios, knowledge, test, go live. The Workflow step added earlier the same day is gone; its choice lives on the go-live screen as "When the agent answers", two radios ("Always", "Outside business hours") that are the gallery's two "AI agent" flow templates, beside the share. The "What this publishes" list names the flow, says it can be changed in Flow Builder later, and shows the share as a "Split" block before "Let AI handle", since that is how Flow Builder's own percentage split would carry it (checked against the live app the same day: the Deploy page offers only all-or-nothing templates, and the Flow Builder has a Randomizer node that splits traffic by weight but nothing surfaces it). The gallery's cards and "Custom flow" row are no longer drawn.
+
+The memo's three features are now said where each decision is made rather than only in hindsight: the welcome's lines for Scenarios, Knowledge and Go live name them ("This decides what we ask next", "Check the policy answers we drafted from your Helpdesk chat history", "Start on 1 in 5 conversations, widen in one click"), the Scenarios subtitle says the picks decide the knowledge questions, and the end-of-demo page, the one screen outside the product fiction, recaps the three in a short list for the memo's reader. In-product screens carry no reader-facing commentary.
+
+Why: the user judged the separate step the kind of unexplained mechanism the memo argues against, and the features too easy to miss in a flat list of steps (user decision, 2026-10-04, on a walkthrough of the live demo).
 
 ## Amendment, 2026-10-04: the knowledge checklist is pre-filled from the Helpdesk chat history
 

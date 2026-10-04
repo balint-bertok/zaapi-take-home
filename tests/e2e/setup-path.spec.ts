@@ -8,10 +8,10 @@
  * filled twin on first touch, Continue included; the knowledge form opens filled from the Helpdesk
  * chat history, each answer citing the past reply it came from. Continue appends to the Personality and Knowledge
  * Source lists, once: a second Continue adds no duplicate; a scenario row is added on Create. The
- * readiness summary on the Test step reads the store. The Workflow step offers the gallery's two "AI
- * agent" templates, the first picked by default, with the picked flow's blocks beside them and the
- * "Custom flow" row inert; Continue stores the pick. Go live shows the flow it publishes, its "Let
- * AI handle" block following the picked share; the done page names that flow. "Go live" opens the AI Agent pages (the rest
+ * readiness summary on the Test step reads the store. Go live picks when the agent answers (the
+ * gallery's two "AI agent" flow templates, "Always" by default) and the share, and shows the flow it
+ * publishes, its "Split" block following the share and its trigger the "when"; the done page names
+ * that flow and recaps the path's three features. "Go live" opens the AI Agent pages (the rest
  * of the rail stays inert, ADR 0003); `?reset=1`
  * restores the path, and the done page, the end of the demo, stands alone and its "start again"
  * resets the demo and returns to sign-up; arriving on sign-up resets it too. "Finish later" is inert: the modal stays.
@@ -159,50 +159,36 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   // The open modal hides the page from the accessibility tree, so the step list is located by CSS.
   const stepList = page.locator('[aria-label="Set up your AI Agent"]');
   for (const name of ["Persona", "Scenarios", "Knowledge", "Test"]) await expect(stepList.locator("a", { hasText: name })).toBeVisible();
-  for (const name of ["Workflow", "Go live"]) {
-    await expect(stepList.locator('button[aria-disabled="true"]', { hasText: name })).toBeVisible();
-    await expect(stepList.locator("a", { hasText: name })).toHaveCount(0);
-  }
+  await expect(stepList.locator('button[aria-disabled="true"]', { hasText: "Go live" })).toBeVisible();
+  await expect(stepList.locator("a", { hasText: "Go live" })).toHaveCount(0);
   await expect(stepList.locator('button[aria-disabled="true"]', { hasText: "I know what I'm doing, skip the setup" })).toBeVisible();
 
-  await test.getByRole("link", { name: "Continue to workflow" }).click();
-  await expect(page).toHaveURL(/\/ai\/setup\/workflow$/);
-
-  // Workflow: the gallery's two "AI agent" templates, the first picked by default; the blocks beside
-  // them follow the pick, and the "Custom flow" row is inert. The pick is kept for go live.
-  const workflow = page.getByRole("dialog", { name: "Workflow" });
-  await expect(progress(workflow).filter({ hasText: "Workflow" })).toHaveAttribute("aria-current", "step");
-  await expect(progress(workflow).filter({ hasText: "Test" })).toContainText("done");
-  await expectFits(workflow);
-  await expect(workflow.getByRole("radio", { name: /AI handles all new tickets/ })).toHaveAttribute("aria-checked", "true");
-  await expect(workflow.getByText("“AI handles new conversations on Test (Demo)”, in Flow Builder.")).toBeVisible();
-  const flow = workflow.getByRole("list", { name: "Flow blocks" });
-  await expect(flow.getByRole("listitem")).toHaveText([/^Trigger: Customer sends a new message and/, /^Let AI handle: the share .* at go live/, /^Assign to/]);
-  await expect(workflow.locator('button[aria-disabled="true"]', { hasText: "Custom flow" })).toBeVisible();
-  await workflow.getByRole("radio", { name: /AI handles out of hours tickets/ }).click();
-  await expect(workflow.getByRole("radio", { checked: true })).toHaveText(/AI handles out of hours tickets/);
-  await expect(flow.getByRole("listitem").first()).toHaveText(/^Trigger: Customer sends a new message outside business hours/);
-  await workflow.getByRole("link", { name: "Continue to go live" }).click();
+  await test.getByRole("link", { name: "Continue to go live" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/live$/);
 
-  // Go live, a modal screen too: a small share by default. It shows the picked flow it publishes,
-  // and the "Let AI handle" block follows the picked share; the done page names the flow and says
-  // pausing it pauses the agent.
+  // Go live, a modal screen too: "Always" and a small share by default. It shows the flow it
+  // publishes: the trigger follows the "when" pick and the "Split" block the share; the done page
+  // names the flow, says pausing it pauses the agent, and recaps the three features.
   const live = page.getByRole("dialog", { name: "Go live" });
   await expect(progress(live).filter({ hasText: "Go live" })).toHaveAttribute("aria-current", "step");
-  await expect(progress(live).filter({ hasText: "Workflow" })).toContainText("done");
+  await expect(progress(live).filter({ hasText: "Test" })).toContainText("done");
   await expectFits(live);
+  await expect(live.getByRole("radio", { name: /^Always/ })).toHaveAttribute("aria-checked", "true");
   await expect(live.getByRole("radio", { name: "1 in 5" })).toHaveAttribute("aria-checked", "true");
-  await expect(live.getByText("“AI handles out-of-hours conversations on Test (Demo)”, the flow you picked, in Flow Builder.")).toBeVisible();
+  await expect(live.getByText("“AI handles new conversations on Test (Demo)”, a flow in Flow Builder. You can change it there later.")).toBeVisible();
   const blocks = live.getByRole("list", { name: "Flow blocks" });
-  await expect(blocks.getByRole("listitem")).toHaveText([/^Trigger/, /^Let AI handle: 1 in 5/, /^Assign to/]);
+  await expect(blocks.getByRole("listitem")).toHaveText([/^Trigger: Customer sends a new message and/, /^Split: 1 in 5/, /^Let AI handle/, /^Assign to/]);
+  await live.getByRole("radio", { name: /^Outside business hours/ }).click();
+  await expect(live.getByText(/“AI handles out-of-hours conversations on Test \(Demo\)”/)).toBeVisible();
+  await expect(blocks.getByRole("listitem").first()).toHaveText(/^Trigger: Customer sends a new message outside business hours/);
   await live.getByRole("radio", { name: "Half" }).click();
-  await expect(blocks.getByRole("listitem").nth(1)).toHaveText(/^Let AI handle: half/);
+  await expect(blocks.getByRole("listitem").nth(1)).toHaveText(/^Split: half/);
   await live.getByRole("link", { name: "Go live" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/live\/done$/);
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Your agent is live. That's the end of the demo." })).toBeVisible();
   await expect(page.getByText(/answers half .* through the flow “AI handles out-of-hours conversations on Test \(Demo\)”\. Pausing the agent/)).toBeVisible();
+  await expect(page.getByRole("list", { name: "What this demo showed" }).getByRole("listitem")).toHaveText([/^Scenarios came before knowledge/, /^Those answers were drafted from the Helpdesk chat history/, /^Go live defaulted to 1 in 5/]);
 
   // After go-live the AI Agent pages open and every step links; pages outside the journey stay inert
   // (ADR 0003). The done page stands alone and every setup URL opens the modal, so the frame behind it
@@ -213,7 +199,7 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
     await expect(behind(page, "Main").locator(`button[aria-disabled="true"][aria-label="${name}"]`)).toBeVisible();
   }
   await expect(behind(page, "Main").locator('a[aria-label="AI Agent"]')).toHaveAttribute("href", /\/ai\/train\/knowledge-source$/);
-  for (const name of ["Persona", "Scenarios", "Knowledge", "Test", "Workflow", "Go live"]) await expect(stepList.locator("a", { hasText: name })).toBeVisible();
+  for (const name of ["Persona", "Scenarios", "Knowledge", "Test", "Go live"]) await expect(stepList.locator("a", { hasText: name })).toBeVisible();
 
   // The lists show what the path created, once each.
   await page.goto("ai/train/personality");
@@ -428,8 +414,6 @@ test.describe("in a 720px-tall window, a laptop with its browser chrome", () => 
     await fitsWindow("Knowledge");
     await page.goto("ai/setup/test");
     await fitsWindow("Test");
-    await page.goto("ai/setup/workflow");
-    await fitsWindow("Workflow");
     await page.goto("ai/setup/live");
     await fitsWindow("Go live");
 

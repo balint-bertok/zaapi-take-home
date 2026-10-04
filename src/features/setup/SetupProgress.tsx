@@ -1,7 +1,6 @@
 import { Icon } from "@/icons/Icon";
 import { cn } from "@/lib/cn";
-import { setupSteps } from "./content";
-import type { SetupStep } from "./fixtures";
+import { setupSteps, type SetupStep } from "./content";
 import { useStepsDone } from "./stepsDone";
 
 const bars = {
