@@ -1,6 +1,6 @@
 import { FormCard } from "../ai/parts";
 import { setupSteps, stepsIntro } from "./content";
-import { ChannelRow, StepsAhead } from "./Intro";
+import { ChannelRow, SavingsLine, StepsAhead } from "./Intro";
 import { ContinueButton, SetupPage } from "./SetupPage";
 
 const card = "border border-gray-200 space-y-3";
@@ -28,6 +28,10 @@ export default function SetupHomePage() {
         <FormCard className={card}>
           <h2 className={cardTitle}>Channel</h2>
           <ChannelRow />
+        </FormCard>
+        <FormCard className={card}>
+          <h2 className={cardTitle}>What it's worth</h2>
+          <SavingsLine className="text-gray-500" />
         </FormCard>
         <FormCard className={card}>
           <h2 className={cardTitle}>What's ahead</h2>

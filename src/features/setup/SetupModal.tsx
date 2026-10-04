@@ -16,6 +16,7 @@ import {
   pauseNote,
   personaSuggestion,
   policies,
+  savingsLine,
   setupSteps,
   shares,
   skipConsequence,
@@ -23,8 +24,7 @@ import {
   writtenScenario,
 } from "./content";
 import { IconRow } from "./IconRow";
-import { ChannelRow, StepsAhead } from "./Intro";
-import { SavingsLine } from "./Savings";
+import { ChannelRow, SavingsLine, StepsAhead } from "./Intro";
 import { KnowledgeForm, type Knowledge } from "./KnowledgeForm";
 import { PersonaForm, type Persona } from "./PersonaForm";
 import { Readiness } from "./Readiness";
@@ -153,7 +153,7 @@ function WelcomeStep() {
         </div>
         <div className="space-y-3">
           <h2 className={sectionTitle}>What it's worth</h2>
-          <SavingsLine replies={flowTemplates[0].replies} share={100} className="text-gray-500" />
+          <SavingsLine className="text-gray-500" />
         </div>
         <div className="space-y-3">
           <h2 className={sectionTitle}>What's ahead</h2>
@@ -482,7 +482,7 @@ function GoLiveStep() {
               no handoffs.
             </p>
             {/* What the picks are worth, by the product's own formula (content.ts). */}
-            <SavingsLine replies={flow.replies} share={share} className="text-gray-800 mt-2" />
+            <SavingsLine line={savingsLine(flow.replies, share)} className="text-gray-800 mt-2" />
           </FormCard>
         </div>
         <div className="space-y-5">

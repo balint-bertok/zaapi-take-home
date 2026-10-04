@@ -1,6 +1,6 @@
 import { asset } from "@/lib/asset";
 import { useDemo } from "@/store/store";
-import { setupSteps } from "./content";
+import { fullVolumeLine, setupSteps } from "./content";
 
 // What the setup's welcome shows, on the page behind the modal and in the modal itself.
 
@@ -20,6 +20,15 @@ export function ChannelRow() {
         <div className="text-gray-500">Pre-selected from the channel you already connected.</div>
       </div>
     </div>
+  );
+}
+
+/** The savings estimate (content.ts): the welcome's full-volume line unless a screen passes its own. */
+export function SavingsLine({ line = fullVolumeLine, className }: { line?: string; className?: string }) {
+  return (
+    <p data-testid="savings" className={className}>
+      {line}
+    </p>
   );
 }
 
