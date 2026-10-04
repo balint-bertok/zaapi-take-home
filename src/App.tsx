@@ -5,6 +5,7 @@ import { SetupShell } from "./features/setup/SetupShell";
 import type { AppRoute } from "./lib/route";
 import { routes } from "./routes";
 import { AppLayout } from "./shell/AppLayout";
+import { DemoBadge } from "./shell/DemoBadge";
 import { sections, type SectionKey } from "./shell/sections";
 import { ShellLayout } from "./shell/ShellLayout";
 import { SuspendedOutlet } from "./shell/SuspendedOutlet";
@@ -25,6 +26,7 @@ export function App() {
   return (
     // One provider, delay 0 as in the app's own tooltip wrapper.
     <TooltipProvider delayDuration={0}>
+      <DemoBadge />
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
           <Route element={<SuspendedOutlet />}>{pages("auth")}</Route>

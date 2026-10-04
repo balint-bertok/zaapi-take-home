@@ -1,12 +1,13 @@
 /**
  * NON-NEGOTIABLE: every route in the route table renders cleanly, and nothing links outside it.
  * For each route: HTTP 200, no console error, no uncaught page error, the catalog title
- * (seo.metaTitle), and every in-app link points at a route in the table, so a click never
+ * (seo.metaTitle), the "Demo" badge in view, and every in-app link points at a route in the table, so a click never
  * dead-ends (uncaptured pages are <Inert>, not links; user decision 2026-10-01).
  * "/" must redirect to /register.
  */
 import { expect, test, type Page } from "@playwright/test";
 import { routes } from "../../src/routes";
+import { demoBadgeLabel } from "../../src/shell/DemoBadge";
 
 const known = new Set(routes.map((r) => r.path));
 
@@ -24,6 +25,7 @@ for (const route of routes) {
 
     expect(response?.status()).toBe(200);
     await expect(page).toHaveTitle(route.title);
+    await expect(page.getByText(demoBadgeLabel)).toBeInViewport();
 
     const base = new URL(baseURL!).pathname.replace(/\/$/, "");
     const hrefs = await page.locator("a[href]").evaluateAll((as) => as.map((a) => a.getAttribute("href")!));

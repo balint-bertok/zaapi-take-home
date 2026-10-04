@@ -5,6 +5,7 @@ Answers: where does the demo differ from the live app, and what was done about i
 | Page | Region | Live value | Demo value before | Fix | Status |
 |---|---|---|---|---|---|
 | global | portalled font | system stack (Inter only on main) | Inter on body | Inter on #root | fixed |
+| global | corner badge, page title and description before hydration | none; "Welcome to Zaapi!" and the product tagline | none | a "Demo" pill top right of every page; index.html names the demo, so link previews do too | kept on purpose 2026-10-04: the demo is public and must not pass for the dashboard |
 | onboarding step2 | all | identical classes/rects | same | - | ok |
 | tickets | sidebar list top | y121 | y125 | drop the extra top padding | fixed |
 | tickets | sidebar B avatar | 16px circle, inner border, text 12.25 | text 10px | UserAvatar rebuilt (see user avatar) | fixed |
