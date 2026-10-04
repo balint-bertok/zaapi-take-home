@@ -1,8 +1,8 @@
-// The writes behind the setup modal's persona, scenarios and knowledge screens: one `updateDemo` call each.
+// The writes behind the setup modal's persona, scenarios, knowledge, test and workflow screens: one `updateDemo` call each.
 import { updateDemo } from "@/store/store";
 import { stamp } from "../ai/format";
 import { templates } from "../ai/scenarioTemplates";
-import { channelLanguage, neededPolicies, referenceType } from "./content";
+import { channelLanguage, neededPolicies, referenceType, type FlowTemplateId } from "./content";
 import { withStep } from "./fixtures";
 import type { Knowledge } from "./KnowledgeForm";
 import type { Persona } from "./PersonaForm";
@@ -40,6 +40,11 @@ export function saveScenarios(pickedIds: string[]) {
 /** The test step marked done (Continue on the test screen). */
 export function markTested() {
   updateDemo((s) => ({ ...s, setupDone: withStep(s.setupDone, "test") }));
+}
+
+/** The picked flow template, which go live publishes, and the step marked done. */
+export function saveWorkflow(flowTemplate: FlowTemplateId) {
+  updateDemo((s) => ({ ...s, flowTemplate, setupDone: withStep(s.setupDone, "workflow") }));
 }
 
 /** The step marked done with no scenario rows. */

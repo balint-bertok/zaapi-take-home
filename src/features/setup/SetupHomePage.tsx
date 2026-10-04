@@ -1,5 +1,5 @@
 import { FormCard } from "../ai/parts";
-import { setupSteps } from "./content";
+import { setupSteps, stepsIntro } from "./content";
 import { ChannelRow, StepsAhead } from "./Intro";
 import { ContinueButton, SetupPage } from "./SetupPage";
 
@@ -8,14 +8,14 @@ const cardTitle = "text-base font-medium text-gray-800";
 
 /**
  * The page behind the setup modal, on every setup URL but the done page:
- * which channel the agent starts on, and the five steps ahead. The modal cannot be left ("Finish
+ * which channel the agent starts on, and the steps ahead. The modal cannot be left ("Finish
  * later" is inert), so the page is only ever its backdrop and its Start button is never reached.
  */
 export default function SetupHomePage() {
   return (
     <SetupPage
       title="Set up your first AI Agent"
-      description="Five short steps, then your agent answers customers on one channel."
+      description={stepsIntro}
       footer={
         <>
           {/* Nothing to go back to: the empty span keeps the button on the right. */}

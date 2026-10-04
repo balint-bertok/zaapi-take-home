@@ -4,32 +4,46 @@ import { Inert } from "@/components/Inert";
 import { ModalTour, StepCard } from "@/components/ModalTour";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/icons/Icon";
+import { cn } from "@/lib/cn";
 import { updateDemo, useDemo } from "@/store/store";
 import { ChoiceCard, ScenarioForm } from "../ai/AddScenarioSheet";
 import { FormCard, RadioCard } from "../ai/parts";
 import { AccountLabel, TestChat } from "../ai/TestChat";
 import { isTemplateName, manualEntry, scratch, templates, type Template } from "../ai/scenarioTemplates";
-import { flowBlocks, flowName, neededPolicies, pauseNote, personaSuggestion, policies, shares, skipConsequence, writtenScenario, type Policy } from "./content";
+import {
+  customFlow,
+  flowBlocks,
+  flowTemplate,
+  flowTemplates,
+  neededPolicies,
+  pauseNote,
+  personaSuggestion,
+  policies,
+  setupSteps,
+  shares,
+  skipConsequence,
+  stepsIntro,
+  writtenScenario,
+  type FlowTemplate,
+  type FlowTemplateId,
+  type Policy,
+} from "./content";
 import { IconRow } from "./IconRow";
 import { ChannelRow, StepsAhead } from "./Intro";
 import { KnowledgeForm, type Knowledge } from "./KnowledgeForm";
 import { PersonaForm, type Persona } from "./PersonaForm";
 import { Readiness } from "./Readiness";
-import { markTested, saveKnowledge, savePersona, saveScenarios, skipScenarios } from "./save";
+import { markTested, saveKnowledge, savePersona, saveScenarios, saveWorkflow, skipScenarios } from "./save";
 import { BackButton, BackLink, ContinueButton, setupCard, setupCardTitle } from "./SetupPage";
 import { SetupProgress, type ProgressStep } from "./SetupProgress";
 
 // The setup's screens, welcome through go live, in the inbox onboarding's modal frame, over the
 // setup page. Copy is not from the catalog (see content.ts).
 
-const personaPath = "/ai/setup/persona";
+// The step URLs from the step list, in tour order; the filled twins and the welcome are not steps.
+const [personaPath, scenariosPath, knowledgePath, testPath, workflowPath, livePath] = setupSteps.map((s) => s.to);
 const filledPath = "/ai/setup/persona/filled";
-const scenariosPath = "/ai/setup/scenarios";
-const knowledgePath = "/ai/setup/knowledge";
 const knowledgeFilledPath = "/ai/setup/knowledge/filled";
-const testPath = "/ai/setup/test";
-const livePath = "/ai/setup/live";
-
 const welcomePath = "/ai/setup";
 
 /** Each modal URL's screen. */
@@ -41,12 +55,13 @@ const screens: Record<string, () => ReactNode> = {
   [knowledgePath]: () => <KnowledgeStep filled={false} />,
   [knowledgeFilledPath]: () => <KnowledgeStep filled />,
   [testPath]: () => <TestStep />,
+  [workflowPath]: () => <WorkflowStep />,
   [livePath]: () => <GoLiveStep />,
 };
 
 // The card's width and the screens' body height, so the card is one size and its footer sits at the
 // same place on every screen, and no screen scrolls to reach the next step (user decision
-// 2026-10-03): the taller screens (persona, scenario form, test, go live) lay their content out in two
+// 2026-10-03): the taller screens (persona, scenario form, test, workflow, go live) lay their content out in two
 // columns instead, and every screen's content fits the body, with the whole card fitting a laptop
 // window (docs/measurements.md, guarded by the setup-path suite). The card is a column capped at the
 // window's height, so in a window shorter than the card the body alone scrolls and the title and
@@ -128,7 +143,7 @@ function WelcomeStep() {
   return (
     <SetupCard
       title="Set up your first AI Agent"
-      subtitle="Five short steps, then your agent answers customers on one channel."
+      subtitle={stepsIntro}
       footer={
         <>
           <LaterButton />
@@ -160,7 +175,7 @@ const suggestion = ({ language, signature }: Picked) => ({
 });
 
 /**
- * Step 1, on both persona URLs. Empty, the demo fills the form in for the viewer rather than making
+ * Persona, on both its URLs. Empty, the demo fills the form in for the viewer rather than making
  * them type, whichever way they reach for it: touching any field, language or signature card, or
  * Continue, moves to the filled URL, a picked language or signature carried along. Filled, the
  * suggestion sits in local state, editable; arriving on the filled URL resets it.
@@ -201,7 +216,7 @@ function PersonaStep({ filled }: { filled: boolean }) {
 }
 
 /**
- * Step 2: pick the scenario templates, or write one. Opens with what the store holds, so coming back
+ * Scenarios: pick the scenario templates, or write one. Opens with what the store holds, so coming back
  * shows the picks. Picking a template opens its prefilled scenario form in the same card, as the "Add
  * scenario" sheet does; creating it adds the row and returns to the cards with that one checked (unless
  * renamed: the card stands for the template's name). Unchecking a card only drops the pick: Continue
@@ -337,7 +352,7 @@ const noKnowledge: Knowledge = { answers: answersFrom(() => ""), reference: null
 const suggestedKnowledge = (reference: string | null) => ({ answers: answersFrom((p) => p.answer), reference });
 
 /**
- * Step 3, on both knowledge URLs. Empty, focusing any answer, checking the reference box or Continue
+ * Knowledge, on both its URLs. Empty, focusing any answer, checking the reference box or Continue
  * moves to the filled URL, as on the persona; filled, Brand One's answers sit in local state,
  * editable. Continue saves each answered policy as a written knowledge source, the reference as a
  * website or file source, and moves to the test screen. With nothing asked (no scenario
@@ -385,7 +400,7 @@ function KnowledgeStep({ filled }: { filled: boolean }) {
 }
 
 /**
- * Step 4: what the agent covers so far beside the AI Agent > Test chat to try it, in two columns so
+ * Test: what the agent covers so far beside the AI Agent > Test chat to try it, in two columns so
  * nothing scrolls (user decision 2026-10-03: the test runs in the modal too). Continue marks the step
  * done and moves to the go-live screen.
  */
@@ -401,7 +416,9 @@ function TestStep() {
             <BackLink to={knowledgePath} />
             <LaterButton />
           </div>
-          <ContinueButton variant="default" to={livePath} onClick={markTested} />
+          <ContinueButton variant="default" to={workflowPath} onClick={markTested}>
+            Continue to workflow
+          </ContinueButton>
         </>
       }
     >
@@ -417,13 +434,123 @@ function TestStep() {
   );
 }
 
+// The gallery's preview tile: the saved page's gradient, with the template's glyph on it.
+const tileBackground =
+  "linear-gradient(112deg, rgba(255, 255, 255, 0.8) 0.12%, rgba(235, 252, 250, 0.8) 100%), linear-gradient(rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 165.25%)";
+
+/** The picked flow's blocks as a list, on the workflow screen (no share yet) and the go-live screen. */
+function FlowBlocks({ flow, share }: { flow: FlowTemplate; share?: number }) {
+  return (
+    <ol aria-label="Flow blocks" className="mt-3 divide-y divide-gray-200 rounded-lg border border-gray-200">
+      {flowBlocks(flow, share).map((b) => (
+        <IconRow key={b.label} icon={b.icon} iconClassName={b.iconClassName} className="p-3">
+          <span className="font-medium">{b.label}</span>
+          <span className="text-gray-500">: {b.detail}</span>
+        </IconRow>
+      ))}
+    </ol>
+  );
+}
+
 /**
- * Step 5: pick the channel's share, see the flow this publishes, then go live (user decision
- * 2026-10-03: go live runs in the modal too). Nothing is stored until "Go live", which leaves the
- * modal for the end-of-demo page.
+ * Workflow: pick the flow that connects the agent to the channel, from Flow Builder's "Create new
+ * flow" gallery narrowed to its "AI agent" templates (user decision 2026-10-04: the workflow is a
+ * step of its own, after the test since the test chat needs no flow). Opens with the stored pick,
+ * the first template by default. The gallery's "Custom flow" row is shown but inert: the canvas is
+ * outside the journey (ADR 0003). The blocks of the picked flow sit beside the cards; the share in
+ * its "Let AI handle" block is go live's to pick. Continue stores the pick and marks the step done.
+ */
+function WorkflowStep() {
+  const stored = useDemo((s) => s.flowTemplate);
+  const [picked, setPicked] = useState<FlowTemplateId>(stored);
+  const flow = flowTemplate(picked);
+  return (
+    <SetupCard
+      step="workflow"
+      title="Workflow"
+      subtitle="Your agent answers customers through a flow. Start from a template; you can change it in Flow Builder later."
+      footer={
+        <>
+          <div className="flex items-center gap-4">
+            <BackLink to={testPath} />
+            <LaterButton />
+          </div>
+          <ContinueButton variant="default" to={livePath} onClick={() => saveWorkflow(picked)}>
+            Continue to go live
+          </ContinueButton>
+        </>
+      }
+    >
+      <div className="px-6 py-5 grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-5 items-start text-sm">
+        <div className="space-y-5">
+          {/* The gallery's "Custom flow" row. */}
+          <Inert className="w-full flex items-center gap-4 p-4 rounded-lg border border-gray-200 bg-white">
+            <div className="size-14 flex items-center rounded-lg justify-center bg-gray-50">
+              <Icon name="pencil" variant="fas" className="size-6! text-gray-500" />
+            </div>
+            <div className="flex-1 text-left">
+              <h4 className="font-medium text-gray-800">{customFlow.title}</h4>
+              <p className="text-gray-400 mt-1">{customFlow.description}</p>
+            </div>
+            <Icon name="arrow-right" variant="fas" className="size-4 text-gray-400 ml-auto" />
+          </Inert>
+          <FormCard className={setupCard}>
+            <h2 className={setupCardTitle}>AI agent</h2>
+            <div role="radiogroup" aria-label="Flow template" className="grid grid-cols-2 gap-4 mt-3">
+              {flowTemplates.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={picked === t.id}
+                  onClick={() => setPicked(t.id)}
+                  className={cn(
+                    "relative flex flex-col gap-3 rounded-lg border bg-white text-left transition-all hover:border-electric-green-500 hover:ring-[3px] hover:ring-electric-green-500/20",
+                    picked === t.id ? "border-electric-green-500 ring-[3px] ring-electric-green-500/20" : "border-gray-200",
+                  )}
+                >
+                  {picked === t.id && <Icon name="check" className="absolute top-3 right-3 size-3.5! text-electric-green-600" />}
+                  <div className="h-[120px] w-full rounded-t-lg flex items-center justify-center" style={{ backgroundImage: tileBackground }}>
+                    <Icon name={t.icon} variant="fas" className="size-12! ai-gradient-icon" />
+                  </div>
+                  <div className="flex flex-col gap-[6px] px-4 pb-4">
+                    <h4 className="font-medium text-gray-800 leading-4">{t.title}</h4>
+                    <p className="text-gray-500 leading-4">{t.description}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </FormCard>
+        </div>
+        <div className="space-y-5">
+          <FormCard className={setupCard}>
+            <h2 className={setupCardTitle}>What this flow does</h2>
+            <p className="text-gray-500 mt-1">“{flow.name}”, in Flow Builder.</p>
+            <FlowBlocks flow={flow} />
+          </FormCard>
+          {/* The AI Agent > Test page's callout. */}
+          <div className="p-3.5 rounded-md border-l-4 bg-(image:--color-ai-gradient-light) border-electric-green-500" role="note">
+            <div className="flex flex-row gap-2">
+              <div className="mt-[2px]">
+                <Icon name="ai-symbol" className="size-5! ai-gradient-icon shrink-0" />
+              </div>
+              <div className="ai-gradient-text">Your team can take over any conversation at any time. {pauseNote}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </SetupCard>
+  );
+}
+
+/**
+ * Go live: pick the channel's share, see what publishing the picked flow does, then go live (user
+ * decision 2026-10-03: go live runs in the modal too). Nothing is stored until "Go live", which
+ * leaves the modal for the end-of-demo page.
  */
 function GoLiveStep() {
   const stored = useDemo((s) => s.agentShare);
+  const flow = useDemo((s) => flowTemplate(s.flowTemplate));
   const [share, setShare] = useState(stored);
   const goLive = () => updateDemo((s) => ({ ...s, agentLive: true, agentShare: share }));
   return (
@@ -434,7 +561,7 @@ function GoLiveStep() {
       footer={
         <>
           <div className="flex items-center gap-4">
-            <BackLink to={testPath} />
+            <BackLink to={workflowPath} />
             <LaterButton />
           </div>
           <ContinueButton variant="default" to="/ai/setup/live/done" onClick={goLive}>
@@ -468,29 +595,11 @@ function GoLiveStep() {
             </p>
           </FormCard>
         </div>
-        <div className="space-y-5">
-          <FormCard className={setupCard}>
-            <h2 className={setupCardTitle}>What this publishes</h2>
-            <p className="text-gray-500 mt-1">A flow in Flow Builder, “{flowName}”. You can change it there later.</p>
-            <ol aria-label="Flow blocks" className="mt-3 divide-y divide-gray-200 rounded-lg border border-gray-200">
-              {flowBlocks(share).map((b) => (
-                <IconRow key={b.label} icon={b.icon} iconClassName={b.iconClassName} className="p-3">
-                  <span className="font-medium">{b.label}</span>
-                  <span className="text-gray-500">: {b.detail}</span>
-                </IconRow>
-              ))}
-            </ol>
-          </FormCard>
-          {/* The AI Agent > Test page's callout. */}
-          <div className="p-3.5 rounded-md border-l-4 bg-(image:--color-ai-gradient-light) border-electric-green-500" role="note">
-            <div className="flex flex-row gap-2">
-              <div className="mt-[2px]">
-                <Icon name="ai-symbol" className="size-5! ai-gradient-icon shrink-0" />
-              </div>
-              <div className="ai-gradient-text">Your team can take over any conversation at any time. {pauseNote}</div>
-            </div>
-          </div>
-        </div>
+        <FormCard className={setupCard}>
+          <h2 className={setupCardTitle}>What this publishes</h2>
+          <p className="text-gray-500 mt-1">“{flow.name}”, the flow you picked, in Flow Builder.</p>
+          <FlowBlocks flow={flow} share={share} />
+        </FormCard>
       </div>
     </SetupCard>
   );

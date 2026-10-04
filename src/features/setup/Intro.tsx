@@ -23,7 +23,7 @@ export function ChannelRow() {
   );
 }
 
-/** The five steps ahead, numbered. */
+/** The steps ahead, numbered. */
 export function StepsAhead() {
   return (
     <ol className="space-y-3">

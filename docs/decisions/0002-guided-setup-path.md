@@ -47,6 +47,12 @@ Why: the path should create the product's own go-live mechanism for the merchant
 | A sixth "Deploy" step mirroring the live Deploy page | That page was never captured, so it would be drawn blind; the memo's path has five steps | User |
 | The Flow Builder canvas as the go-live screen | Reopens ADR 0003 and reinstalls the dependency it removed | User |
 
+## Amendment, 2026-10-04: a Workflow step between Test and Go live
+
+Status stays accepted. The path has six steps: persona, scenarios, knowledge, test, workflow, go live. The user judged the workflow missing from the demo: the flow that connects the agent to the channel was created silently at go live, where the previous amendment lists it as text. The new step is Flow Builder's "Create new flow" gallery narrowed to its "AI agent" templates, drawn from the captured page (the Step 13 reference), with the picked flow's blocks beside the cards; the gallery's "Custom flow" row is shown but inert, since the canvas stays outside the journey (ADR 0003). The pick is stored and go live publishes that flow, naming it; the done page names it too. The step comes after Test, not before as in the reference onboarding's order, because the live app's Test page is a sandbox that needs no flow, while publishing one is what going live means. The "sixth Deploy step" rejection below stands: the Deploy page was never captured, the flow gallery was.
+
+Why: the step should show the product's own mechanism rather than hide it, the argument of the previous amendment, and a merchant should see the choice before the publish (user decision, 2026-10-04).
+
 ## Amendment, 2026-10-03: the inbox points at the path
 
 After sign-up a viewer may click around the inbox instead of starting. A small "Start the demo here" callout beside the rail's AI Agent entry, with an arrow at it, links to the setup until the first step is done (user decision). It is positioned against the entry's measured box, since the rail's item list clips what overflows it, and it is gone the moment a step is done or the agent is live.
