@@ -8,13 +8,12 @@ const modal = (path: string): AppRoute => ({ path, title: titles.ai, layout: "se
 
 // The guided path to a merchant's first live AI Agent, in tour order. Every step, welcome through
 // go live, is a screen of the setup modal (SetupModal, mounted by SetupShell) over one page; the done
-// page stands alone. The `/filled` URLs are the same step with the form already filled in, so the
-// tour can show both states.
+// page stands alone. The persona's `/filled` URL is the same step with the form already filled in,
+// so the tour can show both states; the knowledge step opens filled, so it has one URL.
 export const setupRoutes: AppRoute[] = [
   modal("/ai/setup"),
   ...setupSteps.map((s) => modal(s.to)),
   modal("/ai/setup/persona/filled"),
-  modal("/ai/setup/knowledge/filled"),
   // The end of the demo stands alone: no rail, no step list, only the way back to sign-up.
   { path: "/ai/setup/live/done", title: titles.ai, layout: "auth", Page: lazy(() => import("./LiveDonePage")) },
 ];

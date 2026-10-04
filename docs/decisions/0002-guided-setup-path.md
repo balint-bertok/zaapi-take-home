@@ -53,6 +53,12 @@ Status stays accepted. The path has six steps: persona, scenarios, knowledge, te
 
 Why: the step should show the product's own mechanism rather than hide it, the argument of the previous amendment, and a merchant should see the choice before the publish (user decision, 2026-10-04).
 
+## Amendment, 2026-10-04: the knowledge checklist is pre-filled from the Helpdesk chat history
+
+Status stays accepted. The memo's second root cause is business knowledge that was never written down; its proposal for a later release was to pre-fill the knowledge step from the merchant's existing policy pages and chat history so it no longer starts blank. The demo now shows the chat-history half: a merchant already answers customers through the Helpdesk, so the answers are in past conversations. The knowledge step opens with every asked policy answered and, under each answer, the past reply from the team to a customer on Test (Demo) it was drawn from, with its month; the answers stay editable and the subtitle says where they come from. The step therefore has one URL: the empty twin, `/ai/setup/knowledge/filled` and the first-touch fill are gone, and the policies sit one per column so three of them with their history lines fit the modal body (`docs/measurements.md`). The persona keeps its empty and filled twins. The replies are fixtures, like every other business value here; no conversation is read, since the demo has no backend (ADR 0001).
+
+Why: the user asked for the follow-up the memo deferred (user decision, 2026-10-04).
+
 ## Amendment, 2026-10-03: the inbox points at the path
 
 After sign-up a viewer may click around the inbox instead of starting. A small "Start the demo here" callout beside the rail's AI Agent entry, with an arrow at it, links to the setup until the first step is done (user decision). It is positioned against the entry's measured box, since the rail's item list clips what overflows it, and it is gone the moment a step is done or the agent is live.

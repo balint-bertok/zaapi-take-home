@@ -4,8 +4,9 @@
  * Tickets inert; the step list links only to done steps and the current one, and the "skip the
  * setup" exit is inert. Every step, welcome through go live, runs in the inbox onboarding's modal
  * frame over the setup page; only the done page has no dialog. The
- * modal's step bar marks the current step and the done ones. Each empty form moves to its filled
- * twin on first touch, Continue included. Continue appends to the Personality and Knowledge
+ * modal's step bar marks the current step and the done ones. The empty persona form moves to its
+ * filled twin on first touch, Continue included; the knowledge form opens filled from the Helpdesk
+ * chat history, each answer citing the past reply it came from. Continue appends to the Personality and Knowledge
  * Source lists, once: a second Continue adds no duplicate; a scenario row is added on Create. The
  * readiness summary on the Test step reads the store. The Workflow step offers the gallery's two "AI
  * agent" templates, the first picked by default, with the picked flow's blocks beside them and the
@@ -128,7 +129,8 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   await scenarios.getByRole("link", { name: "Continue to knowledge" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/knowledge$/);
 
-  // Knowledge: the steps before it read as done; each policy names the picked scenario that needs it.
+  // Knowledge: the steps before it read as done; each policy names the picked scenario that needs it
+  // and opens answered from the chat history, citing the past reply.
   const knowledge = page.getByRole("dialog", { name: "Knowledge" });
   for (const name of ["Persona", "Scenarios"]) await expect(progress(knowledge).filter({ hasText: name })).toContainText("done");
   await expect(progress(knowledge).filter({ hasText: "Knowledge" })).toHaveAttribute("aria-current", "step");
@@ -136,12 +138,9 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   await expect(knowledge.getByText("Needed by Check order status")).toBeVisible();
   await expect(knowledge.getByText("Needed by Return or refund")).toBeVisible();
   await expect(knowledge.getByRole("textbox", { name: "Complaints and handover" })).toHaveCount(0);
-  await knowledge.getByRole("link", { name: "Continue to test" }).click();
-  await expect(page).toHaveURL(/\/ai\/setup\/knowledge\/filled$/);
-  await page.goBack();
-  await knowledge.getByRole("textbox", { name: "Shipping times and areas" }).click();
-  await expect(page).toHaveURL(/\/ai\/setup\/knowledge\/filled$/);
   await expect(knowledge.getByRole("textbox", { name: "Shipping times and areas" })).toHaveValue(/Bangkok/);
+  await expect(knowledge.getByText(/^From your chat history, your team to a customer, Sep 2026: “Bangkok orders/)).toBeVisible();
+  await expect(knowledge.getByText(/^From your chat history/)).toHaveCount(2);
   await expectFits(knowledge);
   await knowledge.getByRole("link", { name: "Continue to test" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/test$/);
@@ -351,15 +350,14 @@ test("skipping scenarios states the consequence inline and the knowledge step fo
   const knowledge = page.getByRole("dialog", { name: "Knowledge" });
   await expect(knowledge.getByText("None of your scenarios needs a policy answer", { exact: false })).toBeVisible();
   await expect(knowledge.getByRole("textbox")).toHaveCount(0);
-  // The reference line is the one field: checking it fills the step, the URL becomes a website source.
+  // The reference line is the one field; the URL becomes a website source.
   await knowledge.getByRole("checkbox", { name: "I have a file or website URL that includes this info" }).click();
-  await expect(page).toHaveURL(/\/ai\/setup\/knowledge\/filled$/);
   await expect(knowledge.getByRole("checkbox", { name: "I have a file or website URL that includes this info" })).toHaveAttribute("aria-checked", "true");
   await knowledge.getByRole("textbox", { name: "File name or website URL" }).fill("https://brand-one.example/policies");
   // The upload button is inert: a click opens nothing and changes nothing.
   await expect(knowledge.getByRole("button", { name: "Upload a file" })).toHaveAttribute("aria-disabled", "true");
   await knowledge.getByRole("button", { name: "Upload a file" }).click({ force: true });
-  await expect(page).toHaveURL(/\/ai\/setup\/knowledge\/filled$/);
+  await expect(page).toHaveURL(/\/ai\/setup\/knowledge$/);
   await expect(knowledge.getByRole("textbox", { name: "File name or website URL" })).toHaveValue("https://brand-one.example/policies");
   await knowledge.getByRole("link", { name: "Continue to test" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/test$/);
@@ -419,7 +417,14 @@ test.describe("in a 720px-tall window, a laptop with its browser chrome", () => 
     await page.getByRole("button", { name: /Manual entry/ }).click();
     await page.getByRole("button", { name: "Create scenario" }).click();
     await fitsWindow("Manual entry");
-    await page.goto("ai/setup/knowledge/filled");
+    // Every template picked, so all three policies and their history lines are on the screen. The
+    // first Create filled the manual form in; the second creates it and returns to the cards.
+    await page.getByRole("button", { name: "Create scenario" }).click();
+    for (const name of ["Check order status", "Return or refund", "Customer complaint"]) {
+      await page.getByRole("checkbox", { name: new RegExp(name) }).click();
+      await page.getByRole("button", { name: "Create scenario" }).click();
+    }
+    await page.getByRole("link", { name: "Continue to knowledge" }).click();
     await fitsWindow("Knowledge");
     await page.goto("ai/setup/test");
     await fitsWindow("Test");
