@@ -8,7 +8,7 @@ import { flowTemplate, pauseNote, shareLabel, shownFeatures } from "./content";
 /**
  * After "Go live": the end of the demo. It stands alone, with nothing to click but a restart to the
  * sign-up page, which puts the demo back to its fixtures on arrival, so a viewer can run it again
- * without seeing this run's scenarios or knowledge (user decision, 2026-10-03). It recaps the
+ * without seeing this run's scenarios or knowledge (user decision, 2026-10-03). It recaps the three
  * features the path carried, for the memo's reader (user decision 2026-10-04: said here, outside the
  * product's own screens).
  */
