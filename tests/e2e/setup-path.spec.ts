@@ -11,7 +11,9 @@
  * readiness summary on the Test step reads the store. Go live picks when the agent answers (the
  * gallery's two "AI agent" flow templates, "Always" by default) and the share, and shows the flow it
  * publishes, its "Split" block following the share and its trigger the "when"; the done page names
- * that flow and recaps the path's three features. "Go live" opens the AI Agent pages (the rest
+ * that flow and recaps the path's features, the savings estimate's line last. The estimate, the
+ * product's own ROI formula on the fixture replies, is on the welcome at full volume and in go live's
+ * share card following the "when" and share picks. "Go live" opens the AI Agent pages (the rest
  * of the rail stays inert, ADR 0003); `?reset=1`
  * restores the path, and the done page, the end of the demo, stands alone and its "start again"
  * resets the demo and returns to sign-up; arriving on sign-up resets it too. "Finish later" is inert: the modal stays.
@@ -67,6 +69,8 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   const welcome = page.getByRole("dialog", { name: "Set up your first AI Agent" });
   await expect(welcome.getByText("Test (Demo)", { exact: true })).toBeVisible();
   await expect(welcome.getByRole("button", { name: "Finish later" })).toBeVisible();
+  // The savings estimate at full volume: the product's own ROI formula on the fixture replies.
+  await expect(welcome.getByTestId("savings")).toHaveText("The agent would take all 1,200 of September's replies: about 20 hours a month, or $63 at a $500 monthly agent salary.");
   await welcome.getByRole("link", { name: "Start" }).click();
 
   // Persona: the step bar marks it current; Continue on the empty form fills it, as touching it does.
@@ -167,8 +171,9 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   await expect(page).toHaveURL(/\/ai\/setup\/live$/);
 
   // Go live, a modal screen too: "Always" and a small share by default. It shows the flow it
-  // publishes: the trigger follows the "when" pick and the "Split" block the share; the done page
-  // names the flow, says pausing it pauses the agent, and recaps the three features.
+  // publishes: the trigger follows the "when" pick and the "Split" block the share, and the savings
+  // estimate follows both; the done page names the flow, says pausing it pauses the agent, and
+  // recaps the features.
   const live = page.getByRole("dialog", { name: "Go live" });
   await expect(progress(live).filter({ hasText: "Go live" })).toHaveAttribute("aria-current", "step");
   await expect(progress(live).filter({ hasText: "Test" })).toContainText("done");
@@ -178,17 +183,21 @@ test("the guided setup runs from sign-up to a live agent, then opens the AI Agen
   await expect(live.getByText("“AI handles new conversations on Test (Demo)”, a flow in Flow Builder. You can change it there later.")).toBeVisible();
   const blocks = live.getByRole("list", { name: "Flow blocks" });
   await expect(blocks.getByRole("listitem")).toHaveText([/^Trigger: Customer sends a new message and/, /^Split: 1 in 5/, /^Let AI handle/, /^Assign to/]);
+  const savings = live.getByTestId("savings");
+  await expect(savings).toHaveText("The agent would take 240 of September's 1,200 replies: about 4 hours a month, or $13 at a $500 monthly agent salary.");
   await live.getByRole("radio", { name: /^Outside business hours/ }).click();
   await expect(live.getByText(/“AI handles out-of-hours conversations on Test \(Demo\)”/)).toBeVisible();
   await expect(blocks.getByRole("listitem").first()).toHaveText(/^Trigger: Customer sends a new message outside business hours/);
+  await expect(savings).toHaveText(/^The agent would take 72 of September's 360 out-of-hours replies: about 1\.2 hours a month, or \$4 /);
   await live.getByRole("radio", { name: "Half" }).click();
   await expect(blocks.getByRole("listitem").nth(1)).toHaveText(/^Split: half/);
+  await expect(savings).toHaveText(/^The agent would take 180 of September's 360 out-of-hours replies: about 3 hours a month, or \$9 /);
   await live.getByRole("link", { name: "Go live" }).click();
   await expect(page).toHaveURL(/\/ai\/setup\/live\/done$/);
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Your agent is live. That's the end of the demo." })).toBeVisible();
   await expect(page.getByText(/answers half .* through the flow “AI handles out-of-hours conversations on Test \(Demo\)”\. Pausing the agent/)).toBeVisible();
-  await expect(page.getByRole("list", { name: "What this demo showed" }).getByRole("listitem")).toHaveText([/^Scenarios came before knowledge/, /^Those answers were drafted from the Helpdesk chat history/, /^Go live defaulted to 1 in 5/]);
+  await expect(page.getByRole("list", { name: "What this demo showed" }).getByRole("listitem")).toHaveText([/^Scenarios came before knowledge/, /^Those answers were drafted from the Helpdesk chat history/, /^Go live defaulted to 1 in 5/, /^The savings estimate ran the product's own ROI formula/]);
 
   // After go-live the AI Agent pages open and every step links; pages outside the journey stay inert
   // (ADR 0003). The done page stands alone and every setup URL opens the modal, so the frame behind it
