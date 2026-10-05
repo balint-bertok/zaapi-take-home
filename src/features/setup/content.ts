@@ -15,10 +15,10 @@ export const shareLabel = (value: number) => (shares.find((s) => s.value === val
 
 /**
  * The steps in tour order, as the step list and the intro name them. "Go live" has no SetupStep;
- * `agentLive` marks it done. The scenarios, knowledge and go-live steps carry the memo's features:
- * `text` names them looking ahead, `features` looking back, for the end-of-demo recap (user
- * decision 2026-10-04: the features are said where they happen); go live carries the savings
- * estimate's line too, since its picks drive the estimate.
+ * `agentLive` marks it done. The scenarios, knowledge and go-live steps each carry one of the memo's
+ * three features: `text` names it looking ahead, `feature` looking back, for the end-of-demo recap
+ * (user decision 2026-10-04: the features are said where they happen). The savings estimate is not
+ * a fourth: the memo keeps three, so the recap does too (user decision 2026-10-05).
  */
 const steps = [
   { label: "Persona", to: "/ai/setup/persona", step: "persona", text: "Name your agent and pick how it sounds and which language it answers in." },
@@ -27,33 +27,30 @@ const steps = [
     to: "/ai/setup/scenarios",
     step: "scenarios",
     text: "Pick what the agent should handle, from ready-made templates. This decides what we ask next.",
-    features: ["Scenarios came before knowledge, so the knowledge step asked only for the policies those scenarios need."],
+    feature: "Scenarios came before knowledge, so the knowledge step asked only for the policies those scenarios need.",
   },
   {
     label: "Knowledge",
     to: "/ai/setup/knowledge",
     step: "knowledge",
     text: "Check the policy answers we drafted from your Helpdesk chat history.",
-    features: ["Those answers were drafted from the Helpdesk chat history, not typed onto a blank page."],
+    feature: "Those answers were drafted from the Helpdesk chat history, not typed onto a blank page.",
   },
   { label: "Test", to: "/ai/setup/test", step: "test", text: "See what's covered and try a conversation." },
   {
     label: "Go live",
     to: "/ai/setup/live",
     text: `Start on ${shares[0].label} conversations, widen in one click.`,
-    features: [
-      `Go live defaulted to ${shares[0].label} conversations, with full volume one click away.`,
-      "The savings estimate ran the product's own ROI formula on the merchant's replies before go live, where the live app shows it only after.",
-    ],
+    feature: `Go live defaulted to ${shares[0].label} conversations, with full volume one click away.`,
   },
-] as const satisfies { label: string; to: string; step?: string; text: string; features?: readonly string[] }[];
+] as const satisfies { label: string; to: string; step?: string; text: string; feature?: string }[];
 
 /** A step the store marks done; derived from the table, so a row is the only place a step exists. */
 export type SetupStep = Extract<(typeof steps)[number], { step: string }>["step"];
-export const setupSteps: readonly { label: string; to: string; step?: SetupStep; text: string; features?: readonly string[] }[] = steps;
+export const setupSteps: readonly { label: string; to: string; step?: SetupStep; text: string; feature?: string }[] = steps;
 
-/** The features, in tour order, for the end-of-demo recap. */
-export const shownFeatures = setupSteps.flatMap((s) => s.features ?? []);
+/** The three features, in tour order, for the end-of-demo recap. */
+export const shownFeatures = setupSteps.flatMap((s) => (s.feature ? [s.feature] : []));
 
 /** The welcome's subtitle, on the page behind the modal and in the modal itself. */
 export const stepsIntro = "Five short steps, then your agent answers customers on one channel.";
